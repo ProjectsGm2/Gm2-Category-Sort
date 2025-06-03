@@ -1,0 +1,132 @@
+/* Full-width tree layout */
+.gm2-category-tree {
+    max-height: none;
+    overflow: visible;
+    width: 100%;
+}
+
+.gm2-parent-categories-container {
+    display: block;
+    width: 100%;
+}
+
+.gm2-category-node {
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.gm2-category-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.gm2-category-name-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.gm2-indent {
+    display: inline-block;
+    width: 20px;
+}
+
+.gm2-category-name {
+    cursor: pointer;
+    padding: 5px 0;
+    transition: all 0.2s ease;
+    flex-grow: 1;
+}
+
+.gm2-category-name:hover {
+    color: #3a8bff;
+}
+
+.gm2-category-name.selected {
+    color: #3a8bff;
+    font-weight: bold;
+}
+
+.gm2-expand-button {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    margin-left: 10px;
+}
+
+.gm2-expand-button:hover {
+    background: #e0e0e0;
+}
+
+.gm2-child-categories {
+    padding-left: 30px;
+    border-left: 1px dashed #e0e0e0;
+    margin-left: 10px;
+}
+
+/* Existing styles */
+.gm2-category-sort {
+    margin-bottom: 30px;
+    border: 1px solid #eaeaea;
+    padding: 20px;
+    border-radius: 5px;
+    background: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.gm2-selected-header {
+    margin-top: 20px;
+    font-weight: bold;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 16px;
+}
+
+.gm2-selected-categories {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.gm2-selected-category {
+    background: #f3f3f3;
+    padding: 6px 15px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.gm2-remove-category {
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 2px;
+}
+
+.gm2-remove-category:hover {
+    color: red;
+    transform: scale(1.2);
+}
+
+.gm2-no-categories {
+    padding: 15px;
+    text-align: center;
+    color: #888;
+    font-style: italic;
+}
