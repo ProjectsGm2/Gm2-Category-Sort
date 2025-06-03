@@ -74,17 +74,16 @@ class Gm2_Category_Sort_Query_Handler {
         
         // If all terms are from the same branch, use AND logic
         if (count($branches) === 1) {
-            return [
-                'relation' => 'AND',
-                array_map(function($term_id) {
-                    return [
-                        'taxonomy' => 'product_cat',
-                        'field' => 'term_id',
-                        'terms' => [$term_id],
-                        'include_children' => true,
-                    ];
-                }, $term_ids)
-            ];
+            $clauses = array_map(function ($term_id) {
+                return [
+                    'taxonomy'        => 'product_cat',
+                    'field'           => 'term_id',
+                    'terms'           => [$term_id],
+                    'include_children'=> true,
+                ];
+            }, $term_ids);
+
+            return array_merge(['relation' => 'AND'], $clauses);
         }
         
         // If terms are from different branches, use OR logic
