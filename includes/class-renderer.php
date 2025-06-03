@@ -73,7 +73,7 @@ class Gm2_Category_Sort_Renderer {
         echo $indent;
         
         echo '<div class="gm2-category-name-container">';
-        echo '<div class="gm2-category-name ' . $selected_class . '" data-term-id="' . $term->term_id . '">' . $term->name . '</div>';
+        echo '<div class="gm2-category-name ' . $selected_class . '" data-term-id="' . esc_attr($term->term_id) . '">' . esc_html($term->name) . '</div>';
         
         if ($has_children) {
             echo '<button class="gm2-expand-button" data-expanded="false">+</button>';
