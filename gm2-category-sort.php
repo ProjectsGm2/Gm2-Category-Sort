@@ -1,9 +1,10 @@
 <?php
 /**
  * Plugin Name: Gm2 Category Sort
- * Description: Adds category sorting widget to Elementor for WooCommerce archives.
+ * Description: ...
  * Version: 1.0.1
  * Author: Your Name
+ * Text Domain: gm2-category-sort
  */
 
 defined('ABSPATH') || exit;
