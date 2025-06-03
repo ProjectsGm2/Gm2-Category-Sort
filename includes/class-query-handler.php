@@ -19,8 +19,8 @@ class Gm2_Category_Sort_Query_Handler {
         }
         
         $term_ids = array_map('intval', explode(',', $_GET['gm2_cat']));
-        $filter_type = $_GET['gm2_filter_type'] ?? 'simple';
-        $simple_operator = $_GET['gm2_simple_operator'] ?? 'IN';
+        $filter_type = sanitize_key($_GET['gm2_filter_type'] ?? 'simple');
+        $simple_operator = sanitize_key($_GET['gm2_simple_operator'] ?? 'IN');
         
         // Get existing tax query
         $tax_query = $query->get('tax_query') ?: [];
