@@ -1,0 +1,22 @@
+# Gm2 Category Sort
+
+Gm2 Category Sort adds a product category sorting widget for WooCommerce shops when using Elementor. Visitors can filter products by category through a collapsible tree of categories.
+
+## Requirements
+- WordPress 5.0 or higher
+- [WooCommerce](https://woocommerce.com/)
+- [Elementor](https://elementor.com/)
+
+## Installation
+1. Download or clone this repository into the `wp-content/plugins` directory of your WordPress installation.
+2. Make sure WooCommerce and Elementor are installed and activated.
+3. Activate **Gm2 Category Sort** from the **Plugins** screen in WordPress.
+
+## Usage
+1. Edit a WooCommerce shop or archive page with Elementor.
+2. Search for the **GM2 Category Sort** widget and drag it into your layout.
+3. Choose optional parent categories and select the filter logic (Simple or Advanced) in the widget settings.
+4. Save the page. On the frontend, shoppers can expand categories and filter the product list.
+
+## License
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
