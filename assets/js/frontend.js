@@ -74,6 +74,20 @@ jQuery(document).ready(function($) {
 
         $container.empty();
 
+        const $elementorWidget = $oldList.closest('.elementor-widget');
+        let perPage = 0;
+
+        const settings = $elementorWidget.data('settings');
+        if (settings) {
+            if (settings.columns) {
+                columns = parseInt(settings.columns, 10) || 0;
+            }
+            if (settings.posts_per_page) {
+                perPage = parseInt(settings.posts_per_page, 10) || 0;
+            }
+        }
+
+            gm2_per_page: perPage,
         $widget.find('.gm2-category-name.selected').each(function() {
             const termId = $(this).data('term-id');
             const name = $(this).text().trim();
