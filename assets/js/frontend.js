@@ -92,7 +92,7 @@ jQuery(document).ready(function($) {
         }
 
         url.searchParams.delete('paged');
-      
+
         const $oldList = $('.products').first();
         let columns = 0;
         const match = $oldList.attr('class').match(/columns-(\d+)/);
@@ -123,6 +123,14 @@ jQuery(document).ready(function($) {
                 $oldList.attr('class', oldClasses.trim());
 
                 $oldList.html($newList.html());
+
+                if (response.data.count) {
+                    const $existingCount = $('.woocommerce-result-count').first();
+                    if ($existingCount.length) {
+                        $existingCount.replaceWith($(response.data.count));
+                    }
+                }
+
                 window.history.replaceState(null, '', url.toString());
 
                 gm2ReinitArchiveWidget($oldList);
@@ -139,10 +147,14 @@ jQuery(document).ready(function($) {
             if (elementorFrontend.elementsHandler) {
                 elementorFrontend.elementsHandler.runReadyTrigger($widget);
             }
-            if (type && elementorFrontend.hooks && elementorFrontend.hooks.doAction) {
-                elementorFrontend.hooks.doAction('frontend/element_ready/' + type, $widget, $);
+            if (elementorFrontend.hooks && elementorFrontend.hooks.doAction) {
+                elementorFrontend.hooks.doAction('frontend/element_ready/global', $widget, $);
+                if (type) {
+                    elementorFrontend.hooks.doAction('frontend/element_ready/' + type, $widget, $);
+                }
             }
         }
+        $(document.body).trigger('wc_init');
         $(document.body).trigger('wc_fragment_refresh');
     }
     

@@ -40,11 +40,16 @@ class Gm2_Category_Sort_Ajax {
         // Respect column settings from the current product archive
         $columns = isset($_POST['gm2_columns']) ? absint($_POST['gm2_columns']) : 0;
 
-        wc_setup_loop([
-            'columns' => $columns ?: wc_get_loop_prop('columns'),
+       wc_setup_loop([
+            'columns'      => $columns ?: wc_get_loop_prop('columns'),
+            'per_page'     => $args['posts_per_page'],
+            'current_page' => $args['paged'],
         ]);
 
         $query = new WP_Query($args);
+
+        wc_set_loop_prop('total', $query->found_posts);
+        wc_set_loop_prop('total_pages', $query->max_num_pages);
 
         ob_start();
         if ($query->have_posts()) {
@@ -61,6 +66,14 @@ class Gm2_Category_Sort_Ajax {
         wc_reset_loop();
 
         $html = ob_get_clean();
-        wp_send_json_success(['html' => $html]);
+
+        ob_start();
+        woocommerce_result_count();
+        $result_count = ob_get_clean();
+
+        wp_send_json_success([
+            'html'  => $html,
+            'count' => $result_count,
+        ]);
     }
 }
