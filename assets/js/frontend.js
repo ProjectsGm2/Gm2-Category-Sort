@@ -28,6 +28,7 @@ jQuery(document).ready(function($) {
             $(this).addClass('selected');
         }
         
+        gm2RefreshSelectedList($widget);
         gm2UpdateProductFiltering($widget);
     }
     
@@ -39,7 +40,32 @@ jQuery(document).ready(function($) {
         
         $target.remove();
         $widget.find('.gm2-category-name[data-term-id="' + termId + '"]').removeClass('selected');
+        gm2RefreshSelectedList($widget);
         gm2UpdateProductFiltering($widget);
+    }
+
+    function gm2RefreshSelectedList($widget) {
+        const $container = $widget.find('.gm2-selected-categories');
+        const $header = $widget.find('.gm2-selected-header');
+
+        $container.empty();
+
+        $widget.find('.gm2-category-name.selected').each(function() {
+            const termId = $(this).data('term-id');
+            const name = $(this).text().trim();
+            const $item = $('<div class="gm2-selected-category" data-term-id="' + termId + '"></div>');
+            $item.text(name);
+            $item.append('<span class="gm2-remove-category">✕</span>');
+            $container.append($item);
+        });
+
+        if ($container.children().length > 0) {
+            $header.show();
+            $container.show();
+        } else {
+            $header.hide();
+            $container.hide();
+        }
     }
     
     function gm2UpdateProductFiltering($widget) {
@@ -47,15 +73,15 @@ jQuery(document).ready(function($) {
         $widget.find('.gm2-category-name.selected').each(function() {
             selectedIds.push($(this).data('term-id'));
         });
-        
+
         const url = new URL(window.location.href);
         const filterType = $widget.data('filter-type');
         const simpleOperator = $widget.data('simple-operator') || 'IN';
-        
+
         if (selectedIds.length > 0) {
             url.searchParams.set('gm2_cat', selectedIds.join(','));
             url.searchParams.set('gm2_filter_type', filterType);
-            
+
             if (filterType === 'simple') {
                 url.searchParams.set('gm2_simple_operator', simpleOperator);
             }
@@ -64,12 +90,72 @@ jQuery(document).ready(function($) {
             url.searchParams.delete('gm2_filter_type');
             url.searchParams.delete('gm2_simple_operator');
         }
-        
-        // Remove pagination
+
         url.searchParams.delete('paged');
-        
-        // Reload page with new parameters
-        window.location.href = url.toString();
+
+        const $oldList = $('.products').first();
+        let columns = 0;
+        const match = $oldList.attr('class').match(/columns-(\d+)/);
+        if (match) {
+            columns = parseInt(match[1], 10);
+        }
+
+        const data = {
+            action: 'gm2_filter_products',
+            gm2_cat: selectedIds.join(','),
+            gm2_filter_type: filterType,
+            gm2_simple_operator: simpleOperator,
+            gm2_columns: columns
+        };
+
+        $.post(gm2CategorySort.ajax_url, data, function(response) {
+            if (response.success && response.data && response.data.html) {
+                const $newList = $(response.data.html);
+
+                let oldClasses = $oldList.attr('class') || '';
+                const newClasses = $newList.attr('class') || '';
+
+                oldClasses = oldClasses.replace(/columns-\d+/g, '').trim();
+                const columnMatch = newClasses.match(/columns-\d+/);
+                if (columnMatch) {
+                    oldClasses += ' ' + columnMatch[0];
+                }
+                $oldList.attr('class', oldClasses.trim());
+
+                $oldList.html($newList.html());
+
+                if (response.data.count) {
+                    const $existingCount = $('.woocommerce-result-count').first();
+                    if ($existingCount.length) {
+                        $existingCount.replaceWith($(response.data.count));
+                    }
+                }
+
+                window.history.replaceState(null, '', url.toString());
+
+                gm2ReinitArchiveWidget($oldList);
+            } else {
+                window.location.href = url.toString();
+            }
+        });
+    }
+
+    function gm2ReinitArchiveWidget($list) {
+        const $widget = $list.closest('.elementor-widget');
+        const type = $widget.data('widget_type');
+        if ($widget.length && window.elementorFrontend) {
+            if (elementorFrontend.elementsHandler) {
+                elementorFrontend.elementsHandler.runReadyTrigger($widget);
+            }
+            if (elementorFrontend.hooks && elementorFrontend.hooks.doAction) {
+                elementorFrontend.hooks.doAction('frontend/element_ready/global', $widget, $);
+                if (type) {
+                    elementorFrontend.hooks.doAction('frontend/element_ready/' + type, $widget, $);
+                }
+            }
+        }
+        $(document.body).trigger('wc_init');
+        $(document.body).trigger('wc_fragment_refresh');
     }
     
     // Event delegation for dynamic elements
