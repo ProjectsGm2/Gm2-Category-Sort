@@ -109,7 +109,15 @@ jQuery(document).ready(function($) {
         };
 
         $.post(gm2CategorySort.ajax_url, data, function(response) {
-            if (response.success && response.data && response.data.html) {
+            if (typeof response === 'string') {
+                try {
+                    response = JSON.parse(response);
+                } catch (err) {
+                    response = null;
+                }
+            }
+
+            if (response && response.success && response.data && response.data.html) {
                 const $newList = $(response.data.html);
 
                 let oldClasses = $oldList.attr('class') || '';
