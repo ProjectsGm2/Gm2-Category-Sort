@@ -66,6 +66,7 @@ jQuery(document).ready(function($) {
             $header.hide();
             $container.hide();
         }
+    }
     
     function gm2UpdateProductFiltering($widget, page = 1) {
         const selectedIds = [];
@@ -90,7 +91,7 @@ jQuery(document).ready(function($) {
             url.searchParams.delete('gm2_simple_operator');
         }
 
-         if (page > 1) {
+        if (page > 1) {
             url.searchParams.set('paged', page);
         } else {
             url.searchParams.delete('paged');
@@ -140,6 +141,11 @@ jQuery(document).ready(function($) {
             gm2_paged: page
         };
 
+      if (typeof gm2CategorySort === 'undefined' || !gm2CategorySort.ajax_url) {
+            window.location.href = url.toString();
+            return;
+        }
+      
         $.post(gm2CategorySort.ajax_url, data, function(response) {
             if (typeof response === 'string') {
                 try {
