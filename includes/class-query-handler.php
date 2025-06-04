@@ -52,7 +52,7 @@ class Gm2_Category_Sort_Query_Handler {
         $query->set('tax_query', $tax_query);
     }
     
-    private static function build_advanced_query($term_ids) {
+    public static function build_advanced_query($term_ids) {
         // If only one category is selected, use simple IN query
         if (count($term_ids) === 1) {
             return [
