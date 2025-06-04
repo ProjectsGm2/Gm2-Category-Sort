@@ -30,12 +30,15 @@ class Gm2_Category_Sort_Ajax {
         }
 
         $args = [
-            'post_type' => 'product',
-            'post_status' => 'publish',
+            'post_type'      => 'product',
+            'post_status'    => 'publish',
             'posts_per_page' => wc_get_loop_prop('per_page'),
-            'paged' => 1,
-            'tax_query' => $tax_query,
+            'paged'          => 1,
+            'tax_query'      => $tax_query,
         ];
+
+        // Setup loop properties so the product grid follows archive settings.
+        wc_setup_loop();
 
         $query = new WP_Query($args);
 
@@ -51,6 +54,7 @@ class Gm2_Category_Sort_Ajax {
             woocommerce_no_products_found();
         }
         wp_reset_postdata();
+        wc_reset_loop();
 
         $html = ob_get_clean();
         wp_send_json_success(['html' => $html]);
