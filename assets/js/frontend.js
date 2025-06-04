@@ -47,15 +47,15 @@ jQuery(document).ready(function($) {
         $widget.find('.gm2-category-name.selected').each(function() {
             selectedIds.push($(this).data('term-id'));
         });
-        
+
         const url = new URL(window.location.href);
         const filterType = $widget.data('filter-type');
         const simpleOperator = $widget.data('simple-operator') || 'IN';
-        
+
         if (selectedIds.length > 0) {
             url.searchParams.set('gm2_cat', selectedIds.join(','));
             url.searchParams.set('gm2_filter_type', filterType);
-            
+
             if (filterType === 'simple') {
                 url.searchParams.set('gm2_simple_operator', simpleOperator);
             }
@@ -64,12 +64,22 @@ jQuery(document).ready(function($) {
             url.searchParams.delete('gm2_filter_type');
             url.searchParams.delete('gm2_simple_operator');
         }
-        
-        // Remove pagination
+
         url.searchParams.delete('paged');
-        
-        // Reload page with new parameters
-        window.location.href = url.toString();
+
+        const data = {
+            action: 'gm2_filter_products',
+            gm2_cat: selectedIds.join(','),
+            gm2_filter_type: filterType,
+            gm2_simple_operator: simpleOperator
+        };
+
+        $.post(gm2CategorySort.ajax_url, data, function(response) {
+            if (response.success) {
+                $('.products').first().replaceWith(response.data.html);
+                window.history.replaceState(null, '', url.toString());
+            }
+        });
     }
     
     // Event delegation for dynamic elements
