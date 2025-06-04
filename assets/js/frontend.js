@@ -93,13 +93,20 @@ jQuery(document).ready(function($) {
 
         url.searchParams.delete('paged');
 
-const $oldList = $('.products').first();
-        let columns = 0;
-        const match = $oldList.attr('class').match(/columns-(\d+)/);
-        if (match) {
-            columns = parseInt(match[1], 10);
-        }
+                gm2ReinitArchiveWidget($oldList);
 
+    function gm2ReinitArchiveWidget($list) {
+        const $scope = $list.closest('.elementor-element');
+        if ($scope.length && window.elementorFrontend) {
+            if (elementorFrontend.elementsHandler) {
+                elementorFrontend.elementsHandler.runReadyTrigger($scope);
+            }
+            if (elementorFrontend.hooks && elementorFrontend.hooks.doAction) {
+                elementorFrontend.hooks.doAction('frontend/element_ready/wc-archive-products.default', $scope, $);
+            }
+        }
+        $(document.body).trigger('wc_fragment_refresh');
+    }
         const data = {
             action: 'gm2_filter_products',
             gm2_cat: selectedIds.join(','),
