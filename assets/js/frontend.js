@@ -106,8 +106,20 @@ jQuery(document).ready(function($) {
 
         $.post(gm2CategorySort.ajax_url, data, function(response) {
             if (response.success) {
-                $('.products').first().replaceWith(response.data.html);
+                const $newList = $(response.data.html);
+                const $oldList = $('.products').first();
+                $oldList.attr('class', $newList.attr('class'));
+                $oldList.html($newList.html());
                 window.history.replaceState(null, '', url.toString());
+
+                // Re‑initialize Elementor and WooCommerce behaviors
+                if (window.elementorFrontend && elementorFrontend.elementsHandler) {
+                    const $scope = $newList.closest('.elementor-widget');
+                    if ($scope.length) {
+                        elementorFrontend.elementsHandler.runReadyTrigger($scope);
+                    }
+                }
+                $(document.body).trigger('wc_fragment_refresh');
             }
         });
     }
