@@ -6,6 +6,7 @@ class Gm2_Category_Sort_Ajax {
     }
 
     public static function filter_products() {
+        check_ajax_referer('gm2_filter_products');
         $term_ids = [];
         if (!empty($_POST['gm2_cat'])) {
             $term_ids = array_map('intval', explode(',', $_POST['gm2_cat']));
