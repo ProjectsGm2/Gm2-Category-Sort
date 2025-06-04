@@ -118,7 +118,15 @@ jQuery(document).ready(function($) {
             }
 
             if (response && response.success && response.data && response.data.html) {
-                const $newList = $(response.data.html);
+                const $response = $(response.data.html);
+                let $newList = $response.filter('ul.products').first();
+                if (!$newList.length) {
+                    $newList = $response.find('ul.products').first();
+                }
+                if (!$newList.length) {
+                    window.location.href = url.toString();
+                    return;
+                }
 
                 let oldClasses = $oldList.attr('class') || '';
                 const newClasses = $newList.attr('class') || '';
