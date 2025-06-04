@@ -67,6 +67,30 @@ jQuery(document).ready(function($) {
             $container.hide();
         }
     }
+
+    function gm2RefreshSelectedList($widget) {
+        const $container = $widget.find('.gm2-selected-categories');
+        const $header = $widget.find('.gm2-selected-header');
+
+        $container.empty();
+
+        $widget.find('.gm2-category-name.selected').each(function() {
+            const termId = $(this).data('term-id');
+            const name = $(this).text().trim();
+            const $item = $('<div class="gm2-selected-category" data-term-id="' + termId + '"></div>');
+            $item.text(name);
+            $item.append('<span class="gm2-remove-category">✕</span>');
+            $container.append($item);
+        });
+
+        if ($container.children().length > 0) {
+            $header.show();
+            $container.show();
+        } else {
+            $header.hide();
+            $container.hide();
+        }
+    }
     
     function gm2UpdateProductFiltering($widget, page = 1) {
         const selectedIds = [];

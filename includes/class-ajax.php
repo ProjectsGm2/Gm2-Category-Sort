@@ -29,7 +29,7 @@ class Gm2_Category_Sort_Ajax {
             $tax_query[] = $category_query;
         }
 
-        $paged = isset($_POST['gm2_paged']) ? absint($_POST['gm2_paged']) : 1;
+    $paged = isset($_POST['gm2_paged']) ? absint($_POST['gm2_paged']) : 1;
 
         $args = [
             'post_type'      => 'product',
