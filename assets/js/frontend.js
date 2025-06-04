@@ -66,31 +66,6 @@ jQuery(document).ready(function($) {
             $header.hide();
             $container.hide();
         }
-    }
-
-    function gm2RefreshSelectedList($widget) {
-        const $container = $widget.find('.gm2-selected-categories');
-        const $header = $widget.find('.gm2-selected-header');
-
-        $container.empty();
-
-        $widget.find('.gm2-category-name.selected').each(function() {
-            const termId = $(this).data('term-id');
-            const name = $(this).text().trim();
-            const $item = $('<div class="gm2-selected-category" data-term-id="' + termId + '"></div>');
-            $item.text(name);
-            $item.append('<span class="gm2-remove-category">✕</span>');
-            $container.append($item);
-        });
-
-        if ($container.children().length > 0) {
-            $header.show();
-            $container.show();
-        } else {
-            $header.hide();
-            $container.hide();
-        }
-    }
     
     function gm2UpdateProductFiltering($widget, page = 1) {
         const selectedIds = [];
@@ -115,17 +90,44 @@ jQuery(document).ready(function($) {
             url.searchParams.delete('gm2_simple_operator');
         }
 
-        if (page > 1) {
+         if (page > 1) {
             url.searchParams.set('paged', page);
         } else {
             url.searchParams.delete('paged');
         }
 
         const $oldList = $('.products').first();
+        const $elementorWidget = $oldList.closest('.elementor-widget');
         let columns = 0;
+        let perPage = 0;
+
+        const settings = $elementorWidget.data('settings');
+        if (settings) {
+            if (settings.columns) {
+                columns = parseInt(settings.columns, 10) || 0;
+            }
+            if (settings.posts_per_page) {
+                perPage = parseInt(settings.posts_per_page, 10) || 0;
+            }
+        }
+
         const match = $oldList.attr('class').match(/columns-(\d+)/);
         if (match) {
             columns = parseInt(match[1], 10);
+        }
+
+        if (!columns) {
+            const widgetColumns = $widget.data('columns');
+            if (widgetColumns) {
+                columns = parseInt(widgetColumns, 10) || 0;
+            }
+        }
+
+        if (!perPage) {
+            const widgetPerPage = $widget.data('per-page');
+            if (widgetPerPage) {
+                perPage = parseInt(widgetPerPage, 10) || 0;
+            }
         }
 
         const data = {
@@ -134,6 +136,7 @@ jQuery(document).ready(function($) {
             gm2_filter_type: filterType,
             gm2_simple_operator: simpleOperator,
             gm2_columns: columns,
+            gm2_per_page: perPage,
             gm2_paged: page
         };
 

@@ -12,10 +12,12 @@ class Gm2_Category_Sort_Renderer {
     public function generate_html() {
         ob_start();
         ?>
-        <div class="gm2-category-sort" 
-             data-widget-id="<?= esc_attr($this->settings['widget_id']) ?>" 
+        <div class="gm2-category-sort"
+             data-widget-id="<?= esc_attr($this->settings['widget_id']) ?>"
              data-filter-type="<?= esc_attr($this->settings['filter_type']) ?>"
-             data-simple-operator="<?= esc_attr($this->settings['simple_operator'] ?? 'IN') ?>">
+             data-simple-operator="<?= esc_attr($this->settings['simple_operator'] ?? 'IN') ?>"
+             data-columns="<?= esc_attr(wc_get_loop_prop('columns')) ?>"
+             data-per-page="<?= esc_attr(wc_get_loop_prop('per_page')) ?>">
              
             <div class="gm2-category-tree">
                 <?php $this->render_category_tree(); ?>

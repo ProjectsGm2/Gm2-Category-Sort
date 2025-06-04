@@ -29,12 +29,17 @@ class Gm2_Category_Sort_Ajax {
             $tax_query[] = $category_query;
         }
 
-    $paged = isset($_POST['gm2_paged']) ? absint($_POST['gm2_paged']) : 1;
+        $paged = isset($_POST['gm2_paged']) ? absint($_POST['gm2_paged']) : 1;
+
+        $per_page = isset($_POST['gm2_per_page']) ? absint($_POST['gm2_per_page']) : 0;
+        if (!$per_page) {
+            $per_page = wc_get_loop_prop('per_page');
+        }
 
         $args = [
             'post_type'      => 'product',
             'post_status'    => 'publish',
-            'posts_per_page' => wc_get_loop_prop('per_page'),
+            'posts_per_page' => $per_page,
             'paged'          => max(1, $paged),
             'tax_query'      => $tax_query,
         ];
@@ -44,7 +49,7 @@ class Gm2_Category_Sort_Ajax {
 
         wc_setup_loop([
             'columns'      => $columns ?: wc_get_loop_prop('columns'),
-            'per_page'     => $args['posts_per_page'],
+            'per_page'     => $per_page,
             'current_page' => $args['paged'],
         ]);
 
