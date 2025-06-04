@@ -21,14 +21,16 @@ class Gm2_Category_Sort_Renderer {
                 <?php $this->render_category_tree(); ?>
             </div>
             
-            <?php if (!empty($this->selected_categories)) : ?>
-            <div class="gm2-selected-header">
+            <?php
+            $has_selected = !empty($this->selected_categories);
+            $style = $has_selected ? '' : 'style="display:none"';
+            ?>
+            <div class="gm2-selected-header" <?= $style ?>>
                 <?= __('Selected Categories:', 'gm2-category-sort') ?>
             </div>
-            <div class="gm2-selected-categories">
-                <?php $this->render_selected_categories(); ?>
+            <div class="gm2-selected-categories" <?= $style ?>>
+                <?php if ($has_selected) $this->render_selected_categories(); ?>
             </div>
-            <?php endif; ?>
         </div>
         <?php
         return ob_get_clean();
