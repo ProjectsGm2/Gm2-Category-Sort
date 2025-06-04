@@ -92,8 +92,8 @@ jQuery(document).ready(function($) {
         }
 
         url.searchParams.delete('paged');
-
-const $oldList = $('.products').first();
+      
+        const $oldList = $('.products').first();
         let columns = 0;
         const match = $oldList.attr('class').match(/columns-(\d+)/);
         if (match) {
@@ -111,21 +111,39 @@ const $oldList = $('.products').first();
         $.post(gm2CategorySort.ajax_url, data, function(response) {
             if (response.success && response.data && response.data.html) {
                 const $newList = $(response.data.html);
-                $oldList.attr('class', $newList.attr('class'));
+
+                let oldClasses = $oldList.attr('class') || '';
+                const newClasses = $newList.attr('class') || '';
+
+                oldClasses = oldClasses.replace(/columns-\d+/g, '').trim();
+                const columnMatch = newClasses.match(/columns-\d+/);
+                if (columnMatch) {
+                    oldClasses += ' ' + columnMatch[0];
+                }
+                $oldList.attr('class', oldClasses.trim());
+
                 $oldList.html($newList.html());
                 window.history.replaceState(null, '', url.toString());
 
-                if (window.elementorFrontend && elementorFrontend.elementsHandler) {
-                    const $scope = $oldList.closest('.elementor-widget');
-                    if ($scope.length) {
-                        elementorFrontend.elementsHandler.runReadyTrigger($scope);
-                    }
-                }
-                $(document.body).trigger('wc_fragment_refresh');
+                gm2ReinitArchiveWidget($oldList);
             } else {
                 window.location.href = url.toString();
             }
         });
+    }
+
+    function gm2ReinitArchiveWidget($list) {
+        const $widget = $list.closest('.elementor-widget');
+        const type = $widget.data('widget_type');
+        if ($widget.length && window.elementorFrontend) {
+            if (elementorFrontend.elementsHandler) {
+                elementorFrontend.elementsHandler.runReadyTrigger($widget);
+            }
+            if (type && elementorFrontend.hooks && elementorFrontend.hooks.doAction) {
+                elementorFrontend.hooks.doAction('frontend/element_ready/' + type, $widget, $);
+            }
+        }
+        $(document.body).trigger('wc_fragment_refresh');
     }
     
     // Event delegation for dynamic elements
