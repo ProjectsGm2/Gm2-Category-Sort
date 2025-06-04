@@ -66,7 +66,6 @@ jQuery(document).ready(function($) {
             $header.hide();
             $container.hide();
         }
-    }
     
     function gm2UpdateProductFiltering($widget, page = 1) {
         const selectedIds = [];
@@ -91,7 +90,7 @@ jQuery(document).ready(function($) {
             url.searchParams.delete('gm2_simple_operator');
         }
 
-        if (page > 1) {
+         if (page > 1) {
             url.searchParams.set('paged', page);
         } else {
             url.searchParams.delete('paged');
