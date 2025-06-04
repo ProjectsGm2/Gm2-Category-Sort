@@ -93,33 +93,37 @@ jQuery(document).ready(function($) {
 
         url.searchParams.delete('paged');
 
+const $oldList = $('.products').first();
+        let columns = 0;
+        const match = $oldList.attr('class').match(/columns-(\d+)/);
+        if (match) {
+            columns = parseInt(match[1], 10);
+        }
+
         const data = {
             action: 'gm2_filter_products',
             gm2_cat: selectedIds.join(','),
             gm2_filter_type: filterType,
             gm2_simple_operator: simpleOperator,
-            gm2_columns: (function() {
-                const match = $('.products').first().attr('class').match(/columns-(\d+)/);
-                return match ? parseInt(match[1], 10) : 0;
-            })()
+            gm2_columns: columns
         };
 
         $.post(gm2CategorySort.ajax_url, data, function(response) {
-            if (response.success) {
+            if (response.success && response.data && response.data.html) {
                 const $newList = $(response.data.html);
-                const $oldList = $('.products').first();
                 $oldList.attr('class', $newList.attr('class'));
                 $oldList.html($newList.html());
                 window.history.replaceState(null, '', url.toString());
 
-                // Re‑initialize Elementor and WooCommerce behaviors
                 if (window.elementorFrontend && elementorFrontend.elementsHandler) {
-                    const $scope = $newList.closest('.elementor-widget');
+                    const $scope = $oldList.closest('.elementor-widget');
                     if ($scope.length) {
                         elementorFrontend.elementsHandler.runReadyTrigger($scope);
                     }
                 }
                 $(document.body).trigger('wc_fragment_refresh');
+            } else {
+                window.location.href = url.toString();
             }
         });
     }
