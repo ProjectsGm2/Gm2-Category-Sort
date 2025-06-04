@@ -10,7 +10,7 @@
 defined('ABSPATH') || exit;
 
 // Plugin version used for cache busting
-define('GM2_CAT_SORT_VERSION', '1.0.4');
+define('GM2_CAT_SORT_VERSION', '1.0.5');
 
 // Define plugin constants
 define('GM2_CAT_SORT_PATH', plugin_dir_path(__FILE__));

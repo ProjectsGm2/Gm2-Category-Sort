@@ -11,20 +11,20 @@ class Gm2_Category_Sort_Enqueuer {
             return;
         }
         
-        // CSS
+        $css_ver = filemtime(GM2_CAT_SORT_PATH . 'assets/css/style.css');
         wp_enqueue_style(
             'gm2-category-sort-style',
             GM2_CAT_SORT_URL . 'assets/css/style.css',
             [],
-            GM2_CAT_SORT_VERSION
+            $css_ver
         );
-        
-        // JavaScript
+
+        $js_ver = filemtime(GM2_CAT_SORT_PATH . 'assets/js/frontend.js');
         wp_enqueue_script(
             'gm2-category-sort-script',
             GM2_CAT_SORT_URL . 'assets/js/frontend.js',
             ['jquery'],
-            GM2_CAT_SORT_VERSION,
+            $js_ver,
             true
         );
 
