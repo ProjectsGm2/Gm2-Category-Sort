@@ -29,11 +29,13 @@ class Gm2_Category_Sort_Ajax {
             $tax_query[] = $category_query;
         }
 
+    $paged = isset($_POST['gm2_paged']) ? absint($_POST['gm2_paged']) : 1;
+
         $args = [
             'post_type'      => 'product',
             'post_status'    => 'publish',
             'posts_per_page' => wc_get_loop_prop('per_page'),
-            'paged'          => 1,
+            'paged'          => max(1, $paged),
             'tax_query'      => $tax_query,
         ];
 
@@ -71,9 +73,14 @@ class Gm2_Category_Sort_Ajax {
         woocommerce_result_count();
         $result_count = ob_get_clean();
 
+        ob_start();
+        woocommerce_pagination();
+        $pagination = ob_get_clean();
+
         wp_send_json_success([
             'html'  => $html,
             'count' => $result_count,
+            'pagination' => $pagination,
         ]);
     }
 }
