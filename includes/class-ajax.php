@@ -40,7 +40,7 @@ class Gm2_Category_Sort_Ajax {
         // Respect column settings from the current product archive
         $columns = isset($_POST['gm2_columns']) ? absint($_POST['gm2_columns']) : 0;
 
-       wc_setup_loop([
+        wc_setup_loop([
             'columns'      => $columns ?: wc_get_loop_prop('columns'),
             'per_page'     => $args['posts_per_page'],
             'current_page' => $args['paged'],

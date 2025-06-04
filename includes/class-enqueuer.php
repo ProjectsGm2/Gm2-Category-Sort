@@ -6,8 +6,8 @@ class Gm2_Category_Sort_Enqueuer {
     }
     
     public static function enqueue_assets() {
-        // Only on WooCommerce pages
-        if (!is_shop() && !is_product_category() && !is_product_taxonomy() && !is_search()) {
+        // Don't enqueue in the admin area unless doing AJAX
+        if (is_admin() && !wp_doing_ajax()) {
             return;
         }
         
@@ -16,7 +16,7 @@ class Gm2_Category_Sort_Enqueuer {
             'gm2-category-sort-style',
             GM2_CAT_SORT_URL . 'assets/css/style.css',
             [],
-            filemtime(GM2_CAT_SORT_PATH . 'assets/css/style.css')
+            GM2_CAT_SORT_VERSION
         );
         
         // JavaScript
@@ -24,7 +24,7 @@ class Gm2_Category_Sort_Enqueuer {
             'gm2-category-sort-script',
             GM2_CAT_SORT_URL . 'assets/js/frontend.js',
             ['jquery'],
-            filemtime(GM2_CAT_SORT_PATH . 'assets/js/frontend.js'),
+            GM2_CAT_SORT_VERSION,
             true
         );
 
