@@ -28,6 +28,7 @@ jQuery(document).ready(function($) {
             $(this).addClass('selected');
         }
         
+        gm2RefreshSelectedList($widget);
         gm2UpdateProductFiltering($widget);
     }
     
@@ -39,7 +40,32 @@ jQuery(document).ready(function($) {
         
         $target.remove();
         $widget.find('.gm2-category-name[data-term-id="' + termId + '"]').removeClass('selected');
+        gm2RefreshSelectedList($widget);
         gm2UpdateProductFiltering($widget);
+    }
+
+    function gm2RefreshSelectedList($widget) {
+        const $container = $widget.find('.gm2-selected-categories');
+        const $header = $widget.find('.gm2-selected-header');
+
+        $container.empty();
+
+        $widget.find('.gm2-category-name.selected').each(function() {
+            const termId = $(this).data('term-id');
+            const name = $(this).text().trim();
+            const $item = $('<div class="gm2-selected-category" data-term-id="' + termId + '"></div>');
+            $item.text(name);
+            $item.append('<span class="gm2-remove-category">✕</span>');
+            $container.append($item);
+        });
+
+        if ($container.children().length > 0) {
+            $header.show();
+            $container.show();
+        } else {
+            $header.hide();
+            $container.hide();
+        }
     }
     
     function gm2UpdateProductFiltering($widget) {
@@ -47,15 +73,15 @@ jQuery(document).ready(function($) {
         $widget.find('.gm2-category-name.selected').each(function() {
             selectedIds.push($(this).data('term-id'));
         });
-        
+
         const url = new URL(window.location.href);
         const filterType = $widget.data('filter-type');
         const simpleOperator = $widget.data('simple-operator') || 'IN';
-        
+
         if (selectedIds.length > 0) {
             url.searchParams.set('gm2_cat', selectedIds.join(','));
             url.searchParams.set('gm2_filter_type', filterType);
-            
+
             if (filterType === 'simple') {
                 url.searchParams.set('gm2_simple_operator', simpleOperator);
             }
@@ -64,12 +90,22 @@ jQuery(document).ready(function($) {
             url.searchParams.delete('gm2_filter_type');
             url.searchParams.delete('gm2_simple_operator');
         }
-        
-        // Remove pagination
+
         url.searchParams.delete('paged');
-        
-        // Reload page with new parameters
-        window.location.href = url.toString();
+
+        const data = {
+            action: 'gm2_filter_products',
+            gm2_cat: selectedIds.join(','),
+            gm2_filter_type: filterType,
+            gm2_simple_operator: simpleOperator
+        };
+
+        $.post(gm2CategorySort.ajax_url, data, function(response) {
+            if (response.success) {
+                $('.products').first().replaceWith(response.data.html);
+                window.history.replaceState(null, '', url.toString());
+            }
+        });
     }
     
     // Event delegation for dynamic elements
