@@ -16,7 +16,7 @@ class Gm2_Category_Sort_Enqueuer {
             'gm2-category-sort-style',
             GM2_CAT_SORT_URL . 'assets/css/style.css',
             [],
-            '1.0'
+            filemtime(GM2_CAT_SORT_PATH . 'assets/css/style.css')
         );
         
         // JavaScript
@@ -24,7 +24,7 @@ class Gm2_Category_Sort_Enqueuer {
             'gm2-category-sort-script',
             GM2_CAT_SORT_URL . 'assets/js/frontend.js',
             ['jquery'],
-            '1.0',
+            filemtime(GM2_CAT_SORT_PATH . 'assets/js/frontend.js'),
             true
         );
 
