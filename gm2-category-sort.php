@@ -2,6 +2,7 @@
 /**
  * Plugin Name: Gm2 Category Sort
  * Description: ...
+ * Version: 1.0.1
  * Version: 1.0.3
  * Author: Your Name
  * Text Domain: gm2-category-sort
