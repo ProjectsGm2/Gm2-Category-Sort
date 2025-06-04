@@ -93,7 +93,7 @@ jQuery(document).ready(function($) {
 
         url.searchParams.delete('paged');
 
-        const $oldList = $('.products').first();
+const $oldList = $('.products').first();
         let columns = 0;
         const match = $oldList.attr('class').match(/columns-(\d+)/);
         if (match) {
