@@ -63,8 +63,8 @@ function gm2_category_sort_admin_notice() {
     
     if (!empty($missing)) {
         echo '<div class="notice notice-error"><p>';
-        echo '<strong>Gm2 Category Sort</strong> requires the following plugins: ';
-        echo implode(', ', $missing) . '. Please install and activate them.';
+        echo '<strong>' . esc_html__( 'Gm2 Category Sort', 'gm2-category-sort' ) . '</strong> ' . esc_html__( 'requires the following plugins: ', 'gm2-category-sort' );
+        echo implode( ', ', array_map( 'esc_html', $missing ) ) . '. ' . esc_html__( 'Please install and activate them.', 'gm2-category-sort' );
         echo '</p></div>';
     }
 }
