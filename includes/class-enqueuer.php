@@ -27,13 +27,5 @@ class Gm2_Category_Sort_Enqueuer {
             filemtime(GM2_CAT_SORT_PATH . 'assets/js/frontend.js'),
             true
         );
-
-        wp_localize_script(
-            'gm2-category-sort-script',
-            'gm2CategorySort',
-            [
-                'ajax_url' => admin_url('admin-ajax.php')
-            ]
-        );
     }
 }
