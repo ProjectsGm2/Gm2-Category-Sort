@@ -141,6 +141,10 @@ jQuery(document).ready(function($) {
             gm2_paged: page
         };
 
+        if (typeof gm2CategorySort !== 'undefined' && gm2CategorySort.nonce) {
+            data._ajax_nonce = gm2CategorySort.nonce;
+        }
+
       if (typeof gm2CategorySort === 'undefined' || !gm2CategorySort.ajax_url) {
             window.location.href = url.toString();
             return;
