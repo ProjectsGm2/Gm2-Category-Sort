@@ -97,7 +97,11 @@ jQuery(document).ready(function($) {
             action: 'gm2_filter_products',
             gm2_cat: selectedIds.join(','),
             gm2_filter_type: filterType,
-            gm2_simple_operator: simpleOperator
+            gm2_simple_operator: simpleOperator,
+            gm2_columns: (function() {
+                const match = $('.products').first().attr('class').match(/columns-(\d+)/);
+                return match ? parseInt(match[1], 10) : 0;
+            })()
         };
 
         $.post(gm2CategorySort.ajax_url, data, function(response) {
