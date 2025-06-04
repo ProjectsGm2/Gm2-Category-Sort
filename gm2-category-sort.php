@@ -26,10 +26,12 @@ function gm2_category_sort_init() {
     require_once GM2_CAT_SORT_PATH . 'includes/class-enqueuer.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-query-handler.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-renderer.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-ajax.php';
     
     // Initialize components
     Gm2_Category_Sort_Enqueuer::init();
     Gm2_Category_Sort_Query_Handler::init();
+    Gm2_Category_Sort_Ajax::init();
     
     // Register widget after Elementor is fully loaded
     add_action('elementor/widgets/register', 'gm2_register_widget');
