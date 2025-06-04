@@ -139,10 +139,14 @@ jQuery(document).ready(function($) {
             if (elementorFrontend.elementsHandler) {
                 elementorFrontend.elementsHandler.runReadyTrigger($widget);
             }
-            if (type && elementorFrontend.hooks && elementorFrontend.hooks.doAction) {
-                elementorFrontend.hooks.doAction('frontend/element_ready/' + type, $widget, $);
+            if (elementorFrontend.hooks && elementorFrontend.hooks.doAction) {
+                elementorFrontend.hooks.doAction('frontend/element_ready/global', $widget, $);
+                if (type) {
+                    elementorFrontend.hooks.doAction('frontend/element_ready/' + type, $widget, $);
+                }
             }
         }
+        $(document.body).trigger('wc_init');
         $(document.body).trigger('wc_fragment_refresh');
     }
     
