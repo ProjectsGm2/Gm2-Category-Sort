@@ -141,11 +141,11 @@ jQuery(document).ready(function($) {
             gm2_paged: page
         };
 
-        if (typeof gm2CategorySort === 'undefined' || !gm2CategorySort.ajax_url) {
+      if (typeof gm2CategorySort === 'undefined' || !gm2CategorySort.ajax_url) {
             window.location.href = url.toString();
             return;
         }
-
+      
         $.post(gm2CategorySort.ajax_url, data, function(response) {
             if (typeof response === 'string') {
                 try {
