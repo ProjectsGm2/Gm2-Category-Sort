@@ -70,7 +70,6 @@ class Gm2_Category_Sort_Ajax {
             woocommerce_no_products_found();
         }
         wp_reset_postdata();
-        wc_reset_loop();
 
         $html = ob_get_clean();
 
@@ -81,6 +80,8 @@ class Gm2_Category_Sort_Ajax {
         ob_start();
         woocommerce_pagination();
         $pagination = ob_get_clean();
+
+        wc_reset_loop();
 
         wp_send_json_success([
             'html'  => $html,
