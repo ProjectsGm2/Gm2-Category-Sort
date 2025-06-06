@@ -63,7 +63,7 @@ function gm2_category_sort_admin_notice() {
     
     if (!empty($missing)) {
         echo '<div class="notice notice-error"><p>';
-        printf(
+         printf(
             /* translators: 1: plugin name. 2: comma separated list of missing plugins. */
             esc_html__( '%1$s requires the following plugins: %2$s.', 'gm2-category-sort' ),
             '<strong>Gm2 Category Sort</strong>',
