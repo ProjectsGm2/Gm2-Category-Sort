@@ -19,6 +19,14 @@ Gm2 Category Sort adds a product category sorting widget for WooCommerce shops w
 3. Choose optional parent categories and select the filter logic (Simple or Advanced) in the widget settings.
 4. Save the page. On the frontend, shoppers can expand categories and filter the product list.
 
+## Sorting
+
+The widget honors the WooCommerce sorting dropdown. Values like `price`,
+`price-desc`, `rating`, `popularity`, `date`, `rand`, `id` and `title` are
+accepted. You may also append `-asc` or `-desc` to control direction when
+applicable. These values are translated to `WP_Query` parameters through the
+`gm2_get_orderby_args` helper, so the AJAX output matches the chosen order.
+
 ## Security
 AJAX filtering uses a nonce exposed to JavaScript as `gm2CategorySort.nonce`.
 If you customize the script, include this value in your requests.
