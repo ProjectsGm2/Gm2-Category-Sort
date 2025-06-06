@@ -48,7 +48,7 @@ class Gm2_Category_Sort_Ajax {
             'tax_query'      => $tax_query,
         ];
 
-        if ( $orderby ) {
+         if ( $orderby ) {
             $orderby_value = $orderby;
             $order_dir     = '';
             if ( str_contains( $orderby, '-' ) ) {
