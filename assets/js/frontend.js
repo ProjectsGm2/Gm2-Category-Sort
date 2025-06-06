@@ -68,13 +68,16 @@ jQuery(document).ready(function($) {
         }
     }
     
-    function gm2UpdateProductFiltering($widget, page = 1) {
-        const selectedIds = [];
-        $widget.find('.gm2-category-name.selected').each(function() {
-            selectedIds.push($(this).data('term-id'));
-        });
-
+    function gm2UpdateProductFiltering($widget, page = 1, orderby = null) {
+      const selectedIds = [];
+      $widget.find('.gm2-category-name.selected').each(function() {
+        selectedIds.push($(this).data('term-id'));
+      });
+      
         const url = new URL(window.location.href);
+        if (!orderby) {
+            orderby = $('.woocommerce-ordering select.orderby').first().val() || '';
+        }
         const filterType = $widget.data('filter-type');
         const simpleOperator = $widget.data('simple-operator') || 'IN';
 
@@ -97,6 +100,12 @@ jQuery(document).ready(function($) {
             url.searchParams.delete('paged');
         }
 
+       if (orderby) {
+            url.searchParams.set('orderby', orderby);
+        } else {
+            url.searchParams.delete('orderby');
+        } 
+      
         const $oldList = $('.products').first();
         const $elementorWidget = $oldList.closest('.elementor-widget');
         let columns = 0;
@@ -138,7 +147,9 @@ jQuery(document).ready(function($) {
             gm2_simple_operator: simpleOperator,
             gm2_columns: columns,
             gm2_per_page: perPage,
-            gm2_paged: page
+            gm2_paged: page,
+            orderby: orderby,
+            gm2_nonce: gm2CategorySort.nonce || ''
         };
 
         if (typeof gm2CategorySort === 'undefined' || !gm2CategorySort.ajax_url) {
@@ -237,5 +248,16 @@ jQuery(document).ready(function($) {
         const page = parseInt(url.searchParams.get('paged') || '1', 10);
         const $widget = $('.gm2-category-sort').first();
         gm2UpdateProductFiltering($widget, page);
+    });
+    
+    $(document).on('change', '.woocommerce-ordering select.orderby', function(e) {
+        e.preventDefault();
+        const val = $(this).val();
+        const $widget = $('.gm2-category-sort').first();
+        gm2UpdateProductFiltering($widget, 1, val);
+    });
+
+    $(document).on('submit', 'form.woocommerce-ordering', function(e) {
+        e.preventDefault();
     });
 });

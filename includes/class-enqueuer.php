@@ -27,11 +27,15 @@ class Gm2_Category_Sort_Enqueuer {
             $js_ver,
             true
         );
-         
+
+        $nonce = wp_create_nonce('gm2_filter_products');
         wp_localize_script(
             'gm2-category-sort-script',
             'gm2CategorySort',
-            ['ajax_url' => admin_url('admin-ajax.php')]
+            [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce'    => $nonce,
+            ]
         );
     }
 }

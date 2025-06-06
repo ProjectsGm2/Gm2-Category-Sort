@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gm2 Category Sort
  * Description: ...
- * Version: 1.0.5
+ * Version: 1.0.6
  * Author: Your Name
  * Text Domain: gm2-category-sort
  */
@@ -10,7 +10,7 @@
 defined('ABSPATH') || exit;
 
 // Plugin version used for cache busting
-define('GM2_CAT_SORT_VERSION', '1.0.5');
+define('GM2_CAT_SORT_VERSION', '1.0.6');
 
 // Define plugin constants
 define('GM2_CAT_SORT_PATH', plugin_dir_path(__FILE__));
@@ -63,8 +63,13 @@ function gm2_category_sort_admin_notice() {
     
     if (!empty($missing)) {
         echo '<div class="notice notice-error"><p>';
-        echo '<strong>' . esc_html__( 'Gm2 Category Sort', 'gm2-category-sort' ) . '</strong> ' . esc_html__( 'requires the following plugins: ', 'gm2-category-sort' );
-        echo implode( ', ', array_map( 'esc_html', $missing ) ) . '. ' . esc_html__( 'Please install and activate them.', 'gm2-category-sort' );
+         printf(
+            /* translators: 1: plugin name. 2: comma separated list of missing plugins. */
+            esc_html__( '%1$s requires the following plugins: %2$s.', 'gm2-category-sort' ),
+            '<strong>Gm2 Category Sort</strong>',
+            implode( ', ', array_map( 'esc_html', $missing ) )
+        );
+        echo ' ' . esc_html__( 'Please install and activate them.', 'gm2-category-sort' );
         echo '</p></div>';
     }
 }
