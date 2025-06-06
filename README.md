@@ -18,5 +18,9 @@ Gm2 Category Sort adds a product category sorting widget for WooCommerce shops w
 3. Choose optional parent categories and select the filter logic (Simple or Advanced) in the widget settings.
 4. Save the page. On the frontend, shoppers can expand categories and filter the product list.
 
+## Security
+AJAX filtering uses a nonce exposed to JavaScript as `gm2CategorySort.nonce`.
+If you customize the script, include this value in your requests.
+
 ## License
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.

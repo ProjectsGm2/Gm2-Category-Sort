@@ -2,12 +2,15 @@
 /**
  * Plugin Name: Gm2 Category Sort
  * Description: ...
- * Version: 1.0.1
+ * Version: 1.0.6
  * Author: Your Name
  * Text Domain: gm2-category-sort
  */
 
 defined('ABSPATH') || exit;
+
+// Plugin version used for cache busting
+define('GM2_CAT_SORT_VERSION', '1.0.6');
 
 // Define plugin constants
 define('GM2_CAT_SORT_PATH', plugin_dir_path(__FILE__));
@@ -26,10 +29,12 @@ function gm2_category_sort_init() {
     require_once GM2_CAT_SORT_PATH . 'includes/class-enqueuer.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-query-handler.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-renderer.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-ajax.php';
     
     // Initialize components
     Gm2_Category_Sort_Enqueuer::init();
     Gm2_Category_Sort_Query_Handler::init();
+    Gm2_Category_Sort_Ajax::init();
     
     // Register widget after Elementor is fully loaded
     add_action('elementor/widgets/register', 'gm2_register_widget');
@@ -58,8 +63,13 @@ function gm2_category_sort_admin_notice() {
     
     if (!empty($missing)) {
         echo '<div class="notice notice-error"><p>';
-        echo '<strong>Gm2 Category Sort</strong> requires the following plugins: ';
-        echo implode(', ', $missing) . '. Please install and activate them.';
+        printf(
+            /* translators: 1: plugin name. 2: comma separated list of missing plugins. */
+            esc_html__( '%1$s requires the following plugins: %2$s.', 'gm2-category-sort' ),
+            '<strong>Gm2 Category Sort</strong>',
+            implode( ', ', array_map( 'esc_html', $missing ) )
+        );
+        echo ' ' . esc_html__( 'Please install and activate them.', 'gm2-category-sort' );
         echo '</p></div>';
     }
 }
