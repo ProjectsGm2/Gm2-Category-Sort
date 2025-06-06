@@ -6,7 +6,6 @@ class Gm2_Category_Sort_Ajax {
     }
 
     public static function filter_products() {
-        check_ajax_referer('gm2_filter_products');
         $term_ids = [];
         if (!empty($_POST['gm2_cat'])) {
             $term_ids = array_map('intval', explode(',', $_POST['gm2_cat']));
@@ -59,6 +58,9 @@ class Gm2_Category_Sort_Ajax {
         wc_set_loop_prop('total', $query->found_posts);
         wc_set_loop_prop('total_pages', $query->max_num_pages);
 
+        $prev_wp_query = $GLOBALS['wp_query'];
+        $GLOBALS['wp_query'] = $query;
+      
         ob_start();
         if ($query->have_posts()) {
             woocommerce_product_loop_start();
@@ -71,8 +73,7 @@ class Gm2_Category_Sort_Ajax {
             woocommerce_no_products_found();
         }
         wp_reset_postdata();
-        wc_reset_loop();
-
+        
         $html = ob_get_clean();
 
         ob_start();
@@ -82,6 +83,10 @@ class Gm2_Category_Sort_Ajax {
         ob_start();
         woocommerce_pagination();
         $pagination = ob_get_clean();
+
+        $GLOBALS['wp_query'] = $prev_wp_query;
+
+        wc_reset_loop();
 
         wp_send_json_success([
             'html'  => $html,
