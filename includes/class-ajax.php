@@ -49,7 +49,8 @@ class Gm2_Category_Sort_Ajax {
         ];
 
         if ( $orderby ) {
-            $ordering_args = WC()->query->get_catalog_ordering_args( $orderby );
+            list( $orderby_value, $order_dir ) = array_pad( explode( '-', $orderby ), 2, '' );
+            $ordering_args = WC()->query->get_catalog_ordering_args( $orderby_value, strtoupper( $order_dir ) );
             $args = array_merge( $args, $ordering_args );
         }
 
