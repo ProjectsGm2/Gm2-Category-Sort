@@ -48,14 +48,8 @@ class Gm2_Category_Sort_Ajax {
             'tax_query'      => $tax_query,
         ];
 
-         if ( $orderby ) {
-            $orderby_value = $orderby;
-            $order_dir     = '';
-            if ( gm2_str_contains( $orderby, '-' ) ) {
-                list( $orderby_value, $order_dir ) = array_pad( explode( '-', $orderby ), 2, '' );
-            }
-
-            $ordering_args = WC()->query->get_catalog_ordering_args( $orderby_value, strtoupper( $order_dir ) );
+        if ( $orderby ) {
+            $ordering_args = gm2_get_orderby_args( $orderby );
             $args          = array_merge( $args, $ordering_args );
         }
 
@@ -107,8 +101,6 @@ class Gm2_Category_Sort_Ajax {
         $pagination = ob_get_clean();
 
         $GLOBALS['wp_query'] = $prev_wp_query;
-
-        WC()->query->remove_ordering_args();
 
         wc_reset_loop();
 
