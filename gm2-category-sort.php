@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gm2 Category Sort
  * Description: ...
- * Version: 1.0.7
+ * Version: 1.0.8
  * Author: Your Name
  * Text Domain: gm2-category-sort
  */
@@ -10,7 +10,7 @@
 defined('ABSPATH') || exit;
 
 // Plugin version used for cache busting
-define('GM2_CAT_SORT_VERSION', '1.0.7');
+define('GM2_CAT_SORT_VERSION', '1.0.8');
 
 // Define plugin constants
 define('GM2_CAT_SORT_PATH', plugin_dir_path(__FILE__));
