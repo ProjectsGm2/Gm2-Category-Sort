@@ -36,6 +36,8 @@ class Gm2_Category_Sort_Ajax {
             $per_page = wc_get_loop_prop('per_page');
         }
 
+        $orderby = isset($_POST['orderby']) ? wc_clean($_POST['orderby']) : '';
+
         $args = [
             'post_type'      => 'product',
             'post_status'    => 'publish',
@@ -43,6 +45,11 @@ class Gm2_Category_Sort_Ajax {
             'paged'          => max(1, $paged),
             'tax_query'      => $tax_query,
         ];
+
+        if ( $orderby ) {
+            $ordering_args = WC()->query->get_catalog_ordering_args( $orderby );
+            $args = array_merge( $args, $ordering_args );
+        }
 
         // Respect column settings from the current product archive
         $columns = isset($_POST['gm2_columns']) ? absint($_POST['gm2_columns']) : 0;
@@ -60,6 +67,8 @@ class Gm2_Category_Sort_Ajax {
 
         $prev_wp_query = $GLOBALS['wp_query'];
         $GLOBALS['wp_query'] = $query;
+        WC()->query->remove_ordering_args();
+
       
         ob_start();
         if ($query->have_posts()) {
