@@ -26,6 +26,7 @@ function gm2_category_sort_init() {
     }
     
     // Include non-widget files
+    require_once GM2_CAT_SORT_PATH . 'includes/utilities.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-enqueuer.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-query-handler.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-renderer.php';
