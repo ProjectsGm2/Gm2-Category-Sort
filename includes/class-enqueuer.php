@@ -27,7 +27,7 @@ class Gm2_Category_Sort_Enqueuer {
             $js_ver,
             true
         );
-
+         
         wp_localize_script(
             'gm2-category-sort-script',
             'gm2CategorySort',
@@ -35,4 +35,3 @@ class Gm2_Category_Sort_Enqueuer {
         );
     }
 }
-

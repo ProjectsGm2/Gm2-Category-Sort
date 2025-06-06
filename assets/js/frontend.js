@@ -145,7 +145,7 @@ jQuery(document).ready(function($) {
             window.location.href = url.toString();
             return;
         }
-
+      
         $.post(gm2CategorySort.ajax_url, data, function(response) {
             if (typeof response === 'string') {
                 try {

@@ -60,7 +60,7 @@ class Gm2_Category_Sort_Ajax {
 
         $prev_wp_query = $GLOBALS['wp_query'];
         $GLOBALS['wp_query'] = $query;
-
+      
         ob_start();
         if ($query->have_posts()) {
             woocommerce_product_loop_start();
@@ -73,7 +73,7 @@ class Gm2_Category_Sort_Ajax {
             woocommerce_no_products_found();
         }
         wp_reset_postdata();
-
+        
         $html = ob_get_clean();
 
         ob_start();
