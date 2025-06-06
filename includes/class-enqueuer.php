@@ -35,6 +35,7 @@ class Gm2_Category_Sort_Enqueuer {
             [
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce'    => $nonce,
+                'error_message' => __( 'Error loading products. Please refresh the page.', 'gm2-category-sort' ),
             ]
         );
     }

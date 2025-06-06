@@ -214,8 +214,11 @@ jQuery(document).ready(function($) {
 
                 gm2ReinitArchiveWidget($oldList);
             } else {
+                alert(gm2CategorySort.error_message);
                 window.location.href = url.toString();
             }
+        }).fail(function() {
+            alert(gm2CategorySort.error_message);
         });
     }
 
