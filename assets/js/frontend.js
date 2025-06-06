@@ -11,7 +11,7 @@ jQuery(document).ready(function($) {
             $button.data('expanded', 'false');
         } else {
             $childContainer.slideDown();
-            $button.text('−');
+            $button.text('-');
             $button.data('expanded', 'true');
         }
     });
