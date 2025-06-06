@@ -57,13 +57,6 @@ class Gm2_Category_Sort_Ajax {
 
             $ordering_args = WC()->query->get_catalog_ordering_args( $orderby_value, strtoupper( $order_dir ) );
             $args          = array_merge( $args, $ordering_args );
-
-            if ( ! empty( $ordering_args['orderby'] ) ) {
-                wc_set_loop_prop( 'orderby', $ordering_args['orderby'] );
-            }
-            if ( ! empty( $ordering_args['order'] ) ) {
-                wc_set_loop_prop( 'order', $ordering_args['order'] );
-            }
         }
 
         // Respect column settings from the current product archive
@@ -74,6 +67,13 @@ class Gm2_Category_Sort_Ajax {
             'per_page'     => $per_page,
             'current_page' => $args['paged'],
         ]);
+
+        if ( $orderby && ! empty( $ordering_args['orderby'] ) ) {
+            wc_set_loop_prop( 'orderby', $ordering_args['orderby'] );
+        }
+        if ( $orderby && ! empty( $ordering_args['order'] ) ) {
+            wc_set_loop_prop( 'order', $ordering_args['order'] );
+        }
 
         $query = new WP_Query($args);
 
