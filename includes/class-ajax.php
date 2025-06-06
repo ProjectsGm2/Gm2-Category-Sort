@@ -5,6 +5,23 @@ class Gm2_Category_Sort_Ajax {
         add_action('wp_ajax_nopriv_gm2_filter_products', [__CLASS__, 'filter_products']);
     }
 
+    /**
+     * Handle AJAX requests to filter and sort products.
+     *
+     * Expected POST parameters:
+     * - gm2_cat: comma-separated list of category IDs.
+     * - gm2_filter_type: "simple" or "advanced" filtering mode.
+     * - gm2_simple_operator: tax query operator for simple mode.
+     * - gm2_paged: current page number.
+     * - gm2_per_page: number of products per page.
+     * - orderby: orderby string for sorting products.
+     * - gm2_columns: number of columns in the product loop.
+     *
+     * Sends a JSON response with the rendered product HTML, result count and
+     * pagination for the filtered and sorted products.
+     *
+     * @return void
+     */
     public static function filter_products() {
         check_ajax_referer('gm2_filter_products', 'gm2_nonce');
 
