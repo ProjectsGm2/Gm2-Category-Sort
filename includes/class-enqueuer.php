@@ -39,3 +39,4 @@ class Gm2_Category_Sort_Enqueuer {
         );
     }
 }
+

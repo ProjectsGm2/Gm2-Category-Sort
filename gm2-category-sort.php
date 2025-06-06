@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gm2 Category Sort
  * Description: ...
- * Version: 1.0.6
+ * Version: 1.0.7
  * Author: Your Name
  * Text Domain: gm2-category-sort
  */
@@ -10,7 +10,7 @@
 defined('ABSPATH') || exit;
 
 // Plugin version used for cache busting
-define('GM2_CAT_SORT_VERSION', '1.0.6');
+define('GM2_CAT_SORT_VERSION', '1.0.7');
 
 // Define plugin constants
 define('GM2_CAT_SORT_PATH', plugin_dir_path(__FILE__));
@@ -63,7 +63,7 @@ function gm2_category_sort_admin_notice() {
     
     if (!empty($missing)) {
         echo '<div class="notice notice-error"><p>';
-         printf(
+        printf(
             /* translators: 1: plugin name. 2: comma separated list of missing plugins. */
             esc_html__( '%1$s requires the following plugins: %2$s.', 'gm2-category-sort' ),
             '<strong>Gm2 Category Sort</strong>',

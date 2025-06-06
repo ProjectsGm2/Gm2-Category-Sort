@@ -42,9 +42,9 @@ jQuery(document).ready(function($) {
         $widget.find('.gm2-category-name[data-term-id="' + termId + '"]').removeClass('selected');
         gm2RefreshSelectedList($widget);
         gm2UpdateProductFiltering($widget, 1);
-    }
+        }
 
-    function gm2RefreshSelectedList($widget) {
+     function gm2RefreshSelectedList($widget) {
         const $container = $widget.find('.gm2-selected-categories');
         const $header = $widget.find('.gm2-selected-header');
 
@@ -59,7 +59,7 @@ jQuery(document).ready(function($) {
             $container.append($item);
         });
 
-        if ($container.children().length > 0) {
+     if ($container.children().length > 0) {
             $header.show();
             $container.show();
         } else {
@@ -67,13 +67,13 @@ jQuery(document).ready(function($) {
             $container.hide();
         }
     }
-    
-    function gm2UpdateProductFiltering($widget, page = 1, orderby = null) {
-      const selectedIds = [];
-      $widget.find('.gm2-category-name.selected').each(function() {
-        selectedIds.push($(this).data('term-id'));
-      });
       
+      function gm2UpdateProductFiltering($widget, page = 1, orderby = null) {
+        const selectedIds = [];
+        $widget.find('.gm2-category-name.selected').each(function() {
+            selectedIds.push($(this).data('term-id'));
+        });
+        
         const url = new URL(window.location.href);
         if (!orderby) {
             orderby = $('.woocommerce-ordering select.orderby').first().val() || '';
@@ -100,12 +100,12 @@ jQuery(document).ready(function($) {
             url.searchParams.delete('paged');
         }
 
-       if (orderby) {
+        if (orderby) {
             url.searchParams.set('orderby', orderby);
         } else {
             url.searchParams.delete('orderby');
-        } 
-      
+        }
+        
         const $oldList = $('.products').first();
         const $elementorWidget = $oldList.closest('.elementor-widget');
         let columns = 0;
@@ -156,7 +156,7 @@ jQuery(document).ready(function($) {
             window.location.href = url.toString();
             return;
         }
-      
+        
         $.post(gm2CategorySort.ajax_url, data, function(response) {
             if (typeof response === 'string') {
                 try {
@@ -249,7 +249,7 @@ jQuery(document).ready(function($) {
         const $widget = $('.gm2-category-sort').first();
         gm2UpdateProductFiltering($widget, page);
     });
-    
+
     $(document).on('change', '.woocommerce-ordering select.orderby', function(e) {
         e.preventDefault();
         const val = $(this).val();
