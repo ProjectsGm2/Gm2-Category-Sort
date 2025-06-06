@@ -51,7 +51,7 @@ class Gm2_Category_Sort_Ajax {
          if ( $orderby ) {
             $orderby_value = $orderby;
             $order_dir     = '';
-            if ( str_contains( $orderby, '-' ) ) {
+            if ( gm2_str_contains( $orderby, '-' ) ) {
                 list( $orderby_value, $order_dir ) = array_pad( explode( '-', $orderby ), 2, '' );
             }
 

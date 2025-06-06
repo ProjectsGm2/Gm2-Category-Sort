@@ -3,6 +3,7 @@
 Gm2 Category Sort adds a product category sorting widget for WooCommerce shops when using Elementor. Visitors can filter products by category through a collapsible tree of categories.
 
 ## Requirements
+- PHP 7.0 or higher
 - WordPress 5.0 or higher
 - [WooCommerce](https://woocommerce.com/)
 - [Elementor](https://elementor.com/)
