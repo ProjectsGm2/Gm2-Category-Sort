@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: Gm2 Category Sort
- * Description: ...
+ * Description: Adds a collapsible category filter widget for WooCommerce products in Elementor.
  * Version: 1.0.8
- * Author: Your Name
+ * Author: ProjectsGm2
  * Text Domain: gm2-category-sort
  */
 
