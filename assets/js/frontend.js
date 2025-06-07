@@ -1,4 +1,16 @@
 jQuery(document).ready(function($) {
+    // Add loading overlay to the page
+    if (!$('#gm2-loading-overlay').length) {
+        $('body').append('<div id="gm2-loading-overlay"><div class="gm2-spinner"></div></div>');
+    }
+
+    function gm2ShowLoading() {
+        $('#gm2-loading-overlay').addClass('gm2-visible');
+    }
+
+    function gm2HideLoading() {
+        $('#gm2-loading-overlay').removeClass('gm2-visible');
+    }
     // Expand/collapse functionality for all levels
     $(document).on('click', '.gm2-expand-button', function() {
         const $button = $(this);
@@ -156,7 +168,7 @@ jQuery(document).ready(function($) {
             window.location.href = url.toString();
             return;
         }
-        
+        gm2ShowLoading();
         $.post(gm2CategorySort.ajax_url, data, function(response) {
             if (typeof response === 'string') {
                 try {
@@ -219,6 +231,8 @@ jQuery(document).ready(function($) {
             }
         }).fail(function() {
             alert(gm2CategorySort.error_message);
+        }).always(function() {
+            gm2HideLoading();
         });
     }
 
