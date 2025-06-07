@@ -24,7 +24,10 @@ function gm2_category_sort_init() {
         add_action('admin_notices', 'gm2_category_sort_admin_notice');
         return;
     }
-    
+
+    // Load translations
+    load_plugin_textdomain( 'gm2-category-sort', false, basename( dirname( __FILE__ ) ) . '/languages' );
+
     // Include non-widget files
     require_once GM2_CAT_SORT_PATH . 'includes/utilities.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-enqueuer.php';
