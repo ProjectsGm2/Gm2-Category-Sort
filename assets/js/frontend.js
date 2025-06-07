@@ -5,11 +5,11 @@ jQuery(document).ready(function($) {
     }
 
     function gm2ShowLoading() {
-        $('#gm2-loading-overlay').show();
+        $('#gm2-loading-overlay').addClass('gm2-visible');
     }
 
     function gm2HideLoading() {
-        $('#gm2-loading-overlay').hide();
+        $('#gm2-loading-overlay').removeClass('gm2-visible');
     }
     // Expand/collapse functionality for all levels
     $(document).on('click', '.gm2-expand-button', function() {
