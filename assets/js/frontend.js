@@ -4,12 +4,41 @@ jQuery(document).ready(function($) {
         $('body').append('<div id="gm2-loading-overlay"><div class="gm2-spinner"></div></div>');
     }
 
+    const $initialList = $('ul.products').first();
+    if ($initialList.length) {
+        $initialList.data('original-classes', $initialList.attr('class'));
+    }
+
     function gm2ShowLoading() {
         $('#gm2-loading-overlay').addClass('gm2-visible');
     }
 
     function gm2HideLoading() {
         $('#gm2-loading-overlay').removeClass('gm2-visible');
+    }
+
+    function gm2DisplayNoProducts($list, url, message) {
+        if (!message) {
+            message = 'No Products Found';
+        }
+        if (!$list.data('original-classes')) {
+            $list.data('original-classes', $list.attr('class'));
+        }
+        const original = $list.data('original-classes') || $list.attr('class');
+        $list.attr('class', original);
+        $list.html('<li class="gm2-no-products">' + message + '</li>');
+
+        const $existingNav = $('.woocommerce-pagination').first();
+        if ($existingNav.length) {
+            $existingNav.remove();
+        }
+        const $existingCount = $('.woocommerce-result-count').first();
+        if ($existingCount.length) {
+            $existingCount.remove();
+        }
+
+        window.history.replaceState(null, '', url.toString());
+        gm2ReinitArchiveWidget($list);
     }
     // Expand/collapse functionality for all levels
     $(document).on('click', '.gm2-expand-button', function() {
@@ -133,7 +162,8 @@ jQuery(document).ready(function($) {
             }
         }
 
-        const match = $oldList.attr('class').match(/columns-(\d+)/);
+        const originalClasses = $oldList.data('original-classes') || $oldList.attr('class');
+        const match = originalClasses.match(/columns-(\d+)/);
         if (match) {
             columns = parseInt(match[1], 10);
         }
@@ -178,18 +208,20 @@ jQuery(document).ready(function($) {
                 }
             }
 
-            if (response && response.success && response.data && response.data.html) {
-                const $response = $(response.data.html);
+            if (response && response.success) {
+                const html = response.data && response.data.html ? response.data.html : '';
+                const $response = $(html);
                 let $newList = $response.filter('ul.products').first();
                 if (!$newList.length) {
                     $newList = $response.find('ul.products').first();
                 }
                 if (!$newList.length) {
-                    window.location.href = url.toString();
+                    let message = $response.filter('.woocommerce-info').first().text();
+                    gm2DisplayNoProducts($oldList, url, message);
                     return;
                 }
 
-                let oldClasses = $oldList.attr('class') || '';
+                let oldClasses = $oldList.data('original-classes') || $oldList.attr('class') || '';
                 const newClasses = $newList.attr('class') || '';
 
                 oldClasses = oldClasses.replace(/columns-\d+/g, '').trim();
@@ -198,6 +230,7 @@ jQuery(document).ready(function($) {
                     oldClasses += ' ' + columnMatch[0];
                 }
                 $oldList.attr('class', oldClasses.trim());
+                $oldList.data('original-classes', $oldList.attr('class'));
 
                 $oldList.html($newList.html());
 
@@ -226,11 +259,10 @@ jQuery(document).ready(function($) {
 
                 gm2ReinitArchiveWidget($oldList);
             } else {
-                alert(gm2CategorySort.error_message);
-                window.location.href = url.toString();
+                gm2DisplayNoProducts($oldList, url);
             }
         }).fail(function() {
-            alert(gm2CategorySort.error_message);
+            gm2DisplayNoProducts($oldList, url);
         }).always(function() {
             gm2HideLoading();
         });

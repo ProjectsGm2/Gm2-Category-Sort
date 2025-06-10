@@ -131,6 +131,16 @@
     font-style: italic;
 }
 
+/* Message shown when no products match the filter */
+.gm2-no-products {
+    padding: 15px;
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    list-style: none;
+    width: 100%;
+}
+
 /* Loading overlay */
 #gm2-loading-overlay {
     position: fixed;
