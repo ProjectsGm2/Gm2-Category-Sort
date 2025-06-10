@@ -16,7 +16,7 @@ jQuery(document).ready(function($) {
     function gm2HideLoading() {
         $('#gm2-loading-overlay').removeClass('gm2-visible');
     }
-
+  
     function gm2ScrollToSelectedSection() {
         let $target = $('.gm2-selected-header:visible').first();
         if (!$target.length) {
