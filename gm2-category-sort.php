@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gm2 Category Sort
  * Description: Adds a collapsible category filter widget for WooCommerce products in Elementor.
- * Version: 1.0.8
+ * Version: 1.0.13
  * Author: ProjectsGm2
  * Text Domain: gm2-category-sort
  */
@@ -10,7 +10,7 @@
 defined('ABSPATH') || exit;
 
 // Plugin version used for cache busting
-define('GM2_CAT_SORT_VERSION', '1.0.8');
+define('GM2_CAT_SORT_VERSION', '1.0.13');
 
 // Define plugin constants
 define('GM2_CAT_SORT_PATH', plugin_dir_path(__FILE__));
