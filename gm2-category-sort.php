@@ -40,8 +40,10 @@ function gm2_category_sort_init() {
     Gm2_Category_Sort_Query_Handler::init();
     Gm2_Category_Sort_Ajax::init();
     
-    // Register widget after Elementor is fully loaded
+    // Register widget for both modern and legacy Elementor hooks
     add_action('elementor/widgets/register', 'gm2_register_widget');
+    // Fallback for older Elementor versions
+    add_action('elementor/widgets/widgets_registered', 'gm2_register_widget');
 }
 
 // Register widget callback

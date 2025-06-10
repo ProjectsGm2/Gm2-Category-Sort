@@ -17,6 +17,19 @@ jQuery(document).ready(function($) {
         $('#gm2-loading-overlay').removeClass('gm2-visible');
     }
 
+    function gm2ScrollToSelectedSection() {
+        let $target = $('.gm2-selected-header:visible').first();
+        if (!$target.length) {
+            $target = $('.gm2-selected-categories:visible').first();
+        }
+        if (!$target.length) {
+            $target = $('.gm2-category-sort').first();
+        }
+        if ($target.length) {
+            $('html, body').animate({ scrollTop: $target.offset().top }, 300);
+        }
+    }
+
     function gm2DisplayNoProducts($list, url, message) {
         if (!message) {
             message = 'No Products Found';
@@ -272,6 +285,7 @@ jQuery(document).ready(function($) {
             gm2DisplayNoProducts($oldList, url);
         }).always(function() {
             gm2HideLoading();
+            gm2ScrollToSelectedSection();
         });
     }
 
