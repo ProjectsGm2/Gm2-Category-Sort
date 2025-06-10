@@ -178,8 +178,9 @@ jQuery(document).ready(function($) {
                 }
             }
 
-            if (response && response.success && response.data && response.data.html) {
-                const $response = $(response.data.html);
+            if (response && response.success) {
+                const html = response.data && response.data.html ? response.data.html : '';
+                const $response = $(html);
                 let $newList = $response.filter('ul.products').first();
                 if (!$newList.length) {
                     $newList = $response.find('ul.products').first();
