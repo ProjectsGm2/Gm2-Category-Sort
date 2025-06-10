@@ -207,7 +207,7 @@ jQuery(document).ready(function($) {
                 }
                 if (!$newList.length) {
                     let message = $response.filter('.woocommerce-info').first().text();
-                    gm2DisplayNoProducts($oldList, url, message);
+                     gm2DisplayNoProducts($oldList, url, message);
                     return;
                 }
 
