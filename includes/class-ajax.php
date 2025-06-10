@@ -29,6 +29,16 @@ class Gm2_Category_Sort_Ajax {
         if (!empty($_POST['gm2_cat'])) {
             $term_ids = array_map('intval', explode(',', $_POST['gm2_cat']));
         }
+
+        // When no categories are selected on a product category page,
+        // default to the current category so the results match the
+        // archive context instead of returning all products.
+        if (empty($term_ids) && function_exists('is_product_category') && is_product_category()) {
+            $current = get_queried_object();
+            if ($current && isset($current->term_id)) {
+                $term_ids = [ (int) $current->term_id ];
+            }
+        }
         $filter_type = sanitize_key($_POST['gm2_filter_type'] ?? 'simple');
         $simple_operator = sanitize_key($_POST['gm2_simple_operator'] ?? 'IN');
 
