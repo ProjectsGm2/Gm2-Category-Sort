@@ -17,6 +17,13 @@ jQuery(document).ready(function($) {
         $('#gm2-loading-overlay').removeClass('gm2-visible');
     }
 
+    function gm2ScrollToProductList() {
+        const $list = $('ul.products').first();
+        if ($list.length) {
+            $('html, body').animate({ scrollTop: $list.offset().top }, 300);
+        }
+    }
+
     function gm2DisplayNoProducts($list, url, message) {
         if (!message) {
             message = 'No Products Found';
@@ -272,6 +279,7 @@ jQuery(document).ready(function($) {
             gm2DisplayNoProducts($oldList, url);
         }).always(function() {
             gm2HideLoading();
+            gm2ScrollToProductList();
         });
     }
 
