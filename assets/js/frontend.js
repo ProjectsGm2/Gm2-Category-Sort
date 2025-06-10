@@ -11,6 +11,26 @@ jQuery(document).ready(function($) {
     function gm2HideLoading() {
         $('#gm2-loading-overlay').removeClass('gm2-visible');
     }
+
+    function gm2DisplayNoProducts($list, url, message) {
+        if (!message) {
+            message = 'No Products Found';
+        }
+        $list.attr('class', 'products');
+        $list.html('<li class="gm2-no-products">' + message + '</li>');
+
+        const $existingNav = $('.woocommerce-pagination').first();
+        if ($existingNav.length) {
+            $existingNav.remove();
+        }
+        const $existingCount = $('.woocommerce-result-count').first();
+        if ($existingCount.length) {
+            $existingCount.remove();
+        }
+
+        window.history.replaceState(null, '', url.toString());
+        gm2ReinitArchiveWidget($list);
+    }
     // Expand/collapse functionality for all levels
     $(document).on('click', '.gm2-expand-button', function() {
         const $button = $(this);
@@ -178,30 +198,16 @@ jQuery(document).ready(function($) {
                 }
             }
 
-            if (response && response.success && response.data && response.data.html) {
-                const $response = $(response.data.html);
+            if (response && response.success) {
+                const html = response.data && response.data.html ? response.data.html : '';
+                const $response = $(html);
                 let $newList = $response.filter('ul.products').first();
                 if (!$newList.length) {
                     $newList = $response.find('ul.products').first();
                 }
                 if (!$newList.length) {
                     let message = $response.filter('.woocommerce-info').first().text();
-                    if (!message) {
-                        message = 'No Products Found';
-                    }
-                    $oldList.attr('class', 'products');
-                    $oldList.html('<li class="gm2-no-products">' + message + '</li>');
-
-                    const $existingNav = $('.woocommerce-pagination').first();
-                    if ($existingNav.length) {
-                        $existingNav.remove();
-                    }
-                    const $existingCount = $('.woocommerce-result-count').first();
-                    if ($existingCount.length) {
-                        $existingCount.remove();
-                    }
-                    window.history.replaceState(null, '', url.toString());
-                    gm2ReinitArchiveWidget($oldList);
+                     gm2DisplayNoProducts($oldList, url, message);
                     return;
                 }
 
@@ -242,11 +248,10 @@ jQuery(document).ready(function($) {
 
                 gm2ReinitArchiveWidget($oldList);
             } else {
-                alert(gm2CategorySort.error_message);
-                window.location.href = url.toString();
+                gm2DisplayNoProducts($oldList, url);
             }
         }).fail(function() {
-            alert(gm2CategorySort.error_message);
+            gm2DisplayNoProducts($oldList, url);
         }).always(function() {
             gm2HideLoading();
         });
