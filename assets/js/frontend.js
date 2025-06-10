@@ -185,7 +185,23 @@ jQuery(document).ready(function($) {
                     $newList = $response.find('ul.products').first();
                 }
                 if (!$newList.length) {
-                    window.location.href = url.toString();
+                    let message = $response.filter('.woocommerce-info').first().text();
+                    if (!message) {
+                        message = 'No Products Found';
+                    }
+                    $oldList.attr('class', 'products');
+                    $oldList.html('<li class="gm2-no-products">' + message + '</li>');
+
+                    const $existingNav = $('.woocommerce-pagination').first();
+                    if ($existingNav.length) {
+                        $existingNav.remove();
+                    }
+                    const $existingCount = $('.woocommerce-result-count').first();
+                    if ($existingCount.length) {
+                        $existingCount.remove();
+                    }
+                    window.history.replaceState(null, '', url.toString());
+                    gm2ReinitArchiveWidget($oldList);
                     return;
                 }
 
