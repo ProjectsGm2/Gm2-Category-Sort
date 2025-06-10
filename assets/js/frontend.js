@@ -239,6 +239,13 @@ jQuery(document).ready(function($) {
                     const $existingCount = $('.woocommerce-result-count').first();
                     if ($existingCount.length) {
                         $existingCount.replaceWith($(response.data.count));
+                    } else {
+                        const $ordering = $('.woocommerce-ordering').first();
+                        if ($ordering.length) {
+                            $ordering.before($(response.data.count));
+                        } else {
+                            $oldList.before($(response.data.count));
+                        }
                     }
                 }
 
