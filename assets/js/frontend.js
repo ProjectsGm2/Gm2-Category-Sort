@@ -4,6 +4,11 @@ jQuery(document).ready(function($) {
         $('body').append('<div id="gm2-loading-overlay"><div class="gm2-spinner"></div></div>');
     }
 
+    const $initialList = $('ul.products').first();
+    if ($initialList.length) {
+        $initialList.data('original-classes', $initialList.attr('class'));
+    }
+
     function gm2ShowLoading() {
         $('#gm2-loading-overlay').addClass('gm2-visible');
     }
@@ -15,6 +20,9 @@ jQuery(document).ready(function($) {
     function gm2DisplayNoProducts($list, url, message) {
         if (!message) {
             message = 'No Products Found';
+        }
+        if (!$list.data('original-classes')) {
+            $list.data('original-classes', $list.attr('class'));
         }
         $list.attr('class', 'products');
         $list.html('<li class="gm2-no-products">' + message + '</li>');
@@ -153,7 +161,8 @@ jQuery(document).ready(function($) {
             }
         }
 
-        const match = $oldList.attr('class').match(/columns-(\d+)/);
+        const originalClasses = $oldList.data('original-classes') || $oldList.attr('class');
+        const match = originalClasses.match(/columns-(\d+)/);
         if (match) {
             columns = parseInt(match[1], 10);
         }
@@ -207,7 +216,8 @@ jQuery(document).ready(function($) {
                 }
                 if (!$newList.length) {
                     let message = $response.filter('.woocommerce-info').first().text();
-                     gm2DisplayNoProducts($oldList, url, message);
+                let oldClasses = $oldList.data('original-classes') || $oldList.attr('class') || '';
+                $oldList.data('original-classes', $oldList.attr('class'));
                     return;
                 }
 
