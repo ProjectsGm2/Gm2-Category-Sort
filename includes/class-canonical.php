@@ -10,7 +10,10 @@ class Gm2_Category_Sort_Canonical {
         }
 
         $canonical = '';
-        if (is_product_taxonomy()) {
+
+        if (is_singular('product')) {
+            $canonical = get_permalink();
+        } elseif (is_product_taxonomy()) {
             $term = get_queried_object();
             if ($term && !is_wp_error($term)) {
                 $canonical = get_term_link($term);
