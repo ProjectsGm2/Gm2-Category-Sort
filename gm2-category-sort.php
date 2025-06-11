@@ -34,11 +34,13 @@ function gm2_category_sort_init() {
     require_once GM2_CAT_SORT_PATH . 'includes/class-query-handler.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-renderer.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-ajax.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-canonical.php';
     
     // Initialize components
     Gm2_Category_Sort_Enqueuer::init();
     Gm2_Category_Sort_Query_Handler::init();
     Gm2_Category_Sort_Ajax::init();
+    Gm2_Category_Sort_Canonical::init();
     
     // Register widget for both modern and legacy Elementor hooks
     add_action('elementor/widgets/register', 'gm2_register_widget');
