@@ -35,6 +35,7 @@ function gm2_category_sort_init() {
     require_once GM2_CAT_SORT_PATH . 'includes/class-renderer.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-ajax.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-canonical.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-schema.php';
     
     // Initialize components
     Gm2_Category_Sort_Enqueuer::init();
