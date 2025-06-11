@@ -77,7 +77,12 @@ class Gm2_Category_Sort_Renderer {
         echo $indent;
         
         echo '<div class="gm2-category-name-container">';
-        echo '<div class="gm2-category-name ' . $selected_class . '" data-term-id="' . esc_attr($term->term_id) . '">' . esc_html($term->name) . '</div>';
+        $href = add_query_arg([
+            'gm2_cat' => $term->term_id,
+            'gm2_filter_type' => $this->settings['filter_type'],
+            'gm2_simple_operator' => $this->settings['simple_operator'] ?? 'IN',
+        ]);
+        echo '<a class="gm2-category-name ' . $selected_class . '" data-term-id="' . esc_attr($term->term_id) . '" href="' . esc_url($href) . '">' . esc_html($term->name) . '</a>';
         
         if ($has_children) {
             echo '<button class="gm2-expand-button" data-expanded="false">+</button>';

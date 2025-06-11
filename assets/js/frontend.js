@@ -70,7 +70,16 @@ jQuery(document).ready(function($) {
         }
     });
 
-    function gm2HandleCategoryClick() {
+    function gm2HandleCategoryClick(e) {
+        // Prevent normal navigation so category filters run via AJAX
+        if (e && typeof e.preventDefault === 'function') {
+            e.preventDefault();
+            if (typeof e.stopImmediatePropagation === 'function') {
+                e.stopImmediatePropagation();
+            } else if (typeof e.stopPropagation === 'function') {
+                e.stopPropagation();
+            }
+        }
         const $widget = $(this).closest('.gm2-category-sort');
         const termId = $(this).data('term-id');
         const isSelected = $(this).hasClass('selected');
@@ -84,6 +93,7 @@ jQuery(document).ready(function($) {
         
         gm2RefreshSelectedList($widget);
         gm2UpdateProductFiltering($widget, 1);
+        return false;
     }
     
     function gm2HandleRemoveClick(e) {
@@ -314,10 +324,32 @@ jQuery(document).ready(function($) {
         const href = $(this).attr('href');
         if (!href) return;
         e.preventDefault();
+        if (typeof e.stopImmediatePropagation === 'function') {
+            e.stopImmediatePropagation();
+        } else if (typeof e.stopPropagation === 'function') {
+            e.stopPropagation();
+        }
         const url = new URL(href, window.location.origin);
-        const page = parseInt(url.searchParams.get('paged') || '1', 10);
+        let page = parseInt(
+            url.searchParams.get('paged') ||
+            url.searchParams.get('page') ||
+            url.searchParams.get('product-page') ||
+            $(this).data('page') ||
+            $(this).data('paged') ||
+            '0',
+            10
+        );
+        if (!page) {
+            const match = url.pathname.match(/\/page\/(\d+)/);
+            if (match) {
+                page = parseInt(match[1], 10) || 1;
+            } else {
+                page = 1;
+            }
+        }
         const $widget = $('.gm2-category-sort').first();
         gm2UpdateProductFiltering($widget, page);
+        return false;
     });
 
     $(document).on('change', '.woocommerce-ordering select.orderby', function(e) {
