@@ -29,6 +29,13 @@ accepted. You may also append `-asc` or `-desc` to control direction when
 applicable. These values are translated to `WP_Query` parameters through the
 `gm2_get_orderby_args` helper, so the AJAX output matches the chosen order.
 
+## Sitemap
+
+Run `wp gm2-category-sort sitemap` from the command line to regenerate a
+sitemap of category combinations. The file is saved to
+`wp-content/uploads/gm2-category-sort-sitemap.xml`. You can submit this URL to
+search engines for indexing.
+
 ## Security
 AJAX filtering uses a nonce exposed to JavaScript as `gm2CategorySort.nonce`.
 If you customize the script, include this value in your requests.

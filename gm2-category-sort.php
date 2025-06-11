@@ -36,12 +36,14 @@ function gm2_category_sort_init() {
     require_once GM2_CAT_SORT_PATH . 'includes/class-ajax.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-canonical.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-schema.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-sitemap.php';
     
     // Initialize components
     Gm2_Category_Sort_Enqueuer::init();
     Gm2_Category_Sort_Query_Handler::init();
     Gm2_Category_Sort_Ajax::init();
     Gm2_Category_Sort_Canonical::init();
+    Gm2_Category_Sort_Sitemap::register_cli();
     
     // Register widget for both modern and legacy Elementor hooks
     add_action('elementor/widgets/register', 'gm2_register_widget');
