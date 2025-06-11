@@ -70,7 +70,11 @@ jQuery(document).ready(function($) {
         }
     });
 
-    function gm2HandleCategoryClick() {
+    function gm2HandleCategoryClick(e) {
+        // Prevent default link navigation so filtering occurs via AJAX
+        if (e && typeof e.preventDefault === 'function') {
+            e.preventDefault();
+        }
         const $widget = $(this).closest('.gm2-category-sort');
         const termId = $(this).data('term-id');
         const isSelected = $(this).hasClass('selected');
