@@ -40,7 +40,11 @@ class Gm2_Category_Sort_Renderer {
     
     private function render_category_tree() {
         $roots = $this->get_root_categories();
-        
+
+        if ( class_exists( 'Gm2_Category_Sort_Schema' ) ) {
+            Gm2_Category_Sort_Schema::set_categories( $roots );
+        }
+
         if (empty($roots)) {
             echo '<div class="gm2-no-categories">';
             echo __('No categories found.', 'gm2-category-sort');
