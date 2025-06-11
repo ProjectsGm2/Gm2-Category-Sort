@@ -35,3 +35,7 @@ If you customize the script, include this value in your requests.
 
 ## License
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+### Category Links
+
+Category names are output as anchor tags with query parameters so pagination and sorting work via AJAX.
