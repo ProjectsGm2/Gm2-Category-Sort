@@ -19,9 +19,9 @@ class Gm2_Category_Sort_Renderer {
              data-columns="<?= esc_attr(wc_get_loop_prop('columns')) ?>"
              data-per-page="<?= esc_attr(wc_get_loop_prop('per_page')) ?>">
              
-            <div class="gm2-category-tree">
+            <nav class="gm2-category-tree">
                 <?php $this->render_category_tree(); ?>
-            </div>
+            </nav>
             
             <?php
             $has_selected = !empty($this->selected_categories);
@@ -48,13 +48,13 @@ class Gm2_Category_Sort_Renderer {
             return;
         }
         
-        echo '<div class="gm2-parent-categories-container">';
+        echo '<ul class="gm2-parent-categories-container">';
         foreach ($roots as $root) {
             if (is_wp_error($root) || !is_object($root)) continue;
-            
+
             $this->render_category_node($root, 0);
         }
-        echo '</div>';
+        echo '</ul>';
     }
     
     private function render_category_node($term, $depth) {
@@ -69,7 +69,7 @@ class Gm2_Category_Sort_Renderer {
         $is_selected = in_array($term->term_id, $this->selected_categories);
         $selected_class = $is_selected ? 'selected' : '';
         
-        echo '<div class="gm2-category-node">';
+        echo '<li class="gm2-category-node">';
         echo '<div class="gm2-category-header">';
         
         // Add indentation for child nodes
@@ -92,14 +92,14 @@ class Gm2_Category_Sort_Renderer {
         
         if ($has_children) {
             // Only show immediate children, grandchildren should be hidden
-            echo '<div class="gm2-child-categories" style="display:none">';
+            echo '<ul class="gm2-child-categories" style="display:none">';
             foreach ($children as $child) {
                 // Render child node at next depth level
                 $this->render_category_node($child, $depth + 1);
             }
-            echo '</div>';
+            echo '</ul>';
         }
-        echo '</div>';
+        echo '</li>';
     }
     
     private function render_selected_categories() {
