@@ -324,10 +324,24 @@ jQuery(document).ready(function($) {
         const href = $(this).attr('href');
         if (!href) return;
         e.preventDefault();
+        if (typeof e.stopImmediatePropagation === 'function') {
+            e.stopImmediatePropagation();
+        } else if (typeof e.stopPropagation === 'function') {
+            e.stopPropagation();
+        }
         const url = new URL(href, window.location.origin);
-        const page = parseInt(url.searchParams.get('paged') || '1', 10);
+        let page = parseInt(url.searchParams.get('paged') || '0', 10);
+        if (!page) {
+            const match = url.pathname.match(/\/page\/(\d+)/);
+            if (match) {
+                page = parseInt(match[1], 10) || 1;
+            } else {
+                page = 1;
+            }
+        }
         const $widget = $('.gm2-category-sort').first();
         gm2UpdateProductFiltering($widget, page);
+        return false;
     });
 
     $(document).on('change', '.woocommerce-ordering select.orderby', function(e) {
