@@ -97,7 +97,12 @@ class Gm2_Category_Sort_Sitemap {
         check_ajax_referer('gm2_generate_sitemap', 'nonce');
         $file = self::generate();
         if ($file) {
-            wp_send_json_success(['file' => $file]);
+            $upload_dir = wp_upload_dir();
+            $url = trailingslashit($upload_dir['baseurl']) . basename($file);
+            wp_send_json_success([
+                'file' => $file,
+                'url'  => $url,
+            ]);
         }
 
         wp_send_json_error('failed');
