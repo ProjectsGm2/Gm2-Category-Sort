@@ -34,8 +34,9 @@ applicable. These values are translated to `WP_Query` parameters through the
 Administrators can edit any page containing the **GM2 Category Sort** widget and
 use the **Generate Sitemap** button found in the widget's settings panel to
 create or update the sitemap of category combinations. The file is saved to
-`wp-content/uploads/gm2-category-sort-sitemap.xml`. Submit this URL to search
-engines for indexing.
+`wp-content/uploads/gm2-category-sort-sitemap.xml` and is also regenerated
+automatically once per day via WP&nbsp;Cron. Submit this URL to search engines
+for indexing.
 
 ## Security
 AJAX filtering uses a nonce exposed to JavaScript as `gm2CategorySort.nonce`.
