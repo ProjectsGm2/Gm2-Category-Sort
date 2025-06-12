@@ -15,8 +15,9 @@ class Gm2_Category_Sort_Canonical {
             if ($term && !is_wp_error($term)) {
                 // Check for a primary category and canonicalize to it when set.
                 $primary_id = get_term_meta( $term->term_id, 'gm2_primary_category', true );
+                $primary_id = absint( $primary_id );
                 if ( $primary_id ) {
-                    $primary = get_term( (int) $primary_id, 'product_cat' );
+                    $primary = get_term( $primary_id, 'product_cat' );
                     if ( $primary && ! is_wp_error( $primary ) ) {
                         $canonical = get_term_link( $primary );
                     }
