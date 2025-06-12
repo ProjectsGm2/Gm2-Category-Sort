@@ -362,4 +362,28 @@ jQuery(document).ready(function($) {
     $(document).on('submit', 'form.woocommerce-ordering', function(e) {
         e.preventDefault();
     });
+
+    // Generate sitemap via AJAX
+    $(document).on('click', '.gm2-generate-sitemap', function(e) {
+        e.preventDefault();
+        const $btn = $(this);
+        const nonce = $btn.data('nonce') || (gm2CategorySort.sitemap_nonce || '');
+        $btn.prop('disabled', true);
+        gm2ShowLoading();
+        $.post(gm2CategorySort.ajax_url, {
+            action: 'gm2_generate_sitemap',
+            nonce: nonce
+        }, function(resp) {
+            if (resp && resp.success) {
+                alert(gm2CategorySort.sitemap_success || 'Sitemap generated');
+            } else {
+                alert(gm2CategorySort.error_message);
+            }
+        }).fail(function() {
+            alert(gm2CategorySort.error_message);
+        }).always(function() {
+            $btn.prop('disabled', false);
+            gm2HideLoading();
+        });
+    });
 });

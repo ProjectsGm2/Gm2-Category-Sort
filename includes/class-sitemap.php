@@ -56,6 +56,16 @@ class Gm2_Category_Sort_Sitemap {
     }
 
     /**
+     * Initialize sitemap functionality.
+     *
+     * Registers CLI and AJAX handlers.
+     */
+    public static function init() {
+        self::register_cli();
+        add_action('wp_ajax_gm2_generate_sitemap', [__CLASS__, 'ajax_generate']);
+    }
+
+     /**
      * Register WP-CLI command for generating the sitemap.
      */
     public static function register_cli() {
@@ -74,5 +84,22 @@ class Gm2_Category_Sort_Sitemap {
         } else {
             \WP_CLI::error('Failed to generate sitemap.');
         }
+    }
+    
+    /**
+     * Handle AJAX sitemap generation.
+     */
+    public static function ajax_generate() {
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('unauthorized');
+        }
+
+        check_ajax_referer('gm2_generate_sitemap', 'nonce');
+        $file = self::generate();
+        if ($file) {
+            wp_send_json_success(['file' => $file]);
+        }
+
+        wp_send_json_error('failed');
     }
 }

@@ -181,3 +181,21 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.gm2-sitemap-tools {
+    margin-top: 15px;
+}
+
+.gm2-generate-sitemap {
+    padding: 8px 16px;
+    background: #3a8bff;
+    border: none;
+    color: #fff;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.gm2-generate-sitemap:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
