@@ -181,3 +181,9 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Hide sitemap button in the preview */
+.elementor-widget-gm2-category-sort .gm2-generate-sitemap {
+    display: none;
+}
+
