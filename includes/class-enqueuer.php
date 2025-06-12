@@ -3,11 +3,12 @@ class Gm2_Category_Sort_Enqueuer {
     
     public static function init() {
         add_action('wp_enqueue_scripts', [__CLASS__, 'enqueue_assets']);
+        add_action('elementor/editor/after_enqueue_scripts', [__CLASS__, 'enqueue_editor_assets']);
     }
-    
-    public static function enqueue_assets() {
-        // Don't enqueue in the admin area unless doing AJAX
-        if (is_admin() && !wp_doing_ajax()) {
+
+    public static function enqueue_assets($force = false) {
+        // Don't enqueue in the admin area unless doing AJAX or forced (Elementor editor)
+        if (!$force && is_admin() && !wp_doing_ajax()) {
             return;
         }
         
@@ -41,6 +42,10 @@ class Gm2_Category_Sort_Enqueuer {
                 'error_message'   => __( 'Error loading products. Please refresh the page.', 'gm2-category-sort' ),
             ]
         );
+    }
+
+    public static function enqueue_editor_assets() {
+        self::enqueue_assets(true);
     }
 }
 

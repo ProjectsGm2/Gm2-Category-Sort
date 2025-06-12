@@ -33,13 +33,6 @@ class Gm2_Category_Sort_Renderer {
             <div class="gm2-selected-categories" <?= $style ?>>
                 <?php if ($has_selected) $this->render_selected_categories(); ?>
             </div>
-            <?php if (current_user_can('manage_options')) : ?>
-                <div class="gm2-sitemap-tools">
-                    <button type="button" class="gm2-generate-sitemap" data-nonce="<?= wp_create_nonce('gm2_generate_sitemap') ?>">
-                        <?= esc_html__('Generate Sitemap', 'gm2-category-sort') ?>
-                    </button>
-                </div>
-            <?php endif; ?>
         </div>
         <?php
         return ob_get_clean();

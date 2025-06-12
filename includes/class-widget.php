@@ -93,6 +93,21 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
         ]);
         
         $this->end_controls_section();
+
+        if ( current_user_can( 'manage_options' ) ) {
+            $this->start_controls_section( 'gm2_tools_section', [
+                'label' => __( 'Tools', 'gm2-category-sort' ),
+                'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
+            ] );
+
+            $this->add_control( 'gm2_generate_sitemap', [
+                'type'            => \Elementor\Controls_Manager::RAW_HTML,
+                'raw'             => '<button type="button" class="gm2-generate-sitemap button" data-nonce="' . esc_attr( wp_create_nonce( 'gm2_generate_sitemap' ) ) . '">' . esc_html__( 'Generate Sitemap', 'gm2-category-sort' ) . '</button>',
+                'content_classes' => 'gm2-sitemap-tools',
+            ] );
+
+            $this->end_controls_section();
+        }
     }
     
     private function get_product_categories() {
