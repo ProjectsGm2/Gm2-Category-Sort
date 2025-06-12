@@ -45,6 +45,9 @@ function gm2_category_sort_init() {
     Gm2_Category_Sort_Canonical::init();
     Gm2_Category_Sort_Sitemap::init();
     
+    add_filter('pre_get_document_title', 'gm2_category_sort_modify_title');
+    add_action('wp_head', 'gm2_category_sort_meta_description');
+    
     // Register widget for both modern and legacy Elementor hooks
     add_action('elementor/widgets/register', 'gm2_register_widget');
     // Fallback for older Elementor versions
@@ -83,4 +86,76 @@ function gm2_category_sort_admin_notice() {
         echo ' ' . esc_html__( 'Please install and activate them.', 'gm2-category-sort' );
         echo '</p></div>';
     }
+}
+
+/**
+ * Determine if filter parameters are present in the request.
+ *
+ * @return bool
+ */
+function gm2_category_sort_has_filters() {
+    foreach ( ['gm2_cat', 'gm2_filter_type', 'gm2_simple_operator'] as $key ) {
+        if ( isset( $_GET[ $key ] ) ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Get the names of selected categories from the gm2_cat query param.
+ *
+ * @return array
+ */
+function gm2_category_sort_get_selected_names() {
+    if ( empty( $_GET['gm2_cat'] ) ) {
+        return [];
+    }
+
+    $ids   = array_map( 'intval', explode( ',', $_GET['gm2_cat'] ) );
+    $names = [];
+    foreach ( $ids as $id ) {
+        $term = get_term( $id, 'product_cat' );
+        if ( $term && ! is_wp_error( $term ) ) {
+            $names[] = $term->name;
+        }
+    }
+
+    return $names;
+}
+
+/**
+ * Append selected category names to the document title.
+ *
+ * @param string $title The existing title.
+ * @return string       Modified title when filters are active.
+ */
+function gm2_category_sort_modify_title( $title ) {
+    if ( ! gm2_category_sort_has_filters() ) {
+        return $title;
+    }
+
+    $names = gm2_category_sort_get_selected_names();
+    if ( empty( $names ) ) {
+        return $title;
+    }
+
+    return $title . ' – ' . implode( ', ', $names );
+}
+
+/**
+ * Output a meta description based on the selected categories.
+ */
+function gm2_category_sort_meta_description() {
+    if ( ! gm2_category_sort_has_filters() ) {
+        return;
+    }
+
+    $names = gm2_category_sort_get_selected_names();
+    if ( empty( $names ) ) {
+        return;
+    }
+
+    $desc = sprintf( __( 'Products filtered by: %s', 'gm2-category-sort' ), implode( ', ', $names ) );
+    echo '<meta name="description" content="' . esc_attr( $desc ) . '">' . "\n";
 }
