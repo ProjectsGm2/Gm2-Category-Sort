@@ -60,6 +60,21 @@ and the page title and meta description automatically include the chosen
 category names. The generated sitemap of filter combinations further helps
 search engines discover relevant listings.
 
+## Primary Category
+
+Each product category has a **Canonical Category** dropdown. When you assign a
+category here, that selection becomes the "Primary Category" used for canonical
+URLs. If visitors filter products within this term, the `<link rel="canonical">`
+tag points to the chosen primary category rather than the subcategory currently
+being viewed.
+
+Apply this option to alternate branches or duplicate categories that should
+consolidate SEO signals. Leave the main category unset so other terms can
+reference it. For example, if "Steel Wheels" appears under both **By Vehicle**
+and **By Brand**, pick one branch as authoritative and set it as the Primary
+Category for the other branch. When filters are active, both pages will list the
+canonical URL of the designated category.
+
 ## Security
 AJAX filtering uses a nonce exposed to JavaScript as `gm2CategorySort.nonce`.
 If you customize the script, include this value in your requests.
