@@ -29,13 +29,16 @@ class Gm2_Category_Sort_Enqueuer {
         );
 
         $nonce = wp_create_nonce('gm2_filter_products');
+        $sitemap_nonce = wp_create_nonce('gm2_generate_sitemap');
         wp_localize_script(
             'gm2-category-sort-script',
             'gm2CategorySort',
             [
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce'    => $nonce,
-                'error_message' => __( 'Error loading products. Please refresh the page.', 'gm2-category-sort' ),
+                'sitemap_nonce'   => $sitemap_nonce,
+                'sitemap_success' => __( 'Sitemap generated successfully.', 'gm2-category-sort' ),
+                'error_message'   => __( 'Error loading products. Please refresh the page.', 'gm2-category-sort' ),
             ]
         );
     }
