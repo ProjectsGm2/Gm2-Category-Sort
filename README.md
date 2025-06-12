@@ -39,6 +39,19 @@ create or update the sitemap of category combinations. Alternatively, run
 automatically once per day via WP&nbsp;Cron. Submit this URL to search engines
 for indexing.
 
+## CSV Import
+
+Product categories can be created in bulk from a CSV file. Each line should
+list category names from top to bottom, separated by commas. For example:
+
+```
+Wheel Simulators,By Brand & Model,Ford Wheel Simulators,F350 Wheel Simulators
+```
+
+Upload a CSV through **Tools → Import Categories** in the admin area or run
+`wp gm2-category-sort import &lt;file&gt;` from WP‑CLI. An example file is
+available at `assets/example-categories.csv`.
+
 ## SEO Improvements
 
 When active filters are applied, the plugin outputs a canonical link pointing to
