@@ -375,8 +375,8 @@ jQuery(document).ready(function($) {
             nonce: nonce
         }, function(resp) {
             if (resp && resp.success) {
-                if (resp.data && resp.data.url) {
-                    const url = resp.data.url;
+                const url = resp.data;
+                if (url) {
                     if (navigator.clipboard && window.isSecureContext) {
                         navigator.clipboard.writeText(url).catch(function() {});
                     }

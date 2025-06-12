@@ -100,10 +100,7 @@ class Gm2_Category_Sort_Sitemap {
         if ($file) {
             $upload_dir = wp_upload_dir();
             $url = trailingslashit($upload_dir['baseurl']) . basename($file);
-            wp_send_json_success([
-                'file' => $file,
-                'url'  => $url,
-            ]);
+            wp_send_json_success($url);
         }
 
         wp_send_json_error('failed');
