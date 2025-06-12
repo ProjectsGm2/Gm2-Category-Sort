@@ -66,3 +66,17 @@ If you customize the script, include this value in your requests.
 
 ## License
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+## Testing
+
+To run the PHPUnit test suite:
+
+1. Install PHPUnit (version 9 or newer).
+2. From the project root run:
+
+```bash
+phpunit
+```
+
+The tests use stubbed WordPress functions so no WordPress installation is required.
+
