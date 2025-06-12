@@ -80,17 +80,20 @@ jQuery(document).ready(function($) {
                 e.stopPropagation();
             }
         }
-        const $widget = $(this).closest('.gm2-category-sort');
-        const termId = $(this).data('term-id');
-        const isSelected = $(this).hasClass('selected');
-        
-        // Toggle selection
-        if (isSelected) {
-            $(this).removeClass('selected');
-        } else {
-            $(this).addClass('selected');
+        let $link = $(this);
+        if ($link.hasClass('gm2-category-synonym')) {
+            $link = $link.closest('.gm2-category-name-container').find('.gm2-category-name').first();
         }
-        
+        const $widget = $link.closest('.gm2-category-sort');
+        const isSelected = $link.hasClass('selected');
+
+        // Toggle selection on canonical label
+        if (isSelected) {
+            $link.removeClass('selected');
+        } else {
+            $link.addClass('selected');
+        }
+
         gm2RefreshSelectedList($widget);
         gm2UpdateProductFiltering($widget, 1);
         return false;
@@ -318,7 +321,7 @@ jQuery(document).ready(function($) {
     }
     
     // Event delegation for dynamic elements
-    $(document).on('click', '.gm2-category-name', gm2HandleCategoryClick);
+    $(document).on('click', '.gm2-category-name, .gm2-category-synonym', gm2HandleCategoryClick);
     $(document).on('click', '.gm2-remove-category', gm2HandleRemoveClick);
     $(document).on('click', '.woocommerce-pagination a', function(e) {
         const href = $(this).attr('href');

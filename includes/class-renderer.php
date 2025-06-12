@@ -75,6 +75,12 @@ class Gm2_Category_Sort_Renderer {
             'hide_empty' => false,
             'orderby' => 'name'
         ]);
+        foreach ($children as $child) {
+            if (is_wp_error($child) || !is_object($child)) {
+                continue;
+            }
+            $child->gm2_synonyms = $this->fetch_synonyms($child->term_id);
+        }
         
         $has_children = !empty($children) && !is_wp_error($children);
         $is_selected = in_array($term->term_id, $this->selected_categories);
@@ -94,6 +100,26 @@ class Gm2_Category_Sort_Renderer {
             'gm2_simple_operator' => $this->settings['simple_operator'] ?? 'IN',
         ]);
         echo '<a class="gm2-category-name ' . $selected_class . '" data-term-id="' . esc_attr($term->term_id) . '" href="' . esc_url($href) . '">' . esc_html($term->name) . '</a>';
+
+        $synonyms = isset($term->gm2_synonyms) ? $term->gm2_synonyms : array_filter(array_map('trim', explode(',', (string) get_term_meta($term->term_id, 'gm2_synonyms', true))));
+        if (!empty($synonyms)) {
+            echo ' <span class="gm2-synonyms">(';
+            $first = true;
+            foreach ($synonyms as $syn) {
+                if (!$syn) continue;
+                if (!$first) {
+                    echo ', ';
+                }
+                $href = add_query_arg([
+                    'gm2_cat' => $term->term_id,
+                    'gm2_filter_type' => $this->settings['filter_type'],
+                    'gm2_simple_operator' => $this->settings['simple_operator'] ?? 'IN',
+                ]);
+                echo '<a class="gm2-category-synonym" data-term-id="' . esc_attr($term->term_id) . '" href="' . esc_url($href) . '">' . esc_html($syn) . '</a>';
+                $first = false;
+            }
+            echo ')</span>';
+        }
         
         if ($has_children) {
             echo '<button class="gm2-expand-button" data-expanded="false">+</button>';
@@ -125,29 +151,44 @@ class Gm2_Category_Sort_Renderer {
         }
     }
     
+    private function fetch_synonyms($term_id) {
+        $raw = (string) get_term_meta($term_id, 'gm2_synonyms', true);
+        return array_filter(array_map('trim', explode(',', $raw)));
+    }
+
     private function get_root_categories() {
+        $terms = [];
         // On category pages, use the current category
         if (is_product_category()) {
             $current = get_queried_object();
-            return [$current];
-        }
-        
-        // On shop/search pages, use selected parent categories
-        if (!empty($this->settings['parent_categories'])) {
-            return get_terms([
+            if ($current && !is_wp_error($current)) {
+                $terms = [$current];
+            }
+        } elseif (!empty($this->settings['parent_categories'])) {
+            // On shop/search pages, use selected parent categories
+            $terms = get_terms([
                 'taxonomy' => 'product_cat',
                 'include' => $this->settings['parent_categories'],
                 'hide_empty' => false,
                 'orderby' => 'include'
             ]);
+        } else {
+            // Default: show all top-level categories
+            $terms = get_terms([
+                'taxonomy' => 'product_cat',
+                'parent' => 0,
+                'hide_empty' => false
+            ]);
         }
-        
-        // Default: show all top-level categories
-        return get_terms([
-            'taxonomy' => 'product_cat',
-            'parent' => 0,
-            'hide_empty' => false
-        ]);
+
+        foreach ($terms as $term) {
+            if (is_wp_error($term) || !is_object($term)) {
+                continue;
+            }
+            $term->gm2_synonyms = $this->fetch_synonyms($term->term_id);
+        }
+
+        return $terms;
     }
     
     private function get_selected_categories() {
