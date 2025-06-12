@@ -63,6 +63,7 @@ class Gm2_Category_Sort_Sitemap {
     public static function init() {
         self::register_cli();
         add_action('wp_ajax_gm2_generate_sitemap', [__CLASS__, 'ajax_generate']);
+        add_action( GM2_CAT_SORT_CRON_HOOK, [ __CLASS__, 'generate' ] );
     }
 
     /**

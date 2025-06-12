@@ -15,6 +15,23 @@ define('GM2_CAT_SORT_VERSION', '1.0.13');
 // Define plugin constants
 define('GM2_CAT_SORT_PATH', plugin_dir_path(__FILE__));
 define('GM2_CAT_SORT_URL', plugin_dir_url(__FILE__));
+define('GM2_CAT_SORT_CRON_HOOK', 'gm2_category_sort_generate_sitemap');
+
+register_activation_hook( __FILE__, 'gm2_category_sort_activate' );
+register_deactivation_hook( __FILE__, 'gm2_category_sort_deactivate' );
+
+function gm2_category_sort_activate() {
+    if ( ! wp_next_scheduled( GM2_CAT_SORT_CRON_HOOK ) ) {
+        wp_schedule_event( time(), 'daily', GM2_CAT_SORT_CRON_HOOK );
+    }
+}
+
+function gm2_category_sort_deactivate() {
+    $timestamp = wp_next_scheduled( GM2_CAT_SORT_CRON_HOOK );
+    if ( $timestamp ) {
+        wp_unschedule_event( $timestamp, GM2_CAT_SORT_CRON_HOOK );
+    }
+}
 
 // Initialize plugin
 add_action('plugins_loaded', 'gm2_category_sort_init');
