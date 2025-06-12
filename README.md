@@ -29,6 +29,7 @@ accepted. You may also append `-asc` or `-desc` to control direction when
 applicable. These values are translated to `WP_Query` parameters through the
 `gm2_get_orderby_args` helper, so the AJAX output matches the chosen order.
 
+
 ## Sitemap
 
 Administrators can open any page containing the **GM2 Category Sort** widget and

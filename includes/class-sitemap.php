@@ -65,7 +65,7 @@ class Gm2_Category_Sort_Sitemap {
         add_action('wp_ajax_gm2_generate_sitemap', [__CLASS__, 'ajax_generate']);
     }
 
-    /**
+     /**
      * Register WP-CLI command for generating the sitemap.
      */
     public static function register_cli() {
@@ -85,7 +85,7 @@ class Gm2_Category_Sort_Sitemap {
             \WP_CLI::error('Failed to generate sitemap.');
         }
     }
-
+    
     /**
      * Handle AJAX sitemap generation.
      */
