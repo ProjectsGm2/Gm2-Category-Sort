@@ -375,7 +375,15 @@ jQuery(document).ready(function($) {
             nonce: nonce
         }, function(resp) {
             if (resp && resp.success) {
-                alert(gm2CategorySort.sitemap_success || 'Sitemap generated');
+                if (resp.data && resp.data.url) {
+                    const url = resp.data.url;
+                    if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(url).catch(function() {});
+                    }
+                    alert((gm2CategorySort.sitemap_success || 'Sitemap generated') + '\n' + url);
+                } else {
+                    alert(gm2CategorySort.sitemap_success || 'Sitemap generated');
+                }
             } else {
                 alert(gm2CategorySort.error_message);
             }
