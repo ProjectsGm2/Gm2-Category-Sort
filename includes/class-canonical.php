@@ -13,7 +13,18 @@ class Gm2_Category_Sort_Canonical {
         if (is_product_taxonomy()) {
             $term = get_queried_object();
             if ($term && !is_wp_error($term)) {
-                $canonical = get_term_link($term);
+                // Check for a primary category and canonicalize to it when set.
+                $primary_id = get_term_meta( $term->term_id, 'gm2_primary_category', true );
+                if ( $primary_id ) {
+                    $primary = get_term( (int) $primary_id, 'product_cat' );
+                    if ( $primary && ! is_wp_error( $primary ) ) {
+                        $canonical = get_term_link( $primary );
+                    }
+                }
+
+                if ( ! $canonical ) {
+                    $canonical = get_term_link( $term );
+                }
             }
         } elseif (function_exists('wc_get_page_permalink')) {
             $canonical = wc_get_page_permalink('shop');
