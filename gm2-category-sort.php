@@ -44,7 +44,7 @@ function gm2_category_sort_init() {
     Gm2_Category_Sort_Ajax::init();
     Gm2_Category_Sort_Canonical::init();
     Gm2_Category_Sort_Sitemap::init();
-
+    
     add_filter('pre_get_document_title', 'gm2_category_sort_modify_title');
     add_action('wp_head', 'gm2_category_sort_meta_description');
     
