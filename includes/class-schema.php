@@ -31,7 +31,7 @@ class Gm2_Category_Sort_Schema {
                 '@type'   => 'ListItem',
                 'position'=> $position++,
                 'name'    => $cat->name,
-                'id'      => $cat->term_id,
+                '@id'     => get_term_link( $cat ),
             ];
         }
 
