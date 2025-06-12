@@ -105,6 +105,9 @@ class Gm2_Category_Sort_Ajax {
         $GLOBALS['wp_query'] = $query;
 
         ob_start();
+        // Product markup is generated solely via WooCommerce template
+        // functions. Altering these calls may change or remove the
+        // structured data that WooCommerce outputs.
         if ($query->have_posts()) {
             woocommerce_product_loop_start();
             while ($query->have_posts()) {
