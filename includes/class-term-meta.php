@@ -10,11 +10,11 @@ class Gm2_Category_Sort_Term_Meta {
 
     public static function register_meta() {
         register_meta( 'term', 'gm2_primary_category', [
-            'type'              => 'boolean',
+            'type'              => 'integer',
             'single'            => true,
             'object_subtype'    => 'product_cat',
             'show_in_rest'      => true,
-            'sanitize_callback' => 'wp_validate_boolean',
+            'sanitize_callback' => 'absint',
         ] );
 
         register_meta( 'term', 'gm2_synonyms', [
@@ -27,11 +27,20 @@ class Gm2_Category_Sort_Term_Meta {
     }
 
     public static function add_fields() {
+        $dropdown = wp_dropdown_categories( [
+            'taxonomy'         => 'product_cat',
+            'hide_empty'       => false,
+            'name'             => 'gm2_primary_category',
+            'orderby'          => 'name',
+            'hierarchical'     => true,
+            'echo'             => false,
+            'show_option_none' => __( '&#8212; None &#8212;', 'gm2-category-sort' ),
+        ] );
         ?>
         <div class="form-field">
-            <label for="gm2_primary_category"><?php esc_html_e( 'Primary Category', 'gm2-category-sort' ); ?></label>
-            <input type="checkbox" name="gm2_primary_category" id="gm2_primary_category" value="1">
-            <p class="description"><?php esc_html_e( 'Mark this as a primary category.', 'gm2-category-sort' ); ?></p>
+            <label for="gm2_primary_category"><?php esc_html_e( 'Canonical Category', 'gm2-category-sort' ); ?></label>
+            <?php echo $dropdown; ?>
+            <p class="description"><?php esc_html_e( 'Select the canonical category for this term.', 'gm2-category-sort' ); ?></p>
         </div>
         <div class="form-field">
             <label for="gm2_synonyms"><?php esc_html_e( 'Synonyms', 'gm2-category-sort' ); ?></label>
@@ -46,12 +55,23 @@ class Gm2_Category_Sort_Term_Meta {
         $synonyms = get_term_meta( $term->term_id, 'gm2_synonyms', true );
         ?>
         <tr class="form-field">
-            <th scope="row"><label for="gm2_primary_category"><?php esc_html_e( 'Primary Category', 'gm2-category-sort' ); ?></label></th>
+            <th scope="row"><label for="gm2_primary_category"><?php esc_html_e( 'Canonical Category', 'gm2-category-sort' ); ?></label></th>
             <td>
-                <label>
-                    <input type="checkbox" name="gm2_primary_category" id="gm2_primary_category" value="1" <?php checked( $primary, true ); ?>>
-                    <?php esc_html_e( 'Mark this as a primary category.', 'gm2-category-sort' ); ?>
-                </label>
+                <?php
+                $dropdown = wp_dropdown_categories( [
+                    'taxonomy'         => 'product_cat',
+                    'hide_empty'       => false,
+                    'name'             => 'gm2_primary_category',
+                    'orderby'          => 'name',
+                    'hierarchical'     => true,
+                    'show_option_none' => __( '&#8212; None &#8212;', 'gm2-category-sort' ),
+                    'selected'         => (int) $primary,
+                    'echo'             => false,
+                    'exclude'          => $term->term_id,
+                ] );
+                echo $dropdown; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- dropdown is sanitized by WordPress.
+                ?>
+                <p class="description"><?php esc_html_e( 'Select the canonical category for this term.', 'gm2-category-sort' ); ?></p>
             </td>
         </tr>
         <tr class="form-field">
@@ -65,7 +85,7 @@ class Gm2_Category_Sort_Term_Meta {
     }
 
     public static function save_fields( $term_id ) {
-        $primary  = isset( $_POST['gm2_primary_category'] ) ? 1 : 0;
+        $primary  = isset( $_POST['gm2_primary_category'] ) ? absint( $_POST['gm2_primary_category'] ) : 0;
         $synonyms = isset( $_POST['gm2_synonyms'] ) ? sanitize_textarea_field( $_POST['gm2_synonyms'] ) : '';
 
         update_term_meta( $term_id, 'gm2_primary_category', $primary );
