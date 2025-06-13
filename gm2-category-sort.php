@@ -56,6 +56,7 @@ function gm2_category_sort_init() {
     require_once GM2_CAT_SORT_PATH . 'includes/class-sitemap.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-term-meta.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-category-importer.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-product-category-importer.php';
     
     // Initialize components
     Gm2_Category_Sort_Enqueuer::init();
@@ -65,6 +66,7 @@ function gm2_category_sort_init() {
     Gm2_Category_Sort_Sitemap::init();
     Gm2_Category_Sort_Term_Meta::init();
     Gm2_Category_Sort_Category_Importer::init();
+    Gm2_Category_Sort_Product_Category_Importer::init();
     
     add_filter('pre_get_document_title', 'gm2_category_sort_modify_title');
     add_action('wp_head', 'gm2_category_sort_meta_description');

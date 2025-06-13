@@ -61,6 +61,21 @@ quotes:
 ```
 These values are stored in the category's **Synonyms** field during import.
 
+## Assign Product Categories
+
+You can also bulk assign existing categories to products. Each CSV row should
+begin with the product SKU followed by one or more category names:
+
+```
+SKU123,Accessories
+SKU124,Wheel Simulators,By Brand & Model
+```
+
+Upload a CSV through **Tools → Assign Product Categories** or run
+`wp gm2-category-sort assign-categories <file> --overwrite` to replace existing
+categories (omit `--overwrite` to append). An example file is available at
+`assets/example-product-categories.csv`.
+
 ## SEO Improvements
 
 When active filters are applied, the plugin outputs a canonical link pointing to
