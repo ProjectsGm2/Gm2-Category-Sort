@@ -76,6 +76,10 @@ Upload a CSV through **Tools → Assign Product Categories** or run
 categories (omit `--overwrite` to append). An example file is available at
 `assets/example-product-categories.csv`.
 
+When uploading through the admin screen a progress bar shows the import status
+so large files can be processed incrementally. Each request handles about 50
+rows. For huge imports consider WP‑CLI which displays a terminal progress bar.
+
 ## SEO Improvements
 
 When active filters are applied, the plugin outputs a canonical link pointing to
