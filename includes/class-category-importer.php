@@ -122,6 +122,12 @@ class Gm2_Category_Sort_Category_Importer {
                     continue;
                 }
 
+                $synonyms = '';
+                if ( preg_match( '/^(.*?)\s*\(([^)]*)\)$/', $name, $m ) ) {
+                    $name     = trim( $m[1] );
+                    $synonyms = trim( $m[2] );
+                }
+
                 $existing = term_exists( $name, 'product_cat', $parent );
                 if ( is_array( $existing ) ) {
                     $parent = (int) $existing['term_id'];
@@ -132,6 +138,10 @@ class Gm2_Category_Sort_Category_Importer {
                         return $result;
                     }
                     $parent = (int) $result['term_id'];
+                }
+
+                if ( $synonyms !== '' ) {
+                    update_term_meta( $parent, 'gm2_synonyms', $synonyms );
                 }
             }
         }

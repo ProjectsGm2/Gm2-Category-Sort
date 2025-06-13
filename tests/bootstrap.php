@@ -29,11 +29,13 @@ function __( $text, $domain = null ) {
 $GLOBALS['gm2_test_terms'] = [];
 $GLOBALS['gm2_next_id'] = 1;
 $GLOBALS['gm2_insert_calls'] = [];
+$GLOBALS['gm2_meta_updates'] = [];
 
 function gm2_test_reset_terms() {
     $GLOBALS['gm2_test_terms'] = [];
     $GLOBALS['gm2_next_id'] = 1;
     $GLOBALS['gm2_insert_calls'] = [];
+    $GLOBALS['gm2_meta_updates'] = [];
 }
 
 gm2_test_reset_terms();
@@ -55,4 +57,12 @@ function wp_insert_term( $name, $taxonomy, $args = [] ) {
     $GLOBALS['gm2_test_terms'][ $parent ][ $name ] = $id;
     $GLOBALS['gm2_insert_calls'][] = [ 'name' => $name, 'parent' => $parent, 'id' => $id ];
     return [ 'term_id' => $id ];
+}
+
+function update_term_meta( $term_id, $key, $value ) {
+    $GLOBALS['gm2_meta_updates'][] = [
+        'term_id' => $term_id,
+        'key'     => $key,
+        'value'   => $value,
+    ];
 }
