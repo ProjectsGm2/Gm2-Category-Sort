@@ -60,6 +60,13 @@ and the page title and meta description automatically include the chosen
 category names. The generated sitemap of filter combinations further helps
 search engines discover relevant listings.
 
+## Synonyms
+
+Edit any product category and enter comma-separated words in the **Synonyms**
+field. Each synonym is rendered as an extra filter link beside the category
+name so shoppers can select it directly. These synonyms only appear in the page
+content and are not included in the JSON‑LD schema or meta tags.
+
 ## Primary Category
 
 Each product category has a **Canonical Category** dropdown. When you assign a
