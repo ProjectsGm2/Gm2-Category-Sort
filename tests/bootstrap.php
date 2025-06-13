@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/class-category-importer.php';
+require_once __DIR__ . '/../includes/class-product-category-importer.php';
 
 // Minimal WP_Error class for tests.
 if ( ! class_exists( 'WP_Error' ) ) {
@@ -30,12 +31,16 @@ $GLOBALS['gm2_test_terms'] = [];
 $GLOBALS['gm2_next_id'] = 1;
 $GLOBALS['gm2_insert_calls'] = [];
 $GLOBALS['gm2_meta_updates'] = [];
+$GLOBALS['gm2_products'] = [];
+$GLOBALS['gm2_set_terms_calls'] = [];
 
 function gm2_test_reset_terms() {
     $GLOBALS['gm2_test_terms'] = [];
     $GLOBALS['gm2_next_id'] = 1;
     $GLOBALS['gm2_insert_calls'] = [];
     $GLOBALS['gm2_meta_updates'] = [];
+    $GLOBALS['gm2_products'] = [];
+    $GLOBALS['gm2_set_terms_calls'] = [];
 }
 
 gm2_test_reset_terms();
@@ -65,4 +70,31 @@ function update_term_meta( $term_id, $key, $value ) {
         'key'     => $key,
         'value'   => $value,
     ];
+}
+
+function get_term_by( $field, $value, $taxonomy ) {
+    if ( $field === 'name' && $taxonomy === 'product_cat' ) {
+        foreach ( $GLOBALS['gm2_test_terms'] as $parent => $terms ) {
+            foreach ( $terms as $name => $id ) {
+                if ( $name === $value ) {
+                    return (object) [ 'term_id' => $id ];
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function wc_get_product_id_by_sku( $sku ) {
+    return $GLOBALS['gm2_products'][ $sku ] ?? 0;
+}
+
+function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
+    $GLOBALS['gm2_set_terms_calls'][] = [
+        'object_id' => $object_id,
+        'terms'     => $terms,
+        'taxonomy'  => $taxonomy,
+        'append'    => $append,
+    ];
+    return $terms;
 }
