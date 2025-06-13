@@ -68,4 +68,26 @@ class CategoryImporterTest extends TestCase {
         $this->assertSame('Sub1', $calls[1]['name']);
         $this->assertSame('Cat2', $calls[2]['name']);
     }
+
+    public function test_import_sets_synonyms() {
+        $csv = "\"Parent (SynA,SynB)\",\"Child (Alt)\"\n";
+        $file = $this->createCsvFile($csv);
+        $result = Gm2_Category_Sort_Category_Importer::import_from_csv($file);
+        unlink($file);
+
+        $this->assertTrue($result);
+        $calls = $GLOBALS['gm2_insert_calls'];
+        $this->assertCount(2, $calls);
+        $parent_id = $calls[0]['id'];
+        $child_id  = $calls[1]['id'];
+
+        $meta = $GLOBALS['gm2_meta_updates'];
+        $this->assertCount(2, $meta);
+        $this->assertSame($parent_id, $meta[0]['term_id']);
+        $this->assertSame('gm2_synonyms', $meta[0]['key']);
+        $this->assertSame('SynA,SynB', $meta[0]['value']);
+        $this->assertSame($child_id, $meta[1]['term_id']);
+        $this->assertSame('gm2_synonyms', $meta[1]['key']);
+        $this->assertSame('Alt', $meta[1]['value']);
+    }
 }

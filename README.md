@@ -52,6 +52,15 @@ Upload a CSV through **Tools → Import Categories** in the admin area or run
 `wp gm2-category-sort import &lt;file&gt;` from WP‑CLI. An example file is
 available at `assets/example-categories.csv`.
 
+Synonyms can be specified by appending them in parentheses after a category
+name within the same cell. If the synonyms contain commas, wrap the cell in
+quotes:
+
+```
+"Wheel Covers (hubcaps,wheel caps)",Accessories
+```
+These values are stored in the category's **Synonyms** field during import.
+
 ## SEO Improvements
 
 When active filters are applied, the plugin outputs a canonical link pointing to
@@ -66,6 +75,8 @@ Edit any product category and enter comma-separated words in the **Synonyms**
 field. Each synonym is rendered as an extra filter link beside the category
 name so shoppers can select it directly. These synonyms only appear in the page
 content and are not included in the JSON‑LD schema or meta tags.
+Synonyms may also be imported via CSV using the `(syn1,syn2)` syntax described
+above.
 
 ## Primary Category
 
