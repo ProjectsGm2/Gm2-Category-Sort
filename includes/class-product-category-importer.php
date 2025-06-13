@@ -10,6 +10,8 @@ class Gm2_Category_Sort_Product_Category_Importer {
     public static function init() {
         self::register_cli();
         add_action( 'admin_menu', [ __CLASS__, 'register_admin_page' ] );
+        add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin_assets' ] );
+        add_action( 'wp_ajax_gm2_product_category_import_step', [ __CLASS__, 'ajax_import_step' ] );
     }
 
     /**
@@ -34,9 +36,26 @@ class Gm2_Category_Sort_Product_Category_Importer {
         }
 
         $overwrite = isset( $assoc_args['overwrite'] );
-        $result    = self::import_from_csv( $file, $overwrite );
-        if ( is_wp_error( $result ) ) {
-            \WP_CLI::error( $result->get_error_message() );
+        $total     = self::count_rows( $file );
+        $progress  = null;
+        if ( class_exists( '\\WP_CLI\Utils' ) ) {
+            $progress = \WP_CLI\Utils\make_progress_bar( 'Assigning categories', $total );
+        }
+
+        $offset = 0;
+        do {
+            $result = self::import_from_csv_step( $file, $overwrite, $offset, 50, $progress );
+            if ( is_wp_error( $result ) ) {
+                if ( $progress ) {
+                    $progress->finish();
+                }
+                \WP_CLI::error( $result->get_error_message() );
+            }
+            $offset = $result['offset'];
+        } while ( ! $result['done'] );
+
+        if ( $progress ) {
+            $progress->finish();
         }
 
         \WP_CLI::success( 'Categories assigned successfully.' );
@@ -87,7 +106,7 @@ class Gm2_Category_Sort_Product_Category_Importer {
             <?php elseif ( $error ) : ?>
                 <div class="notice notice-error"><p><?php echo esc_html( $error ); ?></p></div>
             <?php endif; ?>
-            <form method="post" enctype="multipart/form-data">
+            <form id="gm2-product-category-import-form" method="post" enctype="multipart/form-data">
                 <?php wp_nonce_field( 'gm2_product_category_import', 'gm2_product_category_import_nonce' ); ?>
                 <input type="file" name="gm2_product_category_file" accept=".csv">
                 <label>
@@ -95,6 +114,9 @@ class Gm2_Category_Sort_Product_Category_Importer {
                     <?php esc_html_e( 'Overwrite existing categories', 'gm2-category-sort' ); ?>
                 </label>
                 <?php submit_button( __( 'Assign', 'gm2-category-sort' ) ); ?>
+                <progress id="gm2-import-progress" value="0" max="100" style="display:none"></progress>
+                <span class="gm2-progress-text"></span>
+                <div id="gm2-import-message"></div>
             </form>
         </div>
         <?php
@@ -110,6 +132,29 @@ class Gm2_Category_Sort_Product_Category_Importer {
      * @return true|WP_Error
      */
     public static function import_from_csv( $file, $overwrite ) {
+        $offset = 0;
+        do {
+            $result = self::import_from_csv_step( $file, $overwrite, $offset, 0 );
+            if ( is_wp_error( $result ) ) {
+                return $result;
+            }
+            $offset = $result['offset'];
+        } while ( ! $result['done'] );
+
+        return true;
+    }
+
+    /**
+     * Process a chunk of rows from a CSV file.
+     *
+     * @param string                        $file      Path to the CSV file.
+     * @param bool                          $overwrite Whether to overwrite existing terms.
+     * @param int                           $offset    Starting row offset.
+     * @param int                           $limit     Number of rows to process, 0 for all.
+     * @param \WP_CLI\ProgressBar|null $progress  Optional progress bar for CLI.
+     * @return array|WP_Error                       New offset and completion flag or error.
+     */
+    public static function import_from_csv_step( $file, $overwrite, $offset = 0, $limit = 50, $progress = null ) {
         if ( ! file_exists( $file ) || ! is_readable( $file ) ) {
             return new WP_Error( 'gm2_invalid_file', __( 'Invalid CSV file.', 'gm2-category-sort' ) );
         }
@@ -119,7 +164,22 @@ class Gm2_Category_Sort_Product_Category_Importer {
             return new WP_Error( 'gm2_unreadable', __( 'Unable to read file.', 'gm2-category-sort' ) );
         }
 
+        for ( $i = 0; $i < $offset; $i++ ) {
+            if ( false === fgetcsv( $handle ) ) {
+                fclose( $handle );
+                return [
+                    'offset' => $offset,
+                    'done'   => true,
+                ];
+            }
+        }
+
+        $count = 0;
         while ( ( $row = fgetcsv( $handle ) ) !== false ) {
+            if ( $limit && $count >= $limit ) {
+                break;
+            }
+
             if ( empty( $row ) ) {
                 continue;
             }
@@ -149,9 +209,124 @@ class Gm2_Category_Sort_Product_Category_Importer {
             if ( ! empty( $term_ids ) ) {
                 wp_set_object_terms( $product_id, $term_ids, 'product_cat', ! $overwrite );
             }
+
+            $count++;
+            if ( $progress ) {
+                $progress->tick();
+            }
         }
 
+        $new_offset = $offset + $count;
+        $done       = feof( $handle );
         fclose( $handle );
-        return true;
+
+        return [
+            'offset' => $new_offset,
+            'done'   => $done,
+        ];
+    }
+
+    /**
+     * Count rows in a CSV file.
+     *
+     * @param string $file CSV file path.
+     * @return int
+     */
+    public static function count_rows( $file ) {
+        if ( ! file_exists( $file ) || ! is_readable( $file ) ) {
+            return 0;
+        }
+        $handle = fopen( $file, 'r' );
+        if ( ! $handle ) {
+            return 0;
+        }
+        $count = 0;
+        while ( false !== fgetcsv( $handle ) ) {
+            $count++;
+        }
+        fclose( $handle );
+        return $count;
+    }
+
+    /**
+     * Enqueue admin assets for the import page.
+     *
+     * @param string $hook Current admin page hook.
+     */
+    public static function enqueue_admin_assets( $hook ) {
+        if ( $hook !== 'tools_page_gm2-product-category-import' ) {
+            return;
+        }
+
+        $ver = filemtime( GM2_CAT_SORT_PATH . 'assets/js/product-category-import.js' );
+        wp_enqueue_script(
+            'gm2-product-category-import',
+            GM2_CAT_SORT_URL . 'assets/js/product-category-import.js',
+            [ 'jquery' ],
+            $ver,
+            true
+        );
+
+        wp_localize_script(
+            'gm2-product-category-import',
+            'gm2ProductCategoryImport',
+            [
+                'nonce'     => wp_create_nonce( 'gm2_product_category_import' ),
+                'completed' => __( 'Categories assigned successfully.', 'gm2-category-sort' ),
+                'error'     => __( 'Error importing categories.', 'gm2-category-sort' ),
+                'limit'     => 50,
+            ]
+        );
+    }
+
+    /**
+     * Handle AJAX import steps.
+     */
+    public static function ajax_import_step() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( 'unauthorized' );
+        }
+
+        check_ajax_referer( 'gm2_product_category_import', 'nonce' );
+
+        $overwrite = ! empty( $_POST['overwrite'] );
+        $offset    = isset( $_POST['offset'] ) ? absint( $_POST['offset'] ) : 0;
+        $limit     = 50;
+
+        if ( $offset === 0 ) {
+            if ( empty( $_FILES['file']['tmp_name'] ) ) {
+                wp_send_json_error( __( 'Missing file.', 'gm2-category-sort' ) );
+            }
+            $path = wp_tempnam( $_FILES['file']['name'] );
+            if ( ! $path || ! move_uploaded_file( $_FILES['file']['tmp_name'], $path ) ) {
+                wp_send_json_error( __( 'Upload failed.', 'gm2-category-sort' ) );
+            }
+            $total = self::count_rows( $path );
+        } else {
+            $path  = sanitize_text_field( $_POST['path'] ?? '' );
+            $total = isset( $_POST['total'] ) ? absint( $_POST['total'] ) : 0;
+            if ( ! $path || ! file_exists( $path ) ) {
+                wp_send_json_error( __( 'Invalid file.', 'gm2-category-sort' ) );
+            }
+        }
+
+        $result = self::import_from_csv_step( $path, $overwrite, $offset, $limit );
+        if ( is_wp_error( $result ) ) {
+            wp_send_json_error( $result->get_error_message() );
+        }
+
+        if ( $result['done'] ) {
+            unlink( $path );
+        }
+
+        wp_send_json_success(
+            [
+                'offset' => $result['offset'],
+                'done'   => $result['done'],
+                'path'   => $path,
+                'total'  => $total,
+            ]
+        );
     }
 }
+
