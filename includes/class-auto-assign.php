@@ -123,9 +123,24 @@ class Gm2_Category_Sort_Auto_Assign {
             }
             $terms_list = array_merge( [ $name ], array_filter( array_map( 'trim', explode( ',', $synonyms[ $id ] ?? '' ) ) ) );
             foreach ( $terms_list as $term ) {
-                $key = strtolower( $term );
-                if ( ! isset( $mapping[ $key ] ) ) {
-                    $mapping[ $key ] = $path;
+                $variants = [ $term ];
+                if ( substr( $term, -1 ) !== 's' ) {
+                    $variants[] = $term . 's';
+                } else {
+                    $variants[] = substr( $term, 0, -1 );
+                }
+                if ( $term === 'hole' ) {
+                    $variants[] = 'hh';
+                    $variants[] = 'holes';
+                }
+                if ( $term === 'lug' ) {
+                    $variants[] = 'lugs';
+                }
+                foreach ( $variants as $v ) {
+                    $key = Gm2_Category_Sort_Product_Category_Generator::normalize_text( $v );
+                    if ( ! isset( $mapping[ $key ] ) ) {
+                        $mapping[ $key ] = $path;
+                    }
                 }
             }
         }

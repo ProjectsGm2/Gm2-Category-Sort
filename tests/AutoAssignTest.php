@@ -186,5 +186,23 @@ class AutoAssignTest extends TestCase {
 
         $this->assertContains( 'Auto assign complete.', \WP_CLI::$success_messages );
     }
+
+    public function test_cli_handles_negatives_and_variants() {
+        list( $parent_id, $child_id ) = $this->create_categories();
+        $wheel = wp_insert_term( 'Wheel', 'product_cat' );
+        update_term_meta( $wheel['term_id'], 'gm2_synonyms', '10 lug 2 hole' );
+
+        $GLOBALS['gm2_product_objects'][1] = new TestProduct( 1, 'Prod A', 'Contains alt keyword', 'S1' );
+        $GLOBALS['gm2_product_objects'][2] = new TestProduct( 2, 'Prod B', 'Not for alt items', 'S2' );
+        $GLOBALS['gm2_product_objects'][3] = new TestProduct( 3, 'Prod C', '10 lugs 2 hh kit', 'S3' );
+
+        Gm2_Category_Sort_Auto_Assign::cli_run( [], [] );
+
+        $calls = $GLOBALS['gm2_set_terms_calls'];
+        $this->assertCount( 2, $calls );
+        $this->assertContains( $child_id, $calls[0]['terms'] );
+        $this->assertContains( $parent_id, $calls[0]['terms'] );
+        $this->assertSame( [ $wheel['term_id'] ], $calls[1]['terms'] );
+    }
 }
 }

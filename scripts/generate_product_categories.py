@@ -7,6 +7,27 @@ import os
 import re
 from typing import Dict, List
 
+# Common replacements for token normalization
+REPLACEMENTS = {
+    "lugs": "lug",
+    "holes": "hole",
+    "hh": "hole",
+}
+
+NEGATION_PATTERNS = [
+    r"not\s+for\s+{}",
+    r"does\s+not\s+fit\s+{}",
+    r"without\s+{}",
+]
+
+
+def normalize_text(text: str) -> str:
+    text = text.lower()
+    for key, val in REPLACEMENTS.items():
+        text = re.sub(rf"\b{key}\b", val, text)
+    # collapse extra whitespace
+    return re.sub(r"\s+", " ", text)
+
 
 def parse_cell(cell: str):
     cell = cell.strip()
@@ -23,6 +44,13 @@ def parse_cell(cell: str):
 def load_category_mapping(path: str):
     mapping: Dict[str, List[str]] = {}
     patterns: Dict[str, re.Pattern] = {}
+
+    def add_term(term: str, hierarchy: List[str]):
+        norm = normalize_text(term)
+        if norm not in mapping:
+            mapping[norm] = hierarchy.copy()
+            patterns[norm] = re.compile(r"(?<!\w)" + re.escape(norm) + r"(?!\w)")
+
     with open(path, newline='', encoding='utf-8') as f:
         reader = csv.reader(f)
         for row in reader:
@@ -34,25 +62,44 @@ def load_category_mapping(path: str):
                 name, syns = parse_cell(cell)
                 hierarchy.append(name)
                 for term in [name] + syns:
-                    key = term.lower()
-                    if key not in mapping:
-                        mapping[key] = hierarchy.copy()
-                        patterns[key] = re.compile(r"(?<!\w)" + re.escape(key) + r"(?!\w)")
+                    add_term(term, hierarchy)
+                    if not term.endswith('s'):
+                        add_term(term + 's', hierarchy)
+                    if term.endswith('s'):
+                        add_term(term[:-1], hierarchy)
+                    if term == 'hole':
+                        add_term('hh', hierarchy)
+                        add_term('holes', hierarchy)
+                    if term == 'lug':
+                        add_term('lugs', hierarchy)
     return [(k, mapping[k], patterns[k]) for k in mapping]
 
 
 def build_text(row: Dict[str, str]) -> str:
-    parts = [row.get('Name', ''), row.get('Short description', ''), row.get('Description', ''), row.get('Brands', '')]
+    parts = [
+        row.get('Name', ''),
+        row.get('Short description', ''),
+        row.get('Description', ''),
+        row.get('Brands', ''),
+    ]
     for i in range(1, 23):
         parts.append(row.get(f'Attribute {i} name', ''))
         parts.append(row.get(f'Attribute {i} value(s)', ''))
-    return ' '.join(parts).lower()
+    return normalize_text(' '.join(parts))
 
 
 def assign_categories(text: str, mapping) -> List[str]:
+    text = normalize_text(text)
     cats: List[str] = []
     for term, path, pattern in mapping:
         if pattern.search(text):
+            neg = False
+            for pat in NEGATION_PATTERNS:
+                if re.search(pat.format(re.escape(term)), text):
+                    neg = True
+                    break
+            if neg:
+                continue
             for c in path:
                 if c not in cats:
                     cats.append(c)
