@@ -21,6 +21,13 @@ Gm2 Category Sort adds a product category sorting widget for WooCommerce shops w
    After each filter update, the page automatically scrolls back to the selected
    categories list so it's easy to refine choices.
 
+## Styling
+
+The widget's **Expand/Collapse** panel exposes design controls for the toggle
+button. You can customize the background, border, border radius and box shadow
+of the `.gm2-expand-button` element, along with responsive padding and margin.
+These settings override the defaults found in `assets/css/style.css`.
+
 ## Sorting
 
 The widget honors the WooCommerce sorting dropdown. Values like `price`,
