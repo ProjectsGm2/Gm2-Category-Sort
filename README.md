@@ -143,13 +143,14 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 ## Testing
 
-To run the PHPUnit test suite:
+To run the test suite:
 
-1. Install PHPUnit (version 9 or newer).
-2. From the project root run:
+1. Ensure PHP 7.3 or newer is available (required by PHPUnit 9).
+2. Execute `bin/install-phpunit.sh` to download PHPUnit (Composer will be used if present).
+3. From the project root run:
 
 ```bash
-phpunit
+vendor/bin/phpunit
 ```
 
 The tests use stubbed WordPress functions so no WordPress installation is required.
