@@ -1,4 +1,5 @@
 <?php
+namespace {
 require_once __DIR__ . '/../includes/class-category-importer.php';
 require_once __DIR__ . '/../includes/class-product-category-importer.php';
 require_once __DIR__ . '/../includes/class-product-category-generator.php';
@@ -167,6 +168,8 @@ if ( ! function_exists( 'add_query_arg' ) ) {
     function add_query_arg( $params ) {
         return '?' . http_build_query( $params );
     }
+}
+
 }
 
 namespace Elementor {
