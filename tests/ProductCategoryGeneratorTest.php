@@ -50,6 +50,17 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertSame( [], $cats );
     }
 
+    public function test_ignores_except_for_phrases() {
+        $this->create_categories();
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = 'All models except for alt type';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame( [], $cats );
+    }
+
     public function test_matches_morphological_variants() {
         // Single category with variant terms
         $wheel = wp_insert_term( 'Wheel', 'product_cat' );
@@ -61,5 +72,17 @@ class ProductCategoryGeneratorTest extends TestCase {
         $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
 
         $this->assertSame( [ 'Wheel' ], $cats );
+    }
+
+    public function test_replacement_variants_are_normalized() {
+        $hub = wp_insert_term( 'Hubcap', 'product_cat' );
+        update_term_meta( $hub['term_id'], 'gm2_synonyms', 'Wheel Cover' );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = 'Premium wheelcovers and hub caps included';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame( [ 'Hubcap' ], $cats );
     }
 }
