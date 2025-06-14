@@ -135,6 +135,11 @@ Assigning categories  20/20 (100%)
 Success: Auto assign complete.
 ```
 
+During analysis common negative phrases such as `not for`, `does not fit` or
+`without` are detected and prevent category matches. The tool also performs
+basic stemming so minor wording differences like `lugs` vs `lug`,
+`holes`/`hh` vs `hole` still map to the correct terms.
+
 ## SEO Improvements
 
 When active filters are applied, the plugin outputs a canonical link pointing to

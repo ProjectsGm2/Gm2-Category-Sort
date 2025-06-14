@@ -38,4 +38,28 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $this->assertSame( [ 'Parent' ], $cats );
     }
+
+    public function test_ignores_negative_phrases() {
+        $this->create_categories();
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = 'This item is not for alt usage.';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame( [], $cats );
+    }
+
+    public function test_matches_morphological_variants() {
+        // Single category with variant terms
+        $wheel = wp_insert_term( 'Wheel', 'product_cat' );
+        update_term_meta( $wheel['term_id'], 'gm2_synonyms', '10 lug 2 hole' );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = 'Fits 10 lugs 2 hh trucks';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame( [ 'Wheel' ], $cats );
+    }
 }
