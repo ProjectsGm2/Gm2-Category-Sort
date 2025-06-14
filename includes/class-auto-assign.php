@@ -8,9 +8,19 @@ class Gm2_Category_Sort_Auto_Assign {
      * Initialize hooks.
      */
     public static function init() {
+        self::register_cli();
         add_action( 'admin_menu', [ __CLASS__, 'register_admin_page' ] );
         add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin_assets' ] );
         add_action( 'wp_ajax_gm2_auto_assign_step', [ __CLASS__, 'ajax_step' ] );
+    }
+
+    /**
+     * Register WP-CLI command.
+     */
+    public static function register_cli() {
+        if ( defined( 'WP_CLI' ) && WP_CLI ) {
+            \WP_CLI::add_command( 'gm2-category-sort auto-assign', [ __CLASS__, 'cli_run' ] );
+        }
     }
 
     /**
@@ -202,5 +212,73 @@ class Gm2_Category_Sort_Auto_Assign {
             'done'   => $done,
             'items'  => $items,
         ] );
+    }
+
+    /**
+     * Handle WP-CLI auto assignment.
+     *
+     * @param array $args       Positional arguments.
+     * @param array $assoc_args Associative arguments.
+     */
+    public static function cli_run( $args, $assoc_args ) {
+        $mapping = self::build_mapping();
+
+        $query = new WP_Query(
+            [
+                'post_type'      => 'product',
+                'post_status'    => 'publish',
+                'fields'         => 'ids',
+                'posts_per_page' => -1,
+                'orderby'        => 'ID',
+                'order'          => 'ASC',
+            ]
+        );
+
+        $progress = null;
+        if ( class_exists( '\\WP_CLI\Utils' ) ) {
+            $progress = \WP_CLI\Utils\make_progress_bar( 'Assigning categories', count( $query->posts ) );
+        }
+
+        foreach ( $query->posts as $product_id ) {
+            $product = wc_get_product( $product_id );
+            if ( ! $product ) {
+                if ( $progress ) {
+                    $progress->tick();
+                }
+                continue;
+            }
+
+            $text = $product->get_name() . ' ' . $product->get_description() . ' ' . $product->get_short_description();
+            foreach ( $product->get_attributes() as $attr ) {
+                if ( $attr->is_taxonomy() ) {
+                    $names = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'names' ] );
+                    $text .= ' ' . implode( ' ', $names );
+                } else {
+                    $text .= ' ' . implode( ' ', array_map( 'sanitize_text_field', $attr->get_options() ) );
+                }
+            }
+
+            $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+            $term_ids = [];
+            foreach ( $cats as $name ) {
+                $term = get_term_by( 'name', $name, 'product_cat' );
+                if ( $term && ! is_wp_error( $term ) ) {
+                    $term_ids[] = (int) $term->term_id;
+                }
+            }
+            if ( $term_ids ) {
+                wp_set_object_terms( $product_id, $term_ids, 'product_cat', true );
+            }
+
+            if ( $progress ) {
+                $progress->tick();
+            }
+        }
+
+        if ( $progress ) {
+            $progress->finish();
+        }
+
+        \WP_CLI::success( 'Auto assign complete.' );
     }
 }
