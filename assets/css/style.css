@@ -1,3 +1,26 @@
+ :root {
+    --gm2-expand-icon-size: 16px;
+    --gm2-expand-icon-spacing: 0;
+    --gm2-expand-icon-bg: transparent;
+    --gm2-expand-icon-hover-size: var(--gm2-expand-icon-size);
+    --gm2-expand-icon-hover-bg: var(--gm2-expand-icon-bg);
+    --gm2-expand-icon-active-size: var(--gm2-expand-icon-size);
+    --gm2-expand-icon-active-bg: var(--gm2-expand-icon-bg);
+    --gm2-collapse-icon-size: 16px;
+    --gm2-collapse-icon-spacing: 0;
+    --gm2-collapse-icon-bg: transparent;
+    --gm2-collapse-icon-hover-size: var(--gm2-collapse-icon-size);
+    --gm2-collapse-icon-hover-bg: var(--gm2-collapse-icon-bg);
+    --gm2-collapse-icon-active-size: var(--gm2-collapse-icon-size);
+    --gm2-collapse-icon-active-bg: var(--gm2-collapse-icon-bg);
+    --gm2-synonym-icon-size: 16px;
+    --gm2-synonym-icon-spacing: 0 4px 0 0;
+    --gm2-synonym-icon-bg: transparent;
+    --gm2-synonym-icon-hover-size: var(--gm2-synonym-icon-size);
+    --gm2-synonym-icon-hover-bg: var(--gm2-synonym-icon-bg);
+    --gm2-synonym-icon-active-size: var(--gm2-synonym-icon-size);
+    --gm2-synonym-icon-active-bg: var(--gm2-synonym-icon-bg);
+}
 /* Full-width tree layout */
 .gm2-category-tree {
     max-height: none;
