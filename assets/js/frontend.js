@@ -101,22 +101,24 @@ jQuery(document).ready(function($) {
         const $button = $(this);
         const $childContainer = $button.closest('.gm2-category-node').find('> .gm2-child-categories');
         const isExpanded = $button.data('expanded') === 'true';
-        const $icon = $button.find('i').first();
+        const $icon = $button.find('.gm2-expand-icon, .gm2-collapse-icon, i, svg').first();
         const expandClass = $button.data('expand-class');
         const collapseClass = $button.data('collapse-class');
 
         if (isExpanded) {
             $childContainer.slideUp();
-            if ($icon.length && expandClass && collapseClass) {
-                $icon.removeClass(collapseClass).addClass(expandClass);
+            if ($icon.length) {
+                if (collapseClass) $icon.removeClass(collapseClass);
+                if (expandClass) $icon.addClass(expandClass);
             } else {
                 $button.text('+');
             }
             $button.data('expanded', 'false').removeClass('gm2-expanded');
         } else {
             $childContainer.slideDown();
-            if ($icon.length && expandClass && collapseClass) {
-                $icon.removeClass(expandClass).addClass(collapseClass);
+            if ($icon.length) {
+                if (expandClass) $icon.removeClass(expandClass);
+                if (collapseClass) $icon.addClass(collapseClass);
             } else {
                 $button.text('-');
             }
