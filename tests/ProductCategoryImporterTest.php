@@ -43,4 +43,17 @@ class ProductCategoryImporterTest extends TestCase {
         $this->assertSame(20, $calls[0]['object_id']);
         $this->assertSame([2], $calls[0]['terms']);
     }
+
+    public function test_strips_bom_from_sku() {
+        $bom = "\xEF\xBB\xBF";
+        $csv = $bom . "SKU1,Cat1\n";
+        $file = $this->createCsv($csv);
+
+        Gm2_Category_Sort_Product_Category_Importer::import_from_csv($file, false);
+        unlink($file);
+
+        $calls = $GLOBALS['gm2_set_terms_calls'];
+        $this->assertCount(1, $calls);
+        $this->assertSame(10, $calls[0]['object_id']);
+    }
 }

@@ -70,6 +70,8 @@ def main():
 
     with open(args.products, newline='', encoding='utf-8-sig') as pf, open(args.output, 'w', newline='', encoding='utf-8') as out:
         reader = csv.DictReader(pf)
+        if reader.fieldnames and reader.fieldnames[0].startswith('\ufeff'):
+            reader.fieldnames[0] = reader.fieldnames[0].lstrip('\ufeff')
         writer = csv.writer(out)
         for row in reader:
             sku = row.get('SKU', '').strip()

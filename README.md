@@ -108,6 +108,11 @@ fields spanning multiple lines and large field sizes. With Python you can open
 the file using `newline=''` and call `csv.field_size_limit(sys.maxsize)` or use
 `pandas.read_csv` so the description column is read correctly.
 
+WooCommerce exports sometimes prefix the first column header with a UTF-8 byte
+order mark. The helper script and importers detect this marker and strip it so
+`SKU` columns work as expected. If you process the CSV yourself be sure to
+remove the BOM before reading the headers.
+
 ## SEO Improvements
 
 When active filters are applied, the plugin outputs a canonical link pointing to

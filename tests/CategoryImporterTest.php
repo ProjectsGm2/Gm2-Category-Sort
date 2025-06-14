@@ -90,4 +90,16 @@ class CategoryImporterTest extends TestCase {
         $this->assertSame('gm2_synonyms', $meta[1]['key']);
         $this->assertSame('Alt', $meta[1]['value']);
     }
+
+    public function test_import_strips_bom() {
+        $bom = "\xEF\xBB\xBF";
+        $csv = $bom . "Parent\n";
+        $file = $this->createCsvFile($csv);
+        Gm2_Category_Sort_Category_Importer::import_from_csv($file);
+        unlink($file);
+
+        $calls = $GLOBALS['gm2_insert_calls'];
+        $this->assertCount(1, $calls);
+        $this->assertSame('Parent', $calls[0]['name']);
+    }
 }

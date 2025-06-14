@@ -110,9 +110,15 @@ class Gm2_Category_Sort_Category_Importer {
             return new WP_Error( 'gm2_unreadable', __( 'Unable to read file.', 'gm2-category-sort' ) );
         }
 
+        $first_row = true;
         while ( ( $row = fgetcsv( $handle ) ) !== false ) {
             if ( empty( $row ) ) {
                 continue;
+            }
+
+            if ( $first_row && isset( $row[0] ) ) {
+                $row[0]  = preg_replace( "/^\xEF\xBB\xBF/", '', $row[0] );
+                $first_row = false;
             }
 
             $parent = 0;
