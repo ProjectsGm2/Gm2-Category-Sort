@@ -50,6 +50,7 @@ jQuery(function($){
     var productSearch = $('#gm2-product-search');
     var assignBtn = $('#gm2-assign-btn');
     var catSelect = $('#gm2-category-select');
+    var searchProgress = $('#gm2-search-progress');
 
     if(searchBtn.length){
         var products = {};
@@ -77,36 +78,52 @@ jQuery(function($){
             renderList();
         });
 
-        searchBtn.on('click', function(e){
-            e.preventDefault();
-            var fields = searchFields.val() || [];
-            var term = searchTerms.val();
+        function runSearch(fields, term, offset){
             $.post(ajaxurl, {
                 action: 'gm2_auto_assign_search',
                 nonce: gm2AutoAssign.nonce,
                 fields: fields,
-                search: term
+                search: term,
+                offset: offset || 0,
+                batch: 100
             }).done(function(resp){
                 if(resp.success){
                     addItems(resp.data.items);
+                    if(resp.data.total){
+                        var percent = Math.round((resp.data.processed/resp.data.total)*100);
+                        searchProgress.attr('value', percent).show();
+                        if(!resp.data.done){
+                            runSearch(fields, term, resp.data.processed);
+                        }else{
+                            searchProgress.hide();
+                        }
+                    }else{
+                        searchProgress.hide();
+                    }
+                }else{
+                    searchProgress.hide();
                 }
-            });
+            }).fail(function(){ searchProgress.hide(); });
+        }
+
+        searchBtn.on('click', function(e){
+            e.preventDefault();
+            var fields = searchFields.val() || [];
+            var term = searchTerms.val();
+            products = {};
+            renderList();
+            searchProgress.attr('value',0).show();
+            runSearch(fields, term, 0);
         });
 
         productSearch.on('keypress', function(e){
             if(e.which === 13){
                 e.preventDefault();
                 var q = $(this).val();
-                $.post(ajaxurl, {
-                    action: 'gm2_auto_assign_search',
-                    nonce: gm2AutoAssign.nonce,
-                    fields: ['title','description','attributes'],
-                    search: q
-                }).done(function(resp){
-                    if(resp.success){
-                        addItems(resp.data.items);
-                    }
-                });
+                products = {};
+                renderList();
+                searchProgress.attr('value',0).show();
+                runSearch(['title','description','attributes'], q, 0);
             }
         });
 
