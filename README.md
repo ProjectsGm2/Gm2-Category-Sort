@@ -239,11 +239,9 @@ To run the test suite:
 2. Execute `bin/install-phpunit.sh` to download PHPUnit. If you have Composer
    installed you may alternatively run `composer install` which will fetch
    PHPUnit automatically using the provided `composer.json`.
-3. From the project root run:
-
-```bash
-vendor/bin/phpunit
-```
+3. From the project root run `composer test` to execute the suite. This command
+   uses `vendor/bin/phpunit` under the hood after you have run
+   `bin/install-phpunit.sh` to install PHPUnit.
 
 The tests use stubbed WordPress functions so no WordPress installation is required.
 
