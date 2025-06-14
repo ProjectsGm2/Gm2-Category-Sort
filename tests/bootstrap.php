@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../includes/class-category-importer.php';
 require_once __DIR__ . '/../includes/class-product-category-importer.php';
 require_once __DIR__ . '/../includes/class-product-category-generator.php';
+require_once __DIR__ . '/../includes/class-renderer.php';
 
 // Minimal WP_Error class for tests.
 if ( ! class_exists( 'WP_Error' ) ) {
@@ -99,3 +100,72 @@ function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
     ];
     return $terms;
 }
+
+if ( ! function_exists( 'delete_option' ) ) {
+    function delete_option( $name ) {
+        unset( $GLOBALS['gm2_options'][ $name ] );
+        return true;
+    }
+}
+
+if ( ! function_exists( 'wp_count_posts' ) ) {
+    function wp_count_posts( $post_type ) {
+        $count = isset( $GLOBALS['gm2_product_objects'] ) ? count( $GLOBALS['gm2_product_objects'] ) : 0;
+        return (object) [ 'publish' => $count ];
+    }
+}
+
+// Basic stubs for renderer tests and others.
+if ( ! function_exists( 'get_terms' ) ) {
+    function get_terms( $args ) {
+        $parent  = isset( $args['parent'] ) ? (int) $args['parent'] : null;
+        $include = isset( $args['include'] ) ? (array) $args['include'] : null;
+        $terms   = [];
+        foreach ( $GLOBALS['gm2_test_terms'] as $p => $cats ) {
+            foreach ( $cats as $name => $id ) {
+                if ( $parent !== null && (int) $p !== $parent ) {
+                    continue;
+                }
+                if ( $include && ! in_array( $id, $include, true ) ) {
+                    continue;
+                }
+                $terms[] = (object) [
+                    'term_id' => $id,
+                    'parent'  => $p,
+                    'name'    => $name,
+                ];
+            }
+        }
+        return $terms;
+    }
+}
+
+if ( ! function_exists( 'get_term_meta' ) ) {
+    function get_term_meta( $term_id, $key, $single = true ) {
+        foreach ( $GLOBALS['gm2_meta_updates'] as $meta ) {
+            if ( $meta['term_id'] === $term_id && $meta['key'] === $key ) {
+                return $meta['value'];
+            }
+        }
+        return '';
+    }
+}
+
+if ( ! function_exists( 'esc_attr' ) ) {
+    function esc_attr( $text ) { return $text; }
+}
+
+if ( ! function_exists( 'esc_url' ) ) {
+    function esc_url( $url ) { return $url; }
+}
+
+if ( ! function_exists( 'esc_html' ) ) {
+    function esc_html( $text ) { return $text; }
+}
+
+if ( ! function_exists( 'add_query_arg' ) ) {
+    function add_query_arg( $params ) {
+        return '?' . http_build_query( $params );
+    }
+}
+
