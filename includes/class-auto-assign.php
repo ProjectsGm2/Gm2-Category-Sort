@@ -251,58 +251,70 @@ class Gm2_Category_Sort_Auto_Assign {
         $overwrite = ! empty( $assoc_args['overwrite'] );
         $mapping   = self::build_mapping();
 
-        $query = new WP_Query(
-            [
-                'post_type'      => 'product',
-                'post_status'    => 'publish',
-                'fields'         => 'ids',
-                'posts_per_page' => -1,
-                'orderby'        => 'ID',
-                'order'          => 'ASC',
-            ]
-        );
-
+        $total    = wp_count_posts( 'product' )->publish;
         $progress = null;
-        if ( class_exists( '\\WP_CLI\Utils' ) ) {
-            $progress = \WP_CLI\Utils\make_progress_bar( 'Assigning categories', count( $query->posts ) );
+        if ( class_exists( '\WP_CLI\Utils' ) ) {
+            $progress = \WP_CLI\Utils\make_progress_bar( 'Assigning categories', $total );
         }
 
-        foreach ( $query->posts as $product_id ) {
-            $product = wc_get_product( $product_id );
-            if ( ! $product ) {
+        $offset     = 0;
+        $batch_size = 500;
+
+        while ( true ) {
+            $query = new WP_Query(
+                [
+                    'post_type'      => 'product',
+                    'post_status'    => 'publish',
+                    'fields'         => 'ids',
+                    'posts_per_page' => $batch_size,
+                    'offset'         => $offset,
+                    'orderby'        => 'ID',
+                    'order'          => 'ASC',
+                ]
+            );
+
+            if ( empty( $query->posts ) ) {
+                break;
+            }
+
+            foreach ( $query->posts as $product_id ) {
+                $product = wc_get_product( $product_id );
+                if ( ! $product ) {
+                    if ( $progress ) {
+                        $progress->tick();
+                    }
+                    continue;
+                }
+
+                $text = $product->get_name() . ' ' . $product->get_description() . ' ' . $product->get_short_description();
+                foreach ( $product->get_attributes() as $attr ) {
+                    if ( $attr->is_taxonomy() ) {
+                        $names = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'names' ] );
+                        $text .= ' ' . implode( ' ', $names );
+                    } else {
+                        $text .= ' ' . implode( ' ', array_map( 'sanitize_text_field', $attr->get_options() ) );
+                    }
+                }
+
+                $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+                $term_ids = [];
+                foreach ( $cats as $name ) {
+                    $term = get_term_by( 'name', $name, 'product_cat' );
+                    if ( $term && ! is_wp_error( $term ) ) {
+                        $term_ids[] = (int) $term->term_id;
+                    }
+                }
+                if ( $term_ids ) {
+                    wp_set_object_terms( $product_id, $term_ids, 'product_cat', ! $overwrite );
+                }
+
                 if ( $progress ) {
                     $progress->tick();
                 }
-                continue;
             }
 
-            $text = $product->get_name() . ' ' . $product->get_description() . ' ' . $product->get_short_description();
-            foreach ( $product->get_attributes() as $attr ) {
-                if ( $attr->is_taxonomy() ) {
-                    $names = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'names' ] );
-                    $text .= ' ' . implode( ' ', $names );
-                } else {
-                    $text .= ' ' . implode( ' ', array_map( 'sanitize_text_field', $attr->get_options() ) );
-                }
-            }
-
-            $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
-            $term_ids = [];
-            foreach ( $cats as $name ) {
-                $term = get_term_by( 'name', $name, 'product_cat' );
-                if ( $term && ! is_wp_error( $term ) ) {
-                    $term_ids[] = (int) $term->term_id;
-                }
-            }
-            if ( $term_ids ) {
-                wp_set_object_terms( $product_id, $term_ids, 'product_cat', ! $overwrite );
-            }
-
-            if ( $progress ) {
-                $progress->tick();
-            }
+            $offset += $batch_size;
         }
-
         if ( $progress ) {
             $progress->finish();
         }
