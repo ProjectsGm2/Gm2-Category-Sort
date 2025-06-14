@@ -10,12 +10,13 @@ jQuery(function($){
         });
     }
 
-    function step(offset, reset){
+    function step(offset, reset, overwrite){
         $.post(ajaxurl, {
             action: 'gm2_auto_assign_step',
             nonce: gm2AutoAssign.nonce,
             offset: offset,
-            reset: reset ? 1 : 0
+            reset: reset ? 1 : 0,
+            overwrite: overwrite ? 1 : 0
         }).done(function(resp){
             if(!resp.success){
                 log.append('<div class="error">'+ (resp.data || gm2AutoAssign.error) +'</div>');
@@ -23,7 +24,7 @@ jQuery(function($){
             }
             append(resp.data.items);
             if(!resp.data.done){
-                step(resp.data.offset, false);
+                step(resp.data.offset, false, overwrite);
             }else{
                 log.append('<div>'+ gm2AutoAssign.completed +'</div>');
             }
@@ -35,6 +36,7 @@ jQuery(function($){
     btn.on('click', function(e){
         e.preventDefault();
         log.empty();
-        step(0, true);
+        var overwrite = $('input[name="gm2_overwrite"]:checked').val();
+        step(0, true, overwrite);
     });
 });

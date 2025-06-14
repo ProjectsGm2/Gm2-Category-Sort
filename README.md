@@ -117,7 +117,8 @@ remove the BOM before reading the headers.
 
 The plugin can analyze existing products and automatically assign categories
 based on their titles, descriptions and attribute values. Run the tool from
-**Tools → Auto Assign Categories** in the admin area and click **Start Auto
+**Tools → Auto Assign Categories** in the admin area and choose whether to
+**Add categories** or **Overwrite categories** before clicking **Start Auto
 Assign**. As each product is processed it appears in the log window:
 
 ```
@@ -134,6 +135,7 @@ $ wp gm2-category-sort auto-assign
 Assigning categories  20/20 (100%)
 Success: Auto assign complete.
 ```
+Add `--overwrite` to replace existing categories instead of appending.
 
 During analysis common negative phrases such as `not for`, `does not fit` or
 `without` are detected and prevent category matches. The tool also performs
