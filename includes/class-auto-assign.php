@@ -70,8 +70,11 @@ class Gm2_Category_Sort_Auto_Assign {
      * Render the admin page.
      */
     public static function admin_page() {
-        $progress = get_option( 'gm2_auto_assign_progress', [ 'offset' => 0, 'log' => [] ] );
-        $log      = (array) ( $progress['log'] ?? [] );
+        $progress = get_option( 'gm2_auto_assign_progress' );
+        $log      = [];
+        if ( $progress && ! empty( $progress['log'] ) ) {
+            $log = (array) $progress['log'];
+        }
         ?>
         <div class="wrap">
             <h1><?php esc_html_e( 'Auto Assign Categories', 'gm2-category-sort' ); ?></h1>
@@ -229,10 +232,17 @@ class Gm2_Category_Sort_Auto_Assign {
         $new_offset = $offset + count( $query->posts );
         $done       = $new_offset >= $query->found_posts || empty( $query->posts );
 
-        update_option( 'gm2_auto_assign_progress', [
-            'offset' => $done ? 0 : $new_offset,
-            'log'    => $log,
-        ] );
+        if ( $done ) {
+            delete_option( 'gm2_auto_assign_progress' );
+        } else {
+            update_option(
+                'gm2_auto_assign_progress',
+                [
+                    'offset' => $new_offset,
+                    'log'    => $log,
+                ]
+            );
+        }
 
         wp_send_json_success( [
             'offset' => $new_offset,
