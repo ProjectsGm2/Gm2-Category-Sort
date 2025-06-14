@@ -12,12 +12,19 @@ REPLACEMENTS = {
     "lugs": "lug",
     "holes": "hole",
     "hh": "hole",
+    "hub caps": "hubcap",
+    "hub cap": "hubcap",
+    "wheelcovers": "wheel cover",
+    "wheelcover": "wheel cover",
+    "wheel-simulator": "wheel simulator",
+    "wheel-simulators": "wheel simulator",
 }
 
 NEGATION_PATTERNS = [
     r"not\s+for\s+{}",
     r"does\s+not\s+fit\s+{}",
     r"without\s+{}",
+    r"except\s+for\s+{}",
 ]
 
 

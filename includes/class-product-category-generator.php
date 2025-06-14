@@ -6,9 +6,15 @@ class Gm2_Category_Sort_Product_Category_Generator {
 
     /** @var array<string,string> */
     protected static $replacements = [
-        'lugs'  => 'lug',
-        'holes' => 'hole',
-        'hh'    => 'hole',
+        'lugs'            => 'lug',
+        'holes'           => 'hole',
+        'hh'              => 'hole',
+        'hub caps'        => 'hubcap',
+        'hub cap'         => 'hubcap',
+        'wheelcovers'     => 'wheel cover',
+        'wheelcover'      => 'wheel cover',
+        'wheel-simulator' => 'wheel simulator',
+        'wheel-simulators'=> 'wheel simulator',
     ];
 
     /** @var string[] */
@@ -16,6 +22,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
         'not\s+for\s+%s',
         'does\s+not\s+fit\s+%s',
         'without\s+%s',
+        'except\s+for\s+%s',
     ];
 
     /**
