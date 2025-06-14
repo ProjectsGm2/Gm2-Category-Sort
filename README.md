@@ -203,3 +203,18 @@ vendor/bin/phpunit
 
 The tests use stubbed WordPress functions so no WordPress installation is required.
 
+
+## Build
+
+The frontend script is written with modern JavaScript syntax. To generate an ES5
+compatible build for legacy browsers run:
+
+```bash
+npm install
+npm run build
+```
+
+This uses Babel to transpile `assets/js/frontend.js` into
+`assets/dist/frontend.js`. The plugin automatically enqueues this file instead of
+the original when an outdated browser (like Internet Explorer) is detected.
+

@@ -87,3 +87,21 @@ if ( ! function_exists( 'gm2_get_orderby_args' ) ) {
         return $args;
     }
 }
+
+if ( ! function_exists( 'gm2_is_legacy_browser' ) ) {
+    /**
+     * Detect very old browsers like Internet Explorer or legacy Edge.
+     *
+     * @return bool True if the user agent matches a legacy browser.
+     */
+    function gm2_is_legacy_browser() {
+        $ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '';
+        if ( stripos( $ua, 'MSIE' ) !== false || stripos( $ua, 'Trident/' ) !== false ) {
+            return true;
+        }
+        if ( preg_match( '/Edge\/1[0-4]\./', $ua ) ) {
+            return true;
+        }
+        return false;
+    }
+}
