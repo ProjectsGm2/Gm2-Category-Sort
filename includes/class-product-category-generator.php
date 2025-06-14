@@ -23,6 +23,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
         'does\s+not\s+fit\s+%s',
         'without\s+%s',
         'except\s+for\s+%s',
+        'not\s+compatible\s+with\s+%s',
+        'not\s+recommended\s+for\s+%s',
+        'not\s+intended\s+for\s+%s',
     ];
 
     /**
