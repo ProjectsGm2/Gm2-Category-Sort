@@ -1,4 +1,5 @@
 <?php
+namespace {
 require_once __DIR__ . '/../includes/class-category-importer.php';
 require_once __DIR__ . '/../includes/class-product-category-importer.php';
 require_once __DIR__ . '/../includes/class-product-category-generator.php';
@@ -169,6 +170,7 @@ if ( ! function_exists( 'add_query_arg' ) ) {
     }
 }
 
+}
 namespace Elementor {
     class Icons_Manager {
         public static function render_icon( $icon, $attrs = [] ) {

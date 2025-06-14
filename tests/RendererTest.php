@@ -28,6 +28,7 @@ class RendererTest extends TestCase {
 
     public function test_expand_button_contains_icon_markup() {
         $root = wp_insert_term( 'Root', 'product_cat' );
+        wp_insert_term( 'Child', 'product_cat', [ 'parent' => $root['term_id'] ] );
 
         $renderer = new Gm2_Category_Sort_Renderer([
             'filter_type'   => 'simple',
