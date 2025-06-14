@@ -116,6 +116,7 @@ class Gm2_Category_Sort_Auto_Assign {
                 <input type="text" id="gm2-search-terms" style="width:200px;" />
                 <button id="gm2-search-btn" class="button"><?php esc_html_e( 'Search', 'gm2-category-sort' ); ?></button>
             </p>
+            <p><progress id="gm2-search-progress" value="0" max="100" style="display:none;width:100%;"></progress></p>
             <p>
                 <input type="text" id="gm2-product-search" placeholder="<?php esc_attr_e( 'Search by SKU or title', 'gm2-category-sort' ); ?>" style="width:260px;" />
             </p>
@@ -300,6 +301,8 @@ class Gm2_Category_Sort_Auto_Assign {
 
         $fields = array_map( 'sanitize_key', (array) ( $_POST['fields'] ?? [] ) );
         $search = sanitize_text_field( $_POST['search'] ?? '' );
+        $offset = isset( $_POST['offset'] ) ? max( 0, (int) $_POST['offset'] ) : 0;
+        $batch  = isset( $_POST['batch'] ) ? max( 1, (int) $_POST['batch'] ) : 100;
 
         if ( $search === '' ) {
             wp_send_json_success( [ 'items' => [] ] );
@@ -308,7 +311,8 @@ class Gm2_Category_Sort_Auto_Assign {
         $query = new WP_Query( [
             'post_type'      => 'product',
             'post_status'    => 'publish',
-            'posts_per_page' => -1,
+            'posts_per_page' => $batch,
+            'offset'         => $offset,
             'fields'         => 'ids',
             'orderby'        => 'ID',
             'order'          => 'ASC',
@@ -348,7 +352,17 @@ class Gm2_Category_Sort_Auto_Assign {
             }
         }
 
-        wp_send_json_success( [ 'items' => $items ] );
+        $new_offset = $offset + count( $query->posts );
+        $processed  = min( $new_offset, $query->found_posts );
+
+        wp_send_json_success(
+            [
+                'items'     => $items,
+                'processed' => $processed,
+                'total'     => (int) $query->found_posts,
+                'done'      => $processed >= $query->found_posts,
+            ]
+        );
     }
 
     /**
