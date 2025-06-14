@@ -113,6 +113,28 @@ order mark. The helper script and importers detect this marker and strip it so
 `SKU` columns work as expected. If you process the CSV yourself be sure to
 remove the BOM before reading the headers.
 
+## Auto Assign Categories
+
+The plugin can analyze existing products and automatically assign categories
+based on their titles, descriptions and attribute values. Run the tool from
+**Tools → Auto Assign Categories** in the admin area and click **Start Auto
+Assign**. As each product is processed it appears in the log window:
+
+```
+SKU123 - Sample Product => Accessories, Wheel Covers
+SKU124 - Another Item => Wheel Simulators
+Auto assign complete.
+```
+
+For large catalogs the same process is available from WP‑CLI and displays a
+progress bar:
+
+```bash
+$ wp gm2-category-sort auto-assign
+Assigning categories  20/20 (100%)
+Success: Auto assign complete.
+```
+
 ## SEO Improvements
 
 When active filters are applied, the plugin outputs a canonical link pointing to
