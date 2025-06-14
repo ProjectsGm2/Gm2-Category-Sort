@@ -345,6 +345,54 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             ],
         ]);
 
+        $this->add_group_control(
+            \Elementor\Group_Control_Background::get_type(),
+            [
+                'name'     => 'expand_button_bg',
+                'selector' => '{{WRAPPER}} .gm2-expand-button',
+            ]
+        );
+
+        $this->add_group_control(
+            \Elementor\Group_Control_Border::get_type(),
+            [
+                'name'     => 'expand_button_border',
+                'selector' => '{{WRAPPER}} .gm2-expand-button',
+            ]
+        );
+
+        $this->add_responsive_control('expand_button_radius', [
+            'label' => __('Border Radius', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::DIMENSIONS,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+            ],
+        ]);
+
+        $this->add_group_control(
+            \Elementor\Group_Control_Box_Shadow::get_type(),
+            [
+                'name'     => 'expand_button_shadow',
+                'selector' => '{{WRAPPER}} .gm2-expand-button',
+            ]
+        );
+
+        $this->add_responsive_control('expand_button_padding', [
+            'label' => __('Padding', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::DIMENSIONS,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+            ],
+        ]);
+
+        $this->add_responsive_control('expand_button_margin', [
+            'label' => __('Margin', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::DIMENSIONS,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+            ],
+        ]);
+
         $this->end_controls_section();
 
         // Selected Categories
