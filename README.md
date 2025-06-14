@@ -137,6 +137,15 @@ Success: Auto assign complete.
 ```
 Add `--overwrite` to replace existing categories instead of appending.
 
+### Manual Search and Assign
+
+Below the log the page provides a search form to manually select products.
+Choose which fields to search (title, description or attributes), enter a
+keyword and click **Search** to build a list of matching products. Additional
+products can be looked up by SKU or title in the second search box. After
+selecting one or more categories from the list, click **Assign** to apply them
+to all products in the list.
+
 During analysis common negative phrases such as `not for`, `does not fit` or
 `without` are detected and prevent category matches. The tool also performs
 basic stemming so minor wording differences like `lugs` vs `lug`,
