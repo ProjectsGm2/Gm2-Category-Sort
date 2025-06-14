@@ -169,3 +169,17 @@ if ( ! function_exists( 'add_query_arg' ) ) {
     }
 }
 
+namespace Elementor {
+    class Icons_Manager {
+        public static function render_icon( $icon, $attrs = [] ) {
+            $value = $icon['value'] ?? '';
+            $attr_str = '';
+            foreach ( $attrs as $k => $v ) {
+                $attr_str .= ' ' . $k . '="' . $v . '"';
+            }
+            return '<i class="' . $value . '"' . $attr_str . '></i>';
+        }
+        public static function enqueue_shim( $icon ) {}
+    }
+}
+
