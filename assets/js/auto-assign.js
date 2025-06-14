@@ -48,6 +48,8 @@ jQuery(function($){
     var searchTerms = $('#gm2-search-terms');
     var productList = $('#gm2-product-list');
     var productSearch = $('#gm2-product-search');
+    var liveSpinner = $('#gm2-live-spinner');
+    var searchDropdown = $('#gm2-search-dropdown');
     var assignBtn = $('#gm2-assign-btn');
     var catSelect = $('#gm2-category-select');
     var searchProgress = $('#gm2-search-progress');
@@ -114,6 +116,54 @@ jQuery(function($){
             renderList();
             searchProgress.attr('value',0).show();
             runSearch(fields, term, 0);
+        });
+
+        var debounceTimer = null;
+        function liveSearch(q){
+            $.post(ajaxurl, {
+                action: 'gm2_auto_assign_search',
+                nonce: gm2AutoAssign.nonce,
+                fields: ['title','description','attributes'],
+                search: q,
+                offset: 0,
+                batch: 20
+            }).done(function(resp){
+                liveSpinner.hide();
+                searchDropdown.empty();
+                if(resp.success && resp.data.items.length){
+                    resp.data.items.forEach(function(p){
+                        $('<li>').text(p.sku+' - '+p.title).data('item', p).appendTo(searchDropdown);
+                    });
+                    searchDropdown.show();
+                }else{
+                    searchDropdown.hide();
+                }
+            }).fail(function(){
+                liveSpinner.hide();
+                searchDropdown.hide();
+            });
+        }
+
+        productSearch.on('keyup', function(){
+            var q = $(this).val();
+            clearTimeout(debounceTimer);
+            if(!q){
+                searchDropdown.hide();
+                return;
+            }
+            debounceTimer = setTimeout(function(){
+                liveSpinner.show();
+                liveSearch(q);
+            }, 300);
+        });
+
+        searchDropdown.on('click','li', function(){
+            var item = $(this).data('item');
+            if(item && !products[item.id]){
+                products[item.id] = item;
+                renderList();
+            }
+            searchDropdown.hide();
         });
 
         productSearch.on('keypress', function(e){

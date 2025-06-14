@@ -117,8 +117,10 @@ class Gm2_Category_Sort_Auto_Assign {
                 <button id="gm2-search-btn" class="button"><?php esc_html_e( 'Search', 'gm2-category-sort' ); ?></button>
             </p>
             <p><progress id="gm2-search-progress" value="0" max="100" style="display:none;width:100%;"></progress></p>
-            <p>
-                <input type="text" id="gm2-product-search" placeholder="<?php esc_attr_e( 'Search by SKU or title', 'gm2-category-sort' ); ?>" style="width:260px;" />
+            <p style="position:relative;">
+                <input type="text" id="gm2-product-search" placeholder="<?php esc_attr_e( 'Search by SKU or title', 'gm2-category-sort' ); ?>" style="width:260px;" autocomplete="off" />
+                <span id="gm2-live-spinner" class="spinner" style="float:none;margin-top:4px;display:none;"></span>
+                <ul id="gm2-search-dropdown" style="display:none;position:absolute;left:0;right:0;background:#fff;border:1px solid #ccc;padding:5px;max-height:150px;overflow:auto;list-style:none;margin:2px 0 0;"></ul>
             </p>
             <ul id="gm2-product-list" style="background:#fff;border:1px solid #ccc;padding:5px;max-height:200px;overflow:auto;"></ul>
             <p>
