@@ -245,6 +245,57 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             $this->end_controls_section();
         }
 
+        // Expand/Collapse Icons
+        $this->start_controls_section('gm2_expand_section', [
+            'label' => __('Expand/Collapse', 'gm2-category-sort'),
+            'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+        ]);
+
+        $this->add_control('expand_icon', [
+            'label'   => __('Expand Icon', 'gm2-category-sort'),
+            'type'    => \Elementor\Controls_Manager::ICONS,
+            'default' => [
+                'value'   => 'fas fa-plus',
+                'library' => 'fa-solid',
+            ],
+        ]);
+
+        $this->add_control('collapse_icon', [
+            'label'   => __('Collapse Icon', 'gm2-category-sort'),
+            'type'    => \Elementor\Controls_Manager::ICONS,
+            'default' => [
+                'value'   => 'fas fa-minus',
+                'library' => 'fa-solid',
+            ],
+        ]);
+
+        $this->add_control('expand_icon_color', [
+            'label' => __('Icon Color', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button i' => 'color: {{VALUE}};',
+            ],
+        ]);
+
+        $this->add_control('expand_icon_hover_color', [
+            'label' => __('Icon Hover Color', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button:hover i' => 'color: {{VALUE}};',
+            ],
+        ]);
+
+        $this->add_control('expand_icon_active_color', [
+            'label' => __('Icon Active Color', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button.gm2-expanded i' => 'color: {{VALUE}};',
+                '{{WRAPPER}} .gm2-expand-button[data-expanded="true"] i' => 'color: {{VALUE}};',
+            ],
+        ]);
+
+        $this->end_controls_section();
+
         // Selected Categories
         $this->start_controls_section('gm2_selected_section', [
             'label' => __('Selected Categories', 'gm2-category-sort'),
@@ -487,6 +538,8 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'widget_id'            => $this->get_id(),
             'synonym_icon'         => $settings['synonym_icon'],
             'synonym_icon_position'=> $settings['synonym_icon_position'],
+            'expand_icon'          => $settings['expand_icon'],
+            'collapse_icon'        => $settings['collapse_icon'],
         ]);
         
         echo $renderer->generate_html();

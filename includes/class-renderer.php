@@ -133,7 +133,11 @@ class Gm2_Category_Sort_Renderer {
         }
         
         if ($has_children) {
-            echo '<button class="gm2-expand-button" data-expanded="false">+</button>';
+            $expand_class   = ! empty( $this->settings['expand_icon']['value'] ) ? $this->settings['expand_icon']['value'] : '';
+            $collapse_class = ! empty( $this->settings['collapse_icon']['value'] ) ? $this->settings['collapse_icon']['value'] : '';
+            $expand_html    = $expand_class ? '<i class="' . esc_attr( $expand_class ) . '"></i>' : '<i>+</i>';
+
+            echo '<button class="gm2-expand-button" data-expanded="false" data-expand-class="' . esc_attr( $expand_class ) . '" data-collapse-class="' . esc_attr( $collapse_class ) . '">' . $expand_html . '</button>';
         }
         echo '</div>';
         echo '</div>';
