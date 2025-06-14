@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/class-category-importer.php';
 require_once __DIR__ . '/../includes/class-product-category-importer.php';
+require_once __DIR__ . '/../includes/class-product-category-generator.php';
 
 // Minimal WP_Error class for tests.
 if ( ! class_exists( 'WP_Error' ) ) {

@@ -1,0 +1,41 @@
+<?php
+use PHPUnit\Framework\TestCase;
+
+class ProductCategoryGeneratorTest extends TestCase {
+
+    protected function setUp(): void {
+        gm2_test_reset_terms();
+    }
+
+    private function create_categories() {
+        // Parent category with synonym
+        $parent = wp_insert_term( 'Parent', 'product_cat' );
+        update_term_meta( $parent['term_id'], 'gm2_synonyms', 'Main' );
+
+        // Child category with its own synonym
+        $child = wp_insert_term( 'Child', 'product_cat', [ 'parent' => $parent['term_id'] ] );
+        update_term_meta( $child['term_id'], 'gm2_synonyms', 'Alt' );
+    }
+
+    public function test_assigns_using_synonyms_and_hierarchy() {
+        $this->create_categories();
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = 'This product matches alt keyword';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame( [ 'Parent', 'Child' ], $cats );
+    }
+
+    public function test_assigns_parent_synonym() {
+        $this->create_categories();
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = 'A main category item';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame( [ 'Parent' ], $cats );
+    }
+}
