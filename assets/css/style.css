@@ -232,6 +232,18 @@
     transition: all 0.2s ease;
 }
 
+.gm2-expand-button .gm2-collapse-icon {
+    display: none;
+}
+
+.gm2-expand-button[data-expanded="true"] .gm2-expand-icon {
+    display: none;
+}
+
+.gm2-expand-button[data-expanded="true"] .gm2-collapse-icon {
+    display: inline-block;
+}
+
 .gm2-expand-button:hover .gm2-collapse-icon {
     font-size: var(--gm2-collapse-icon-hover-size, var(--gm2-collapse-icon-size, 16px));
     background-color: var(--gm2-collapse-icon-hover-bg, var(--gm2-collapse-icon-bg, transparent));
