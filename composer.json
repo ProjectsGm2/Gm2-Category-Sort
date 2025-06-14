@@ -1,0 +1,8 @@
+{
+    "name": "gm2/category-sort",
+    "description": "Gm2 Category Sort plugin",
+    "type": "project",
+    "require-dev": {
+        "phpunit/phpunit": "^9"
+    }
+}
