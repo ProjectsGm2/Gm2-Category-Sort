@@ -80,6 +80,28 @@ When uploading through the admin screen a progress bar shows the import status
 so large files can be processed incrementally. Each request handles about 50
 rows. For huge imports consider WP‑CLI which displays a terminal progress bar.
 
+### Generate Category Assignments from Research CSV
+
+The `scripts/generate_product_categories.py` helper reads
+`Research/wc-products.csv` and the category tree at
+`Research/Category Tree With Synonyms-Auto Enhance-13 JUN - Category Tree With Synonyms-Auto Enhance-13 JUN.csv`.
+It builds a mapping of category names and their synonyms, scans the product
+data for matches and writes a CSV suitable for the **Assign Product Categories**
+importer.
+
+Run the script from the project root:
+
+```bash
+python3 scripts/generate_product_categories.py \
+  --products Research/wc-products.csv \
+  --categories "Research/Category Tree With Synonyms-Auto Enhance-13 JUN - Category Tree With Synonyms-Auto Enhance-13 JUN.csv" \
+  --output product-categories.csv
+```
+
+The resulting `product-categories.csv` follows the same structure as
+`assets/example-product-categories.csv` where the first column contains the SKU
+and subsequent columns list category names.
+
 ## SEO Improvements
 
 When active filters are applied, the plugin outputs a canonical link pointing to
