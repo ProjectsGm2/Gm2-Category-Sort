@@ -192,6 +192,17 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
                 'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
             ] );
 
+            $this->add_control( 'display_mode_depth_' . $i, [
+                'label' => __( 'Display Mode', 'gm2-category-sort' ),
+                'type' => \Elementor\Controls_Manager::SELECT,
+                'options' => [
+                    'block'  => __( 'Block', 'gm2-category-sort' ),
+                    'inline' => __( 'Inline', 'gm2-category-sort' ),
+                ],
+                'default' => 'block',
+                'prefix_class' => 'gm2-depth-' . $i . '-display-'
+            ] );
+
             $selector = '.gm2-category-name.depth-' . $i;
             $syn_selector = '.gm2-category-synonym.depth-' . $i;
 
