@@ -112,17 +112,17 @@ jQuery(document).ready(function ($) {
     var $button = $(this);
     var $childContainer = $button.closest('.gm2-category-node').find('> .gm2-child-categories');
     var isExpanded = $button.data('expanded') === 'true';
-    var $expandIcon = $button.find('.gm2-expand-icon');
-    var $collapseIcon = $button.find('.gm2-collapse-icon');
+    var $expand = $button.find('.gm2-expand-icon');
+    var $collapse = $button.find('.gm2-collapse-icon');
     if (isExpanded) {
       $childContainer.slideUp();
-      $collapseIcon.hide();
-      $expandIcon.show();
+      $collapse.css('display', 'none');
+      $expand.css('display', '');
       $button.data('expanded', 'false').removeClass('gm2-expanded');
     } else {
       $childContainer.slideDown();
-      $expandIcon.hide();
-      $collapseIcon.show();
+      $expand.css('display', 'none');
+      $collapse.css('display', '');
       $button.data('expanded', 'true').addClass('gm2-expanded');
     }
   });

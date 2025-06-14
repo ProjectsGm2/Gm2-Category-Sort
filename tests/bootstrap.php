@@ -180,6 +180,9 @@ namespace Elementor {
             foreach ( $attrs as $k => $v ) {
                 $attr_str .= ' ' . $k . '="' . $v . '"';
             }
+            if ( isset( $icon['library'] ) && $icon['library'] === 'svg' ) {
+                return '<svg' . $attr_str . '><path d="' . $value . '"></path></svg>';
+            }
             return '<i class="' . $value . '"' . $attr_str . '></i>';
         }
         public static function enqueue_shim( $icon ) {}
