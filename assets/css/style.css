@@ -188,7 +188,8 @@
 
 /* Icon defaults */
 .gm2-expand-button i,
-.gm2-expand-button svg {
+.gm2-expand-button svg,
+.gm2-expand-button .gm2-expand-icon {
     font-size: var(--gm2-expand-icon-size, 16px);
     width: var(--gm2-expand-icon-size, 16px);
     height: var(--gm2-expand-icon-size, 16px);
@@ -198,15 +199,18 @@
 }
 
 .gm2-expand-button:hover i,
-.gm2-expand-button:hover svg {
+.gm2-expand-button:hover svg,
+.gm2-expand-button:hover .gm2-expand-icon {
     font-size: var(--gm2-expand-icon-hover-size, var(--gm2-expand-icon-size, 16px));
     background-color: var(--gm2-expand-icon-hover-bg, var(--gm2-expand-icon-bg, transparent));
 }
 
 .gm2-expand-button.gm2-expanded i,
 .gm2-expand-button.gm2-expanded svg,
+.gm2-expand-button.gm2-expanded .gm2-expand-icon,
 .gm2-expand-button[data-expanded="true"] i,
-.gm2-expand-button[data-expanded="true"] svg {
+.gm2-expand-button[data-expanded="true"] svg,
+.gm2-expand-button[data-expanded="true"] .gm2-expand-icon {
     font-size: var(--gm2-expand-icon-active-size, var(--gm2-expand-icon-size, 16px));
     background-color: var(--gm2-expand-icon-active-bg, var(--gm2-expand-icon-bg, transparent));
 }
