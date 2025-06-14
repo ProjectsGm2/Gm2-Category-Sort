@@ -29,10 +29,12 @@ class Gm2_Category_Sort_Enqueuer {
             true
         );
 
-        $js_ver = filemtime(GM2_CAT_SORT_PATH . 'assets/js/frontend.js');
+        $legacy      = gm2_is_legacy_browser();
+        $js_path     = $legacy ? 'assets/dist/frontend.js' : 'assets/js/frontend.js';
+        $js_ver      = filemtime(GM2_CAT_SORT_PATH . $js_path);
         wp_enqueue_script(
             'gm2-category-sort-script',
-            GM2_CAT_SORT_URL . 'assets/js/frontend.js',
+            GM2_CAT_SORT_URL . $js_path,
             ['jquery', 'gm2-url-polyfill'],
             $js_ver,
             true
