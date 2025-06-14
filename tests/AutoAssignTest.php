@@ -80,6 +80,9 @@ if ( ! function_exists( 'update_option' ) ) {
 if ( ! function_exists( 'sanitize_text_field' ) ) {
     function sanitize_text_field( $str ) { return $str; }
 }
+if ( ! function_exists( 'sanitize_key' ) ) {
+    function sanitize_key( $str ) { return $str; }
+}
 
 if ( ! function_exists( 'wc_get_product' ) ) {
     function wc_get_product( $id ) {
@@ -134,6 +137,7 @@ class AutoAssignTest extends TestCase {
         $GLOBALS['gm2_product_objects'] = [];
         $GLOBALS['gm2_json_result'] = null;
         \WP_CLI::$success_messages = [];
+        $_POST = [];
     }
 
     private function create_categories() {
@@ -260,6 +264,55 @@ class AutoAssignTest extends TestCase {
         $calls = $GLOBALS['gm2_set_terms_calls'];
         $this->assertCount( 1, $calls );
         $this->assertSame( [ $wheel['term_id'] ], $calls[0]['terms'] );
+    }
+
+    public function test_ajax_search_products() {
+        $this->create_products();
+
+        $_POST['nonce'] = 't';
+        $_POST['fields'] = [ 'title' ];
+        $_POST['search'] = 'Prod One';
+
+        Gm2_Category_Sort_Auto_Assign::ajax_search_products();
+
+        $result = $GLOBALS['gm2_json_result'];
+        $this->assertTrue( $result['success'] );
+        $this->assertCount( 1, $result['data']['items'] );
+        $this->assertSame( 'SKU1', $result['data']['items'][0]['sku'] );
+    }
+
+    public function test_ajax_assign_selected() {
+        $term = wp_insert_term( 'NewCat', 'product_cat' );
+        $this->create_products();
+
+        $_POST['nonce'] = 't';
+        $_POST['products'] = [1];
+        $_POST['categories'] = [ $term['term_id'] ];
+
+        Gm2_Category_Sort_Auto_Assign::ajax_assign_selected();
+
+        $calls = $GLOBALS['gm2_set_terms_calls'];
+        $this->assertCount( 1, $calls );
+        $this->assertSame( [ $term['term_id'] ], $calls[0]['terms'] );
+        $this->assertTrue( $calls[0]['append'] );
+    }
+
+    public function test_ajax_reset_step() {
+        $this->create_products();
+
+        $_POST['nonce'] = 't';
+        $_POST['reset'] = '1';
+
+        Gm2_Category_Sort_Auto_Assign::ajax_reset_step();
+
+        $calls = $GLOBALS['gm2_set_terms_calls'];
+        $this->assertCount( 2, $calls );
+        $this->assertSame( [], $calls[0]['terms'] );
+        $this->assertFalse( $calls[0]['append'] );
+
+        $result = $GLOBALS['gm2_json_result'];
+        $this->assertTrue( $result['success'] );
+        $this->assertCount( 2, $result['data']['items'] );
     }
 }
 }
