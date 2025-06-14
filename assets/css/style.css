@@ -215,6 +215,14 @@
     background-color: var(--gm2-expand-icon-active-bg, var(--gm2-expand-icon-bg, transparent));
 }
 
+.gm2-expand-icon i,
+.gm2-collapse-icon i {
+    font-size: inherit;
+    width: inherit;
+    height: inherit;
+    line-height: 1;
+}
+
 .gm2-collapse-icon {
     font-size: var(--gm2-collapse-icon-size, 16px);
     width: var(--gm2-collapse-icon-size, 16px);
