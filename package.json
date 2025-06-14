@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "babel assets/js/frontend.js -o assets/dist/frontend.js"
+    "build": "babel assets/js/frontend.js -o assets/dist/frontend.js && postcss assets/css/style.css --use autoprefixer --no-map -o assets/css/style.css"
   },
   "devDependencies": {
     "@babel/cli": "^7.22.10",
     "@babel/core": "^7.22.10",
-    "@babel/preset-env": "^7.22.10"
+    "@babel/preset-env": "^7.22.10",
+    "autoprefixer": "^10.4.16",
+    "postcss-cli": "^10.1.0"
   },
   "babel": {
     "presets": [

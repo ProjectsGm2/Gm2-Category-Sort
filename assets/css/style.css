@@ -133,6 +133,20 @@
     transition: all 0.2s ease;
 }
 
+@supports not (gap: 1px) {
+    .gm2-selected-categories {
+        margin-right: -10px;
+        margin-bottom: -10px;
+    }
+    .gm2-selected-category {
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+    .gm2-selected-category > * + * {
+        margin-left: 8px;
+    }
+}
+
 .gm2-remove-category {
     cursor: pointer;
     font-size: 16px;
