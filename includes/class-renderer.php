@@ -115,7 +115,18 @@ class Gm2_Category_Sort_Renderer {
                     'gm2_filter_type' => $this->settings['filter_type'],
                     'gm2_simple_operator' => $this->settings['simple_operator'] ?? 'IN',
                 ]);
-                echo '<a class="gm2-category-synonym depth-' . intval( $depth ) . '" data-term-id="' . esc_attr($term->term_id) . '" href="' . esc_url($href) . '">' . esc_html($syn) . '</a>';
+                $icon_html = '';
+                if ( ! empty( $this->settings['synonym_icon']['value'] ) ) {
+                    $icon_html = \Elementor\Icons_Manager::render_icon( $this->settings['synonym_icon'], [ 'aria-hidden' => 'true' ] );
+                }
+                if ( ! empty( $icon_html ) && $this->settings['synonym_icon_position'] === 'after' ) {
+                    $link_content = esc_html($syn) . $icon_html;
+                } elseif ( ! empty( $icon_html ) ) {
+                    $link_content = $icon_html . esc_html($syn);
+                } else {
+                    $link_content = esc_html($syn);
+                }
+                echo '<a class="gm2-category-synonym depth-' . intval( $depth ) . '" data-term-id="' . esc_attr($term->term_id) . '" href="' . esc_url($href) . '">' . $link_content . '</a>';
                 $first = false;
             }
             echo ')</span>';

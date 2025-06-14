@@ -45,11 +45,18 @@
     flex-grow: 1;
 }
 
-.gm2-category-name:hover {
+.gm2-category-name.depth-0:hover,
+.gm2-category-name.depth-1:hover,
+.gm2-category-name.depth-2:hover,
+.gm2-category-synonym.depth-0:hover,
+.gm2-category-synonym.depth-1:hover,
+.gm2-category-synonym.depth-2:hover {
     color: #3a8bff;
 }
 
-.gm2-category-name.selected {
+.gm2-category-name.depth-0.selected,
+.gm2-category-name.depth-1.selected,
+.gm2-category-name.depth-2.selected {
     color: #3a8bff;
     font-weight: bold;
 }
@@ -66,9 +73,6 @@
     color: #666;
 }
 
-.gm2-category-synonym:hover {
-    color: #3a8bff;
-}
 
 .gm2-expand-button {
     background: #f5f5f5;
