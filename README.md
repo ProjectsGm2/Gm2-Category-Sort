@@ -26,7 +26,9 @@ Gm2 Category Sort adds a product category sorting widget for WooCommerce shops w
 The widget's **Expand/Collapse** panel exposes design controls for the toggle
 button. You can customize the background, border, border radius and box shadow
 of the `.gm2-expand-button` element, along with responsive padding and margin.
-These settings override the defaults found in `assets/css/style.css`.
+Icon size, spacing and background colours for the expand, collapse and synonym
+icons are available as separate controls. These settings override the defaults
+found in `assets/css/style.css`.
 
 ## Sorting
 

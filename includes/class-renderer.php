@@ -117,7 +117,7 @@ class Gm2_Category_Sort_Renderer {
                 ]);
                 $icon_html = '';
                 if ( ! empty( $this->settings['synonym_icon']['value'] ) ) {
-                    $icon_html = \Elementor\Icons_Manager::render_icon( $this->settings['synonym_icon'], [ 'aria-hidden' => 'true' ] );
+                    $icon_html = \Elementor\Icons_Manager::render_icon( $this->settings['synonym_icon'], [ 'aria-hidden' => 'true', 'class' => 'gm2-synonym-icon' ] );
                 }
                 if ( ! empty( $icon_html ) && $this->settings['synonym_icon_position'] === 'after' ) {
                     $link_content = esc_html($syn) . $icon_html;
