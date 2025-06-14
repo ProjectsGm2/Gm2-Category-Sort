@@ -171,6 +171,7 @@ if ( ! function_exists( 'add_query_arg' ) ) {
 }
 
 }
+
 namespace Elementor {
     class Icons_Manager {
         public static function render_icon( $icon, $attrs = [] ) {

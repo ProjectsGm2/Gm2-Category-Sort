@@ -60,8 +60,9 @@ jQuery(function($){
         function renderList(){
             productList.empty();
             Object.values(products).forEach(function(p){
-                var li = $('<li>').attr('data-id', p.id).text(p.sku+' - '+p.title);
-                $('<a href="#" class="gm2-remove">&times;</a>').appendTo(li);
+                var li = $('<li>').attr('data-id', p.id);
+                $('<a href="#" class="gm2-remove" style="font-size:18px;margin-right:6px;">&times;</a>').appendTo(li);
+                $('<span>').text(p.sku + ' - ' + p.title).appendTo(li);
                 productList.append(li);
             });
         }
