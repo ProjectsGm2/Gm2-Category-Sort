@@ -101,15 +101,26 @@ jQuery(document).ready(function($) {
         const $button = $(this);
         const $childContainer = $button.closest('.gm2-category-node').find('> .gm2-child-categories');
         const isExpanded = $button.data('expanded') === 'true';
-        
+        const $icon = $button.find('i').first();
+        const expandClass = $button.data('expand-class');
+        const collapseClass = $button.data('collapse-class');
+
         if (isExpanded) {
             $childContainer.slideUp();
-            $button.text('+');
-            $button.data('expanded', 'false');
+            if ($icon.length && expandClass && collapseClass) {
+                $icon.removeClass(collapseClass).addClass(expandClass);
+            } else {
+                $button.text('+');
+            }
+            $button.data('expanded', 'false').removeClass('gm2-expanded');
         } else {
             $childContainer.slideDown();
-            $button.text('-');
-            $button.data('expanded', 'true');
+            if ($icon.length && expandClass && collapseClass) {
+                $icon.removeClass(expandClass).addClass(collapseClass);
+            } else {
+                $button.text('-');
+            }
+            $button.data('expanded', 'true').addClass('gm2-expanded');
         }
     });
 
