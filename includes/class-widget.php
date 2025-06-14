@@ -134,6 +134,57 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
 
         $this->end_controls_section();
 
+        // Layout
+        $this->start_controls_section('gm2_layout_section', [
+            'label' => __('Layout', 'gm2-category-sort'),
+            'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+        ]);
+
+        $this->add_control('display_mode', [
+            'label' => __('Display Mode', 'gm2-category-sort'),
+            'type' => \Elementor\Controls_Manager::SELECT,
+            'options' => [
+                'block'  => __('Block', 'gm2-category-sort'),
+                'inline' => __('Inline', 'gm2-category-sort'),
+            ],
+            'default' => 'block',
+            'prefix_class' => 'gm2-display-'
+        ]);
+
+        $this->add_responsive_control('vertical_spacing', [
+            'label' => __('Vertical Spacing', 'gm2-category-sort'),
+            'type' => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => ['px'],
+            'range' => [
+                'px' => ['min' => 0, 'max' => 50],
+            ],
+            'default' => [
+                'size' => 5,
+                'unit' => 'px',
+            ],
+            'selectors' => [
+                '{{WRAPPER}} .gm2-category-node' => 'margin-bottom: {{SIZE}}{{UNIT}};'
+            ],
+        ]);
+
+        $this->add_responsive_control('horizontal_spacing', [
+            'label' => __('Horizontal Spacing', 'gm2-category-sort'),
+            'type' => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => ['px'],
+            'range' => [
+                'px' => ['min' => 0, 'max' => 50],
+            ],
+            'default' => [
+                'size' => 5,
+                'unit' => 'px',
+            ],
+            'selectors' => [
+                '{{WRAPPER}}.gm2-display-inline .gm2-category-node' => 'margin-right: {{SIZE}}{{UNIT}};'
+            ],
+        ]);
+
+        $this->end_controls_section();
+
         // Category Levels
         for ( $i = 0; $i <= 3; $i++ ) {
             $this->start_controls_section( 'gm2_depth_' . $i . '_section', [

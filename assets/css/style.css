@@ -19,6 +19,18 @@
     list-style: none;
 }
 
+.elementor-widget-gm2-category-sort.gm2-display-inline .gm2-category-node {
+    display: inline-block;
+    width: auto;
+    margin-right: 5px;
+}
+
+.elementor-widget-gm2-category-sort.gm2-display-inline .gm2-parent-categories-container,
+.elementor-widget-gm2-category-sort.gm2-display-inline .gm2-child-categories {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 .gm2-category-header {
     display: flex;
     align-items: center;
