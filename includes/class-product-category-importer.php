@@ -174,7 +174,8 @@ class Gm2_Category_Sort_Product_Category_Importer {
             }
         }
 
-        $count = 0;
+        $count      = 0;
+        $first_row  = ( 0 === $offset );
         while ( ( $row = fgetcsv( $handle ) ) !== false ) {
             if ( $limit && $count >= $limit ) {
                 break;
@@ -182,6 +183,11 @@ class Gm2_Category_Sort_Product_Category_Importer {
 
             if ( empty( $row ) ) {
                 continue;
+            }
+
+            if ( $first_row && isset( $row[0] ) ) {
+                $row[0]  = preg_replace( "/^\xEF\xBB\xBF/", '', $row[0] );
+                $first_row = false;
             }
 
             $sku = trim( array_shift( $row ) );
