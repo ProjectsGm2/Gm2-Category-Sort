@@ -25,4 +25,27 @@ class RendererTest extends TestCase {
         $this->assertStringContainsString( 'gm2-category-name depth-0', $html );
         $this->assertStringContainsString( 'depth-1', $html );
     }
+
+    public function test_expand_button_contains_icon_markup() {
+        $root = wp_insert_term( 'Root', 'product_cat' );
+
+        $renderer = new Gm2_Category_Sort_Renderer([
+            'filter_type'   => 'simple',
+            'widget_id'     => '1',
+            'expand_icon'   => [ 'value' => 'fas fa-plus', 'library' => 'fa-solid' ],
+            'collapse_icon' => [ 'value' => 'fas fa-minus', 'library' => 'fa-solid' ],
+        ]);
+
+        $ref = new ReflectionClass( $renderer );
+        $method = $ref->getMethod( 'render_category_node' );
+        $method->setAccessible( true );
+
+        ob_start();
+        $term = (object) [ 'term_id' => $root['term_id'], 'name' => 'Root', 'gm2_synonyms' => [] ];
+        $method->invoke( $renderer, $term, 0 );
+        $html = ob_get_clean();
+
+        $this->assertMatchesRegularExpression( '/<(?:i|span)[^>]*fas fa-plus/', $html );
+        $this->assertMatchesRegularExpression( '/<(?:i|span)[^>]*fas fa-minus/', $html );
+    }
 }

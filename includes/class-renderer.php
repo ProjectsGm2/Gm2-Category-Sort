@@ -135,9 +135,20 @@ class Gm2_Category_Sort_Renderer {
         if ($has_children) {
             $expand_class   = ! empty( $this->settings['expand_icon']['value'] ) ? $this->settings['expand_icon']['value'] : '';
             $collapse_class = ! empty( $this->settings['collapse_icon']['value'] ) ? $this->settings['collapse_icon']['value'] : '';
-            $expand_html    = $expand_class ? '<i class="' . esc_attr( $expand_class ) . '"></i>' : '<i>+</i>';
 
-            echo '<button class="gm2-expand-button" data-expanded="false" data-expand-class="' . esc_attr( $expand_class ) . '" data-collapse-class="' . esc_attr( $collapse_class ) . '">' . $expand_html . '</button>';
+            if ( $expand_class ) {
+                $expand_html = \Elementor\Icons_Manager::render_icon( $this->settings['expand_icon'], [ 'aria-hidden' => 'true', 'class' => 'gm2-expand-icon' ] );
+            } else {
+                $expand_html = '<i class="gm2-expand-icon" aria-hidden="true">+</i>';
+            }
+
+            if ( $collapse_class ) {
+                $collapse_html = \Elementor\Icons_Manager::render_icon( $this->settings['collapse_icon'], [ 'aria-hidden' => 'true', 'class' => 'gm2-collapse-icon', 'style' => 'display:none;' ] );
+            } else {
+                $collapse_html = '<i class="gm2-collapse-icon" style="display:none;" aria-hidden="true">-</i>';
+            }
+
+            echo '<button class="gm2-expand-button" data-expanded="false" data-expand-class="' . esc_attr( $expand_class ) . '" data-collapse-class="' . esc_attr( $collapse_class ) . '">' . $expand_html . $collapse_html . '</button>';
         }
         echo '</div>';
         echo '</div>';

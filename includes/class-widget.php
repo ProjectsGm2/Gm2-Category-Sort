@@ -583,7 +583,14 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
     
     protected function render() {
         $settings = $this->get_settings_for_display();
-        
+
+        if ( ! empty( $settings['expand_icon'] ) ) {
+            \Elementor\Icons_Manager::enqueue_shim( $settings['expand_icon'] );
+        }
+        if ( ! empty( $settings['collapse_icon'] ) ) {
+            \Elementor\Icons_Manager::enqueue_shim( $settings['collapse_icon'] );
+        }
+
         // Only render on WooCommerce pages
         if (!is_shop() && !is_product_category() && !is_product_taxonomy() && !is_search()) {
             echo '<div class="elementor-alert elementor-alert-info">';
