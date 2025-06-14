@@ -201,7 +201,7 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 To run the test suite:
 
-1. Ensure PHP 7.3 or newer is available (required by PHPUnit 9).
+1. Ensure PHP 7.3 or newer is installed and available in your `$PATH` (required by PHPUnit 9). On local setups you can install it with `apt-get install php` or your package manager.
 2. Execute `bin/install-phpunit.sh` to download PHPUnit (Composer will be used if present).
 3. From the project root run:
 
