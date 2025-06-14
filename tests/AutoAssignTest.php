@@ -249,5 +249,17 @@ class AutoAssignTest extends TestCase {
         $this->assertCount( 1, $calls );
         $this->assertSame( [ $term['term_id'] ], $calls[0]['terms'] );
     }
+
+    public function test_cli_fuzzy_matching() {
+        $wheel = wp_insert_term( 'Wheel', 'product_cat' );
+
+        $GLOBALS['gm2_product_objects'][1] = new TestProduct( 1, 'Prod F', 'Stylish wheell kit', 'S1' );
+
+        Gm2_Category_Sort_Auto_Assign::cli_run( [], [ 'fuzzy' => 1 ] );
+
+        $calls = $GLOBALS['gm2_set_terms_calls'];
+        $this->assertCount( 1, $calls );
+        $this->assertSame( [ $wheel['term_id'] ], $calls[0]['terms'] );
+    }
 }
 }

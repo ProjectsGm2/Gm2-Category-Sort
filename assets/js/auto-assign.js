@@ -10,13 +10,14 @@ jQuery(function($){
         });
     }
 
-    function step(offset, reset, overwrite){
+    function step(offset, reset, overwrite, fuzzy){
         $.post(ajaxurl, {
             action: 'gm2_auto_assign_step',
             nonce: gm2AutoAssign.nonce,
             offset: offset,
             reset: reset ? 1 : 0,
-            overwrite: overwrite ? 1 : 0
+            overwrite: overwrite ? 1 : 0,
+            fuzzy: fuzzy ? 1 : 0
         }).done(function(resp){
             if(!resp.success){
                 log.append('<div class="error">'+ (resp.data || gm2AutoAssign.error) +'</div>');
@@ -24,7 +25,7 @@ jQuery(function($){
             }
             append(resp.data.items);
             if(!resp.data.done){
-                step(resp.data.offset, false, overwrite);
+                step(resp.data.offset, false, overwrite, fuzzy);
             }else{
                 log.append('<div>'+ gm2AutoAssign.completed +'</div>');
             }
@@ -37,6 +38,7 @@ jQuery(function($){
         e.preventDefault();
         log.empty();
         var overwrite = $('input[name="gm2_overwrite"]:checked').val();
-        step(0, true, overwrite);
+        var fuzzy = $('#gm2_fuzzy').is(':checked');
+        step(0, true, overwrite, fuzzy);
     });
 });

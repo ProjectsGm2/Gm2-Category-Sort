@@ -90,6 +90,12 @@ class Gm2_Category_Sort_Auto_Assign {
                     <?php esc_html_e( 'Overwrite categories', 'gm2-category-sort' ); ?>
                 </label>
             </p>
+            <p>
+                <label>
+                    <input type="checkbox" id="gm2_fuzzy" value="1">
+                    <?php esc_html_e( 'Use fuzzy matching', 'gm2-category-sort' ); ?>
+                </label>
+            </p>
             <p><button id="gm2-auto-assign-start" class="button button-primary"><?php esc_html_e( 'Start Auto Assign', 'gm2-category-sort' ); ?></button></p>
             <div id="gm2-auto-assign-log" style="background:#fff;border:1px solid #ccc;padding:10px;max-height:400px;overflow:auto;">
                 <?php foreach ( $log as $line ) : ?>
@@ -173,6 +179,7 @@ class Gm2_Category_Sort_Auto_Assign {
 
         $reset     = ! empty( $_POST['reset'] );
         $overwrite = ! empty( $_POST['overwrite'] );
+        $fuzzy     = ! empty( $_POST['fuzzy'] );
         $progress = get_option( 'gm2_auto_assign_progress', [ 'offset' => 0, 'log' => [] ] );
         if ( $reset ) {
             $progress = [ 'offset' => 0, 'log' => [] ];
@@ -209,7 +216,7 @@ class Gm2_Category_Sort_Auto_Assign {
                 }
             }
 
-            $cats      = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+            $cats      = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy );
             $term_ids  = [];
             foreach ( $cats as $name ) {
                 $term = get_term_by( 'name', $name, 'product_cat' );
@@ -259,6 +266,7 @@ class Gm2_Category_Sort_Auto_Assign {
      */
     public static function cli_run( $args, $assoc_args ) {
         $overwrite = ! empty( $assoc_args['overwrite'] );
+        $fuzzy     = ! empty( $assoc_args['fuzzy'] );
         $mapping   = self::build_mapping();
 
         $total    = wp_count_posts( 'product' )->publish;
@@ -306,7 +314,7 @@ class Gm2_Category_Sort_Auto_Assign {
                     }
                 }
 
-                $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+                $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy );
                 $term_ids = [];
                 foreach ( $cats as $name ) {
                     $term = get_term_by( 'name', $name, 'product_cat' );
