@@ -102,6 +102,12 @@ The resulting `product-categories.csv` follows the same structure as
 `assets/example-product-categories.csv` where the first column contains the SKU
 and subsequent columns list category names.
 
+Some rows in `Research/wc-products.csv` contain long HTML descriptions with line
+breaks. Make sure to parse this file using a CSV library that supports quoted
+fields spanning multiple lines and large field sizes. With Python you can open
+the file using `newline=''` and call `csv.field_size_limit(sys.maxsize)` or use
+`pandas.read_csv` so the description column is read correctly.
+
 ## SEO Improvements
 
 When active filters are applied, the plugin outputs a canonical link pointing to
