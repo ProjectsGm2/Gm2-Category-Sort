@@ -30,6 +30,11 @@ Icon size, spacing and background colours for the expand, collapse and synonym
 icons are available as separate controls. These settings override the defaults
 found in `assets/css/style.css`.
 
+Each **Category Level** section also includes a **Display Mode** control. This
+mirrors the global layout options but applies only to that depth. Choosing
+`Inline` adds a `gm2-depth-#-display-inline` class to the widget so categories at
+the selected level render side-by-side.
+
 ## Sorting
 
 The widget honors the WooCommerce sorting dropdown. Values like `price`,
