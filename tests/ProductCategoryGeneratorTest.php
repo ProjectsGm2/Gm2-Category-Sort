@@ -113,4 +113,15 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $this->assertSame( [ 'Over-Lug' ], $cats );
     }
+
+    public function test_fuzzy_matches_misspelling() {
+        $wheel = wp_insert_term( 'Wheel', 'product_cat' );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = 'Heavy duty wheell cover';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, true );
+
+        $this->assertSame( [ 'Wheel' ], $cats );
+    }
 }

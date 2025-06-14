@@ -7,6 +7,7 @@ import os
 import re
 import sys
 from typing import Dict, List
+from difflib import SequenceMatcher
 
 # Common replacements for token normalization
 REPLACEMENTS = {
@@ -100,11 +101,23 @@ def build_text(row: Dict[str, str]) -> str:
     return normalize_text(' '.join(parts))
 
 
-def assign_categories(text: str, mapping) -> List[str]:
+def assign_categories(text: str, mapping, fuzzy: bool = False, threshold: float = 0.85) -> List[str]:
     text = normalize_text(text)
     cats: List[str] = []
+    words = text.split()
     for term, path, pattern in mapping:
+        matched = False
         if pattern.search(text):
+            matched = True
+        elif fuzzy:
+            term_words = term.split()
+            n = len(term_words)
+            for i in range(len(words) - n + 1):
+                segment = " ".join(words[i:i + n])
+                if SequenceMatcher(None, term, segment).ratio() >= threshold:
+                    matched = True
+                    break
+        if matched:
             neg = False
             for pat in NEGATION_PATTERNS:
                 if re.search(pat.format(re.escape(term)), text):
@@ -123,6 +136,7 @@ def main():
     parser.add_argument('--products', default='Research/wc-products.csv', help='Path to products CSV')
     parser.add_argument('--categories', default='Research/Category Tree With Synonyms-Auto Enhance-13 JUN - Category Tree With Synonyms-Auto Enhance-13 JUN.csv', help='Path to category tree CSV')
     parser.add_argument('--output', default='product-categories.csv', help='Output CSV path')
+    parser.add_argument('--fuzzy', action='store_true', help='Enable fuzzy matching for near terms')
     args = parser.parse_args()
 
     mapping = load_category_mapping(args.categories)
@@ -140,7 +154,7 @@ def main():
             if not sku:
                 continue
             text = build_text(row)
-            cats = assign_categories(text, mapping)
+            cats = assign_categories(text, mapping, args.fuzzy)
             if cats:
                 writer.writerow([sku] + cats)
 

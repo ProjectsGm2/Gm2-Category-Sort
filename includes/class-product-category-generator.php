@@ -111,11 +111,29 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @param array  $mapping Term mapping from build_mapping_from_globals().
      * @return array List of category names.
      */
-    public static function assign_categories( $text, array $mapping ) {
+    public static function assign_categories( $text, array $mapping, $fuzzy = false, $threshold = 85 ) {
         $lower = self::normalize_text( $text );
         $cats  = [];
+        $words = preg_split( '/\s+/', $lower );
+        $word_count = count( $words );
         foreach ( $mapping as $term => $path ) {
+            $matched = false;
             if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
+                $matched = true;
+            } elseif ( $fuzzy ) {
+                $term_words = preg_split( '/\s+/', $term );
+                $n = count( $term_words );
+                for ( $i = 0; $i <= $word_count - $n; $i++ ) {
+                    $segment = implode( ' ', array_slice( $words, $i, $n ) );
+                    similar_text( $term, $segment, $percent );
+                    if ( $percent >= $threshold ) {
+                        $matched = true;
+                        break;
+                    }
+                }
+            }
+
+            if ( $matched ) {
                 $neg = false;
                 foreach ( self::$negation_patterns as $pattern ) {
                     $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
