@@ -25,6 +25,9 @@ NEGATION_PATTERNS = [
     r"does\s+not\s+fit\s+{}",
     r"without\s+{}",
     r"except\s+for\s+{}",
+    r"not\s+compatible\s+with\s+{}",
+    r"not\s+recommended\s+for\s+{}",
+    r"not\s+intended\s+for\s+{}",
 ]
 
 

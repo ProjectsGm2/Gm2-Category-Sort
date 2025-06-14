@@ -85,4 +85,20 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $this->assertSame( [ 'Hubcap' ], $cats );
     }
+
+    public function test_ignores_additional_negation_patterns() {
+        $this->create_categories();
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $phrases = [
+            'This is not compatible with alt parts',
+            'Item not recommended for alt equipment',
+            'Package not intended for alt usage',
+        ];
+
+        foreach ( $phrases as $phrase ) {
+            $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $phrase, $mapping );
+            $this->assertSame( [], $cats, $phrase );
+        }
+    }
 }
