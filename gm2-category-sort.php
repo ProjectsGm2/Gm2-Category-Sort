@@ -56,6 +56,7 @@ function gm2_category_sort_init() {
     require_once GM2_CAT_SORT_PATH . 'includes/class-sitemap.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-term-meta.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-category-importer.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-product-category-generator.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-product-category-importer.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-auto-assign.php';
     
