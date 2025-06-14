@@ -5,6 +5,7 @@ import argparse
 import csv
 import os
 import re
+import sys
 from typing import Dict, List
 
 # Common replacements for token normalization
@@ -125,6 +126,9 @@ def main():
     args = parser.parse_args()
 
     mapping = load_category_mapping(args.categories)
+
+    # Allow extremely large fields for product descriptions
+    csv.field_size_limit(sys.maxsize)
 
     with open(args.products, newline='', encoding='utf-8-sig') as pf, open(args.output, 'w', newline='', encoding='utf-8') as out:
         reader = csv.DictReader(pf)
