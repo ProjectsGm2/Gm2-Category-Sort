@@ -23,17 +23,25 @@ Gm2 Category Sort adds a product category sorting widget for WooCommerce shops w
 
 ## Styling
 
-The widget's **Expand/Collapse** panel exposes design controls for the toggle
-button. You can customize the background, border, border radius and box shadow
-of the `.gm2-expand-button` element, along with responsive padding and margin.
-Icon size, spacing and background colours for the expand, collapse and synonym
-icons are available as separate controls. These settings override the defaults
-found in `assets/css/style.css`.
+The **Widget Box** section styles the outer `.gm2-category-sort` container. Set
+a background, border, radius and box shadow here so the widget blends with your
+theme.
 
-Each **Category Level** section also includes a **Display Mode** control. This
-mirrors the global layout options but applies only to that depth. Choosing
-`Inline` adds a `gm2-depth-#-display-inline` class to the widget so categories at
-the selected level render side-by-side.
+The **Layout** panel switches the entire widget between block and inline
+display. Selecting **Inline** adds the `gm2-display-inline` class to
+`.elementor-widget-gm2-category-sort` so all categories flow horizontally.
+
+Use the **Expand/Collapse** panel to design the toggle button
+(`.gm2-expand-button`). Padding, margin, border radius and shadow controls are
+available along with icon size, spacing and background colours for the expand,
+collapse and synonym icons. These options override the defaults in
+`assets/css/style.css`.
+
+Each **Category Level** panel targets a single depth in the tree. Typography,
+colors, background, borders, padding, margin, radius and shadow can all be
+customized. A **Display Mode** dropdown per level mirrors the global layout
+setting—choosing `Inline` attaches a `gm2-depth-#-display-inline` class so the
+categories at that depth line up horizontally.
 
 ## Sorting
 
