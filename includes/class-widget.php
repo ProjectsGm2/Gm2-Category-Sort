@@ -486,6 +486,17 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'default' => 'before',
         ]);
 
+        $this->add_control('synonym_position', [
+            'label' => __('Synonym Position', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::SELECT,
+            'options' => [
+                'inline' => __('Inline', 'gm2-category-sort'),
+                'below'  => __('Below', 'gm2-category-sort'),
+            ],
+            'default' => 'inline',
+            'prefix_class' => 'gm2-synonym-pos-'
+        ]);
+
         $this->end_controls_section();
 
         if ( current_user_can( 'manage_options' ) ) {

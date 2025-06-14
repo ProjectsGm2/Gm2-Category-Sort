@@ -103,7 +103,7 @@ class Gm2_Category_Sort_Renderer {
 
         $synonyms = isset($term->gm2_synonyms) ? $term->gm2_synonyms : array_filter(array_map('trim', explode(',', (string) get_term_meta($term->term_id, 'gm2_synonyms', true))));
         if (!empty($synonyms)) {
-            echo ' <span class="gm2-synonyms">(';
+            echo '<div class="gm2-synonyms-container"><span class="gm2-synonyms">(';
             $first = true;
             foreach ($synonyms as $syn) {
                 if (!$syn) continue;
@@ -129,7 +129,7 @@ class Gm2_Category_Sort_Renderer {
                 echo '<a class="gm2-category-synonym depth-' . intval( $depth ) . '" data-term-id="' . esc_attr($term->term_id) . '" href="' . esc_url($href) . '">' . $link_content . '</a>';
                 $first = false;
             }
-            echo ')</span>';
+            echo ')</span></div>';
         }
         
         if ($has_children) {
