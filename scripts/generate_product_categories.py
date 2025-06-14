@@ -18,6 +18,7 @@ REPLACEMENTS = {
     "wheelcover": "wheel cover",
     "wheel-simulator": "wheel simulator",
     "wheel-simulators": "wheel simulator",
+    "over-lug": "over lug",
 }
 
 NEGATION_PATTERNS = [
