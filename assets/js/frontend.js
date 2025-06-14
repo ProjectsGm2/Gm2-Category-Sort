@@ -1,4 +1,42 @@
 jQuery(document).ready(function($) {
+    // Feature detection for the URL API and history.replaceState
+    const gm2SupportsURL = (function(){
+        if (typeof URL === 'undefined') return false;
+        try { new URL('https://example.com'); return true; } catch(e) { return false; }
+    })();
+    const gm2SupportsReplaceState = !!(window.history && typeof window.history.replaceState === 'function');
+
+    function gm2CreateURL(href) {
+        if (gm2SupportsURL) {
+            return new URL(href, window.location.origin);
+        }
+        const a = document.createElement('a');
+        a.href = href;
+        let params = {};
+        if (a.search.length > 1) {
+            a.search.substring(1).split('&').forEach(function(pair){
+                if (!pair) return;
+                const parts = pair.split('=');
+                const key = decodeURIComponent(parts[0]);
+                const val = parts[1] ? decodeURIComponent(parts[1]) : '';
+                params[key] = val;
+            });
+        }
+        function sync(){
+            const q = Object.keys(params).map(function(k){
+                return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+            }).join('&');
+            a.search = q ? '?' + q : '';
+        }
+        return {
+            searchParams: {
+                get: function(k){ return Object.prototype.hasOwnProperty.call(params, k) ? params[k] : null; },
+                set: function(k,v){ params[k] = v; sync(); },
+                delete: function(k){ delete params[k]; sync(); }
+            },
+            toString: function(){ return a.pathname + a.search + a.hash; }
+        };
+    }
     // Add loading overlay to the page
     if (!$('#gm2-loading-overlay').length) {
         $('body').append('<div id="gm2-loading-overlay"><div class="gm2-spinner"></div></div>');
@@ -50,7 +88,12 @@ jQuery(document).ready(function($) {
             $existingCount.remove();
         }
 
-        window.history.replaceState(null, '', url.toString());
+        if (gm2SupportsReplaceState) {
+            window.history.replaceState(null, '', url.toString());
+        } else {
+            window.location.href = url.toString();
+            return;
+        }
         gm2ReinitArchiveWidget($list);
     }
     // Expand/collapse functionality for all levels
@@ -141,7 +184,7 @@ jQuery(document).ready(function($) {
             selectedIds.push($(this).data('term-id'));
         });
         
-        const url = new URL(window.location.href);
+        const url = gm2CreateURL(window.location.href);
         if (!orderby) {
             orderby = $('.woocommerce-ordering select.orderby').first().val() || '';
         }
@@ -288,7 +331,12 @@ jQuery(document).ready(function($) {
                     }
                 }
 
-                window.history.replaceState(null, '', url.toString());
+                if (gm2SupportsReplaceState) {
+                    window.history.replaceState(null, '', url.toString());
+                } else {
+                    window.location.href = url.toString();
+                    return;
+                }
 
                 gm2ReinitArchiveWidget($oldList);
             } else {
@@ -332,7 +380,7 @@ jQuery(document).ready(function($) {
         } else if (typeof e.stopPropagation === 'function') {
             e.stopPropagation();
         }
-        const url = new URL(href, window.location.origin);
+        const url = gm2CreateURL(href);
         let page = parseInt(
             url.searchParams.get('paged') ||
             url.searchParams.get('page') ||

@@ -20,11 +20,20 @@ class Gm2_Category_Sort_Enqueuer {
             $css_ver
         );
 
+        $polyfill_ver = filemtime(GM2_CAT_SORT_PATH . 'assets/vendor/url-polyfill.min.js');
+        wp_enqueue_script(
+            'gm2-url-polyfill',
+            GM2_CAT_SORT_URL . 'assets/vendor/url-polyfill.min.js',
+            [],
+            $polyfill_ver,
+            true
+        );
+
         $js_ver = filemtime(GM2_CAT_SORT_PATH . 'assets/js/frontend.js');
         wp_enqueue_script(
             'gm2-category-sort-script',
             GM2_CAT_SORT_URL . 'assets/js/frontend.js',
-            ['jquery'],
+            ['jquery', 'gm2-url-polyfill'],
             $js_ver,
             true
         );
