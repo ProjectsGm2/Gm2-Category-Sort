@@ -180,6 +180,14 @@ If you customize the script, include this value in your requests.
 
 ## Browser Compatibility
 
+Gm2 Category Sort targets the latest versions of modern browsers and is
+regularly tested with:
+
+- **Chrome** – current and previous release
+- **Firefox** – current and previous release
+- **Safari** – version&nbsp;13 and newer
+- **Edge** – version&nbsp;83 and newer
+
 The frontend script relies on the `URL` API and `history.replaceState`. For
 older browsers that lack these features the plugin enqueues
 [url-polyfill](https://github.com/lifaon74/url-polyfill) automatically. If you
