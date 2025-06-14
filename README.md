@@ -178,6 +178,14 @@ canonical URL of the designated category.
 AJAX filtering uses a nonce exposed to JavaScript as `gm2CategorySort.nonce`.
 If you customize the script, include this value in your requests.
 
+## Browser Compatibility
+
+The frontend script relies on the `URL` API and `history.replaceState`. For
+older browsers that lack these features the plugin enqueues
+[url-polyfill](https://github.com/lifaon74/url-polyfill) automatically. If you
+override script loading, ensure a compatible polyfill is present so filtering
+continues to work.
+
 ## License
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
