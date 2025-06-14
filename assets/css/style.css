@@ -135,6 +135,71 @@
     background: #e0e0e0;
 }
 
+/* Icon defaults */
+.gm2-expand-button i,
+.gm2-expand-button svg {
+    font-size: var(--gm2-expand-icon-size, 16px);
+    width: var(--gm2-expand-icon-size, 16px);
+    height: var(--gm2-expand-icon-size, 16px);
+    margin: var(--gm2-expand-icon-spacing, 0);
+    background-color: var(--gm2-expand-icon-bg, transparent);
+    transition: all 0.2s ease;
+}
+
+.gm2-expand-button:hover i,
+.gm2-expand-button:hover svg {
+    font-size: var(--gm2-expand-icon-hover-size, var(--gm2-expand-icon-size, 16px));
+    background-color: var(--gm2-expand-icon-hover-bg, var(--gm2-expand-icon-bg, transparent));
+}
+
+.gm2-expand-button.gm2-expanded i,
+.gm2-expand-button.gm2-expanded svg,
+.gm2-expand-button[data-expanded="true"] i,
+.gm2-expand-button[data-expanded="true"] svg {
+    font-size: var(--gm2-expand-icon-active-size, var(--gm2-expand-icon-size, 16px));
+    background-color: var(--gm2-expand-icon-active-bg, var(--gm2-expand-icon-bg, transparent));
+}
+
+.gm2-collapse-icon {
+    font-size: var(--gm2-collapse-icon-size, 16px);
+    width: var(--gm2-collapse-icon-size, 16px);
+    height: var(--gm2-collapse-icon-size, 16px);
+    margin: var(--gm2-collapse-icon-spacing, 0);
+    background-color: var(--gm2-collapse-icon-bg, transparent);
+    transition: all 0.2s ease;
+}
+
+.gm2-expand-button:hover .gm2-collapse-icon {
+    font-size: var(--gm2-collapse-icon-hover-size, var(--gm2-collapse-icon-size, 16px));
+    background-color: var(--gm2-collapse-icon-hover-bg, var(--gm2-collapse-icon-bg, transparent));
+}
+
+.gm2-expand-button.gm2-expanded .gm2-collapse-icon,
+.gm2-expand-button[data-expanded="true"] .gm2-collapse-icon {
+    font-size: var(--gm2-collapse-icon-active-size, var(--gm2-collapse-icon-size, 16px));
+    background-color: var(--gm2-collapse-icon-active-bg, var(--gm2-collapse-icon-bg, transparent));
+}
+
+.gm2-synonym-icon {
+    font-size: var(--gm2-synonym-icon-size, 16px);
+    width: var(--gm2-synonym-icon-size, 16px);
+    height: var(--gm2-synonym-icon-size, 16px);
+    margin: var(--gm2-synonym-icon-spacing, 0 4px 0 0);
+    background-color: var(--gm2-synonym-icon-bg, transparent);
+    transition: all 0.2s ease;
+}
+
+.gm2-category-synonym:hover .gm2-synonym-icon {
+    font-size: var(--gm2-synonym-icon-hover-size, var(--gm2-synonym-icon-size, 16px));
+    background-color: var(--gm2-synonym-icon-hover-bg, var(--gm2-synonym-icon-bg, transparent));
+}
+
+.gm2-category-synonym.selected .gm2-synonym-icon,
+.gm2-category-synonym.active .gm2-synonym-icon {
+    font-size: var(--gm2-synonym-icon-active-size, var(--gm2-synonym-icon-size, 16px));
+    background-color: var(--gm2-synonym-icon-active-bg, var(--gm2-synonym-icon-bg, transparent));
+}
+
 .gm2-child-categories {
     padding-left: 30px;
     border-left: 1px dashed #e0e0e0;

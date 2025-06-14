@@ -320,6 +320,64 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             ],
         ]);
 
+        $this->add_responsive_control('expand_icon_size', [
+            'label' => __('Icon Size', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => ['px'],
+            'range' => [ 'px' => ['min' => 8, 'max' => 60] ],
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button i, {{WRAPPER}} .gm2-expand-button svg' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+            ],
+        ]);
+        $this->add_responsive_control('expand_icon_hover_size', [
+            'label' => __('Icon Size (Hover)', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => ['px'],
+            'range' => [ 'px' => ['min' => 8, 'max' => 60] ],
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button:hover i, {{WRAPPER}} .gm2-expand-button:hover svg' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+            ],
+        ]);
+        $this->add_responsive_control('expand_icon_active_size', [
+            'label' => __('Icon Size (Active)', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => ['px'],
+            'range' => [ 'px' => ['min' => 8, 'max' => 60] ],
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button.gm2-expanded i, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] i, {{WRAPPER}} .gm2-expand-button.gm2-expanded svg, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] svg' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+            ],
+        ]);
+
+        $this->add_responsive_control('expand_icon_margin', [
+            'label' => __('Icon Spacing', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::DIMENSIONS,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button i, {{WRAPPER}} .gm2-expand-button svg' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+            ],
+        ]);
+
+        $this->add_control('expand_icon_bg', [
+            'label' => __('Icon Background', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button i, {{WRAPPER}} .gm2-expand-button svg' => 'background-color: {{VALUE}};',
+            ],
+        ]);
+        $this->add_control('expand_icon_hover_bg', [
+            'label' => __('Icon Hover Background', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button:hover i, {{WRAPPER}} .gm2-expand-button:hover svg' => 'background-color: {{VALUE}};',
+            ],
+        ]);
+        $this->add_control('expand_icon_active_bg', [
+            'label' => __('Icon Active Background', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button.gm2-expanded i, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] i, {{WRAPPER}} .gm2-expand-button.gm2-expanded svg, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] svg' => 'background-color: {{VALUE}};',
+            ],
+        ]);
+
         $this->add_control('expand_icon_color', [
             'label' => __('Icon Color', 'gm2-category-sort'),
             'type'  => \Elementor\Controls_Manager::COLOR,
@@ -342,6 +400,89 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'selectors' => [
                 '{{WRAPPER}} .gm2-expand-button.gm2-expanded i' => 'color: {{VALUE}};',
                 '{{WRAPPER}} .gm2-expand-button[data-expanded="true"] i' => 'color: {{VALUE}};',
+            ],
+        ]);
+
+        $this->add_responsive_control('collapse_icon_size', [
+            'label' => __('Collapse Icon Size', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => ['px'],
+            'range' => [ 'px' => ['min' => 8, 'max' => 60] ],
+            'selectors' => [
+                '{{WRAPPER}} .gm2-collapse-icon' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+            ],
+        ]);
+        $this->add_responsive_control('collapse_icon_hover_size', [
+            'label' => __('Collapse Icon Size (Hover)', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => ['px'],
+            'range' => [ 'px' => ['min' => 8, 'max' => 60] ],
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button:hover .gm2-collapse-icon' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+            ],
+        ]);
+        $this->add_responsive_control('collapse_icon_active_size', [
+            'label' => __('Collapse Icon Size (Active)', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => ['px'],
+            'range' => [ 'px' => ['min' => 8, 'max' => 60] ],
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button.gm2-expanded .gm2-collapse-icon, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] .gm2-collapse-icon' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+            ],
+        ]);
+
+        $this->add_responsive_control('collapse_icon_margin', [
+            'label' => __('Collapse Icon Spacing', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::DIMENSIONS,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-collapse-icon' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+            ],
+        ]);
+
+        $this->add_control('collapse_icon_bg', [
+            'label' => __('Collapse Icon Background', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-collapse-icon' => 'background-color: {{VALUE}};',
+            ],
+        ]);
+        $this->add_control('collapse_icon_hover_bg', [
+            'label' => __('Collapse Icon Hover Background', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button:hover .gm2-collapse-icon' => 'background-color: {{VALUE}};',
+            ],
+        ]);
+        $this->add_control('collapse_icon_active_bg', [
+            'label' => __('Collapse Icon Active Background', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button.gm2-expanded .gm2-collapse-icon, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] .gm2-collapse-icon' => 'background-color: {{VALUE}};',
+            ],
+        ]);
+
+        $this->add_control('collapse_icon_color', [
+            'label' => __('Collapse Icon Color', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-collapse-icon' => 'color: {{VALUE}};',
+            ],
+        ]);
+
+        $this->add_control('collapse_icon_hover_color', [
+            'label' => __('Collapse Icon Hover Color', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button:hover .gm2-collapse-icon' => 'color: {{VALUE}};',
+            ],
+        ]);
+
+        $this->add_control('collapse_icon_active_color', [
+            'label' => __('Collapse Icon Active Color', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-expand-button.gm2-expanded .gm2-collapse-icon' => 'color: {{VALUE}};',
+                '{{WRAPPER}} .gm2-expand-button[data-expanded="true"] .gm2-collapse-icon' => 'color: {{VALUE}};',
             ],
         ]);
 
@@ -573,6 +714,64 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'label' => __('Icon', 'gm2-category-sort'),
             'type'  => \Elementor\Controls_Manager::ICONS,
             'label_block' => true,
+        ]);
+
+        $this->add_responsive_control('synonym_icon_size', [
+            'label' => __('Icon Size', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => ['px'],
+            'range' => [ 'px' => ['min' => 8, 'max' => 60] ],
+            'selectors' => [
+                '{{WRAPPER}} .gm2-synonym-icon' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+            ],
+        ]);
+        $this->add_responsive_control('synonym_icon_hover_size', [
+            'label' => __('Icon Size (Hover)', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => ['px'],
+            'range' => [ 'px' => ['min' => 8, 'max' => 60] ],
+            'selectors' => [
+                '{{WRAPPER}} .gm2-category-synonym:hover .gm2-synonym-icon' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+            ],
+        ]);
+        $this->add_responsive_control('synonym_icon_active_size', [
+            'label' => __('Icon Size (Active)', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => ['px'],
+            'range' => [ 'px' => ['min' => 8, 'max' => 60] ],
+            'selectors' => [
+                '{{WRAPPER}} .gm2-category-synonym.selected .gm2-synonym-icon, {{WRAPPER}} .gm2-category-synonym.active .gm2-synonym-icon' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+            ],
+        ]);
+
+        $this->add_responsive_control('synonym_icon_margin', [
+            'label' => __('Icon Spacing', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::DIMENSIONS,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-synonym-icon' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+            ],
+        ]);
+
+        $this->add_control('synonym_icon_bg', [
+            'label' => __('Icon Background', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-synonym-icon' => 'background-color: {{VALUE}};',
+            ],
+        ]);
+        $this->add_control('synonym_icon_hover_bg', [
+            'label' => __('Icon Hover Background', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-category-synonym:hover .gm2-synonym-icon' => 'background-color: {{VALUE}};',
+            ],
+        ]);
+        $this->add_control('synonym_icon_active_bg', [
+            'label' => __('Icon Active Background', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-category-synonym.selected .gm2-synonym-icon, {{WRAPPER}} .gm2-category-synonym.active .gm2-synonym-icon' => 'background-color: {{VALUE}};',
+            ],
         ]);
 
         $this->add_control('synonym_icon_position', [
