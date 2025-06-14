@@ -76,6 +76,17 @@ class Gm2_Category_Sort_Auto_Assign {
         <div class="wrap">
             <h1><?php esc_html_e( 'Auto Assign Categories', 'gm2-category-sort' ); ?></h1>
             <p><?php esc_html_e( 'Analyze products and assign categories based on product text and attribute values.', 'gm2-category-sort' ); ?></p>
+            <p>
+                <label>
+                    <input type="radio" name="gm2_overwrite" value="0" checked>
+                    <?php esc_html_e( 'Add categories', 'gm2-category-sort' ); ?>
+                </label>
+                &nbsp;
+                <label>
+                    <input type="radio" name="gm2_overwrite" value="1">
+                    <?php esc_html_e( 'Overwrite categories', 'gm2-category-sort' ); ?>
+                </label>
+            </p>
             <p><button id="gm2-auto-assign-start" class="button button-primary"><?php esc_html_e( 'Start Auto Assign', 'gm2-category-sort' ); ?></button></p>
             <div id="gm2-auto-assign-log" style="background:#fff;border:1px solid #ccc;padding:10px;max-height:400px;overflow:auto;">
                 <?php foreach ( $log as $line ) : ?>
@@ -157,7 +168,8 @@ class Gm2_Category_Sort_Auto_Assign {
 
         check_ajax_referer( 'gm2_auto_assign', 'nonce' );
 
-        $reset    = ! empty( $_POST['reset'] );
+        $reset     = ! empty( $_POST['reset'] );
+        $overwrite = ! empty( $_POST['overwrite'] );
         $progress = get_option( 'gm2_auto_assign_progress', [ 'offset' => 0, 'log' => [] ] );
         if ( $reset ) {
             $progress = [ 'offset' => 0, 'log' => [] ];
@@ -203,7 +215,7 @@ class Gm2_Category_Sort_Auto_Assign {
                 }
             }
             if ( $term_ids ) {
-                wp_set_object_terms( $product_id, $term_ids, 'product_cat', true );
+                wp_set_object_terms( $product_id, $term_ids, 'product_cat', ! $overwrite );
             }
 
             $items[] = [
@@ -236,7 +248,8 @@ class Gm2_Category_Sort_Auto_Assign {
      * @param array $assoc_args Associative arguments.
      */
     public static function cli_run( $args, $assoc_args ) {
-        $mapping = self::build_mapping();
+        $overwrite = ! empty( $assoc_args['overwrite'] );
+        $mapping   = self::build_mapping();
 
         $query = new WP_Query(
             [
@@ -282,7 +295,7 @@ class Gm2_Category_Sort_Auto_Assign {
                 }
             }
             if ( $term_ids ) {
-                wp_set_object_terms( $product_id, $term_ids, 'product_cat', true );
+                wp_set_object_terms( $product_id, $term_ids, 'product_cat', ! $overwrite );
             }
 
             if ( $progress ) {

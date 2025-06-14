@@ -165,11 +165,29 @@ class AutoAssignTest extends TestCase {
         $this->assertContains( $parent_id, $calls[0]['terms'] );
         $this->assertContains( $child_id, $calls[0]['terms'] );
         $this->assertSame( [ $parent_id ], $calls[1]['terms'] );
+        $this->assertTrue( $calls[0]['append'] );
+        $this->assertTrue( $calls[1]['append'] );
 
         $result = $GLOBALS['gm2_json_result'];
         $this->assertTrue( $result['success'] );
         $this->assertSame( [ 'Parent', 'Child' ], $result['data']['items'][0]['cats'] );
         $this->assertSame( [ 'Parent' ], $result['data']['items'][1]['cats'] );
+    }
+
+    public function test_ajax_handler_overwrites_categories() {
+        list( $parent_id, $child_id ) = $this->create_categories();
+        $this->create_products();
+
+        $_POST['nonce'] = 't';
+        $_POST['reset'] = '1';
+        $_POST['overwrite'] = '1';
+
+        Gm2_Category_Sort_Auto_Assign::ajax_step();
+
+        $calls = $GLOBALS['gm2_set_terms_calls'];
+        $this->assertCount( 2, $calls );
+        $this->assertFalse( $calls[0]['append'] );
+        $this->assertFalse( $calls[1]['append'] );
     }
 
     public function test_cli_assigns_categories() {
@@ -183,6 +201,8 @@ class AutoAssignTest extends TestCase {
         $this->assertContains( $parent_id, $calls[0]['terms'] );
         $this->assertContains( $child_id, $calls[0]['terms'] );
         $this->assertSame( [ $parent_id ], $calls[1]['terms'] );
+        $this->assertTrue( $calls[0]['append'] );
+        $this->assertTrue( $calls[1]['append'] );
 
         $this->assertContains( 'Auto assign complete.', \WP_CLI::$success_messages );
     }
@@ -203,6 +223,18 @@ class AutoAssignTest extends TestCase {
         $this->assertContains( $child_id, $calls[0]['terms'] );
         $this->assertContains( $parent_id, $calls[0]['terms'] );
         $this->assertSame( [ $wheel['term_id'] ], $calls[1]['terms'] );
+    }
+
+    public function test_cli_overwrites_categories() {
+        list( $parent_id, $child_id ) = $this->create_categories();
+        $this->create_products();
+
+        Gm2_Category_Sort_Auto_Assign::cli_run( [], [ 'overwrite' => 1 ] );
+
+        $calls = $GLOBALS['gm2_set_terms_calls'];
+        $this->assertCount( 2, $calls );
+        $this->assertFalse( $calls[0]['append'] );
+        $this->assertFalse( $calls[1]['append'] );
     }
 }
 }
