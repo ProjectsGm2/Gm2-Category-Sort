@@ -15,6 +15,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
         'wheelcover'      => 'wheel cover',
         'wheel-simulator' => 'wheel simulator',
         'wheel-simulators'=> 'wheel simulator',
+        'over-lug'        => 'over lug',
     ];
 
     /** @var string[] */

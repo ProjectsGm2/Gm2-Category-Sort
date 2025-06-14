@@ -101,4 +101,16 @@ class ProductCategoryGeneratorTest extends TestCase {
             $this->assertSame( [], $cats, $phrase );
         }
     }
+
+    public function test_over_the_lug_synonym() {
+        $cat = wp_insert_term( 'Over-Lug', 'product_cat' );
+        update_term_meta( $cat['term_id'], 'gm2_synonyms', 'Over Lug,Over the Lug' );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = 'Works with over the lug wheels';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame( [ 'Over-Lug' ], $cats );
+    }
 }

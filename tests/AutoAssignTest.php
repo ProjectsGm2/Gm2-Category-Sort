@@ -236,5 +236,18 @@ class AutoAssignTest extends TestCase {
         $this->assertFalse( $calls[0]['append'] );
         $this->assertFalse( $calls[1]['append'] );
     }
+
+    public function test_cli_recognizes_over_the_lug_synonym() {
+        $term = wp_insert_term( 'Over-Lug', 'product_cat' );
+        update_term_meta( $term['term_id'], 'gm2_synonyms', 'Over Lug,Over the Lug' );
+
+        $GLOBALS['gm2_product_objects'][1] = new TestProduct( 1, 'Prod X', 'Works over the lug', 'S3' );
+
+        Gm2_Category_Sort_Auto_Assign::cli_run( [], [] );
+
+        $calls = $GLOBALS['gm2_set_terms_calls'];
+        $this->assertCount( 1, $calls );
+        $this->assertSame( [ $term['term_id'] ], $calls[0]['terms'] );
+    }
 }
 }
