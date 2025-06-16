@@ -204,7 +204,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 }
             }
         }
-
+        
         foreach ( $model_map as $model => $candidate ) {
             if ( ! isset( $brand_matches[ $candidate['brand'] ] ) ) {
                 continue;
@@ -246,7 +246,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 }
             }
         }
-
+      
         return $cats;
     }
 }

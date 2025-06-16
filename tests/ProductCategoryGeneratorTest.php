@@ -151,7 +151,7 @@ class ProductCategoryGeneratorTest extends TestCase {
             $cats
         );
     }
-
+  
     public function test_eagle_flight_brand_rule() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
         $brands = wp_insert_term( 'Brands', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
@@ -165,7 +165,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertSame( [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators' ], $cats );
     }
 
-    public function test_brand_model_requires_brand_word() {
+  public function test_brand_model_requires_brand_word() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
         $branch = wp_insert_term( 'By Brand & Model', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
 
