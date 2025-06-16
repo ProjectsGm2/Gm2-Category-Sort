@@ -12,6 +12,9 @@ class Gm2_Category_Sort_Auto_Assign {
         add_action( 'admin_menu', [ __CLASS__, 'register_admin_page' ] );
         add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin_assets' ] );
         add_action( 'wp_ajax_gm2_auto_assign_step', [ __CLASS__, 'ajax_step' ] );
+        add_action( 'wp_ajax_gm2_auto_assign_search', [ __CLASS__, 'ajax_search_products' ] );
+        add_action( 'wp_ajax_gm2_auto_assign_selected', [ __CLASS__, 'ajax_assign_selected' ] );
+        add_action( 'wp_ajax_gm2_reset_categories_step', [ __CLASS__, 'ajax_reset_step' ] );
     }
 
     /**
@@ -59,9 +62,10 @@ class Gm2_Category_Sort_Auto_Assign {
             'gm2-auto-assign',
             'gm2AutoAssign',
             [
-                'nonce'     => wp_create_nonce( 'gm2_auto_assign' ),
-                'completed' => __( 'Auto assign complete.', 'gm2-category-sort' ),
-                'error'     => __( 'Error assigning categories.', 'gm2-category-sort' ),
+                'nonce'          => wp_create_nonce( 'gm2_auto_assign' ),
+                'completed'      => __( 'Auto assign complete.', 'gm2-category-sort' ),
+                'resetCompleted' => __( 'Reset complete.', 'gm2-category-sort' ),
+                'error'          => __( 'Error assigning categories.', 'gm2-category-sort' ),
             ]
         );
     }
@@ -74,6 +78,12 @@ class Gm2_Category_Sort_Auto_Assign {
         $log      = [];
         if ( $progress && ! empty( $progress['log'] ) ) {
             $log = (array) $progress['log'];
+        }
+
+        $r_progress = get_option( 'gm2_reset_progress' );
+        $r_log      = [];
+        if ( $r_progress && ! empty( $r_progress['log'] ) ) {
+            $r_log = (array) $r_progress['log'];
         }
         ?>
         <div class="wrap">
@@ -96,12 +106,49 @@ class Gm2_Category_Sort_Auto_Assign {
                     <?php esc_html_e( 'Use fuzzy matching', 'gm2-category-sort' ); ?>
                 </label>
             </p>
-            <p><button id="gm2-auto-assign-start" class="button button-primary"><?php esc_html_e( 'Start Auto Assign', 'gm2-category-sort' ); ?></button></p>
+            <p>
+                <button id="gm2-auto-assign-start" class="button button-primary"><?php esc_html_e( 'Start Auto Assign', 'gm2-category-sort' ); ?></button>
+                &nbsp;
+                <button id="gm2-reset-start" class="button"><?php esc_html_e( 'Reset All Categories', 'gm2-category-sort' ); ?></button>
+            </p>
             <div id="gm2-auto-assign-log" style="background:#fff;border:1px solid #ccc;padding:10px;max-height:400px;overflow:auto;">
                 <?php foreach ( $log as $line ) : ?>
                     <div><?php echo esc_html( $line ); ?></div>
                 <?php endforeach; ?>
             </div>
+            <div id="gm2-reset-log" style="background:#fff;border:1px solid #ccc;padding:10px;max-height:200px;overflow:auto;margin-top:10px;">
+                <?php foreach ( $r_log as $line ) : ?>
+                    <div><?php echo esc_html( $line ); ?></div>
+                <?php endforeach; ?>
+            </div>
+
+            <hr />
+            <h2><?php esc_html_e( 'Search and Assign', 'gm2-category-sort' ); ?></h2>
+            <p>
+                <select id="gm2-search-fields" multiple style="min-width:220px;">
+                    <option value="title"><?php esc_html_e( 'Product Title', 'gm2-category-sort' ); ?></option>
+                    <option value="description"><?php esc_html_e( 'Product Description', 'gm2-category-sort' ); ?></option>
+                    <option value="attributes"><?php esc_html_e( 'Attributes', 'gm2-category-sort' ); ?></option>
+                </select>
+                <input type="text" id="gm2-search-terms" style="width:200px;" />
+                <button id="gm2-search-btn" class="button"><?php esc_html_e( 'Search', 'gm2-category-sort' ); ?></button>
+            </p>
+            <p>
+                <input type="text" id="gm2-product-search" placeholder="<?php esc_attr_e( 'Search by SKU or title', 'gm2-category-sort' ); ?>" style="width:260px;" />
+            </p>
+            <ul id="gm2-product-list" style="background:#fff;border:1px solid #ccc;padding:5px;max-height:200px;overflow:auto;"></ul>
+            <p>
+                <label for="gm2-category-select"><?php esc_html_e( 'Categories', 'gm2-category-sort' ); ?></label><br>
+                <select id="gm2-category-select" multiple style="min-width:220px;min-height:120px;">
+                    <?php
+                    $cats = get_terms( [ 'taxonomy' => 'product_cat', 'hide_empty' => false ] );
+                    foreach ( $cats as $cat ) {
+                        echo '<option value="' . esc_attr( $cat->term_id ) . '">' . esc_html( $cat->name ) . '</option>';
+                    }
+                    ?>
+                </select>
+            </p>
+            <p><button id="gm2-assign-btn" class="button button-primary"><?php esc_html_e( 'Assign', 'gm2-category-sort' ); ?></button></p>
         </div>
         <?php
     }
@@ -256,6 +303,152 @@ class Gm2_Category_Sort_Auto_Assign {
             'done'   => $done,
             'items'  => $items,
         ] );
+    }
+
+    /**
+     * Search products by fields for manual assignment.
+     */
+    public static function ajax_search_products() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( 'unauthorized' );
+        }
+
+        check_ajax_referer( 'gm2_auto_assign', 'nonce' );
+
+        $fields = array_map( 'sanitize_key', (array) ( $_POST['fields'] ?? [] ) );
+        $search = sanitize_text_field( $_POST['search'] ?? '' );
+
+        if ( $search === '' ) {
+            wp_send_json_success( [ 'items' => [] ] );
+        }
+
+        $query = new WP_Query( [
+            'post_type'      => 'product',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'orderby'        => 'ID',
+            'order'          => 'ASC',
+        ] );
+
+        $items = [];
+        foreach ( $query->posts as $product_id ) {
+            $product = wc_get_product( $product_id );
+            if ( ! $product ) {
+                continue;
+            }
+
+            $text = '';
+            if ( in_array( 'title', $fields, true ) ) {
+                $text .= ' ' . $product->get_name();
+            }
+            if ( in_array( 'description', $fields, true ) ) {
+                $text .= ' ' . $product->get_description() . ' ' . $product->get_short_description();
+            }
+            if ( in_array( 'attributes', $fields, true ) ) {
+                foreach ( $product->get_attributes() as $attr ) {
+                    if ( $attr->is_taxonomy() ) {
+                        $names = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'names' ] );
+                        $text .= ' ' . implode( ' ', $names );
+                    } else {
+                        $text .= ' ' . implode( ' ', array_map( 'sanitize_text_field', $attr->get_options() ) );
+                    }
+                }
+            }
+
+            if ( stripos( $text, $search ) !== false ) {
+                $items[] = [
+                    'id'    => $product_id,
+                    'sku'   => $product->get_sku(),
+                    'title' => $product->get_name(),
+                ];
+            }
+        }
+
+        wp_send_json_success( [ 'items' => $items ] );
+    }
+
+    /**
+     * Assign selected categories to given products.
+     */
+    public static function ajax_assign_selected() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( 'unauthorized' );
+        }
+
+        check_ajax_referer( 'gm2_auto_assign', 'nonce' );
+
+        $products  = array_map( 'intval', (array) ( $_POST['products'] ?? [] ) );
+        $categories = array_map( 'intval', (array) ( $_POST['categories'] ?? [] ) );
+        $overwrite = ! empty( $_POST['overwrite'] );
+
+        if ( empty( $products ) || empty( $categories ) ) {
+            wp_send_json_error( 'missing' );
+        }
+
+        foreach ( $products as $id ) {
+            wp_set_object_terms( $id, $categories, 'product_cat', ! $overwrite );
+        }
+
+        wp_send_json_success();
+    }
+
+    /**
+     * Reset all categories for products in batches.
+     */
+    public static function ajax_reset_step() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( 'unauthorized' );
+        }
+
+        check_ajax_referer( 'gm2_auto_assign', 'nonce' );
+
+        $reset    = ! empty( $_POST['reset'] );
+        $progress = get_option( 'gm2_reset_progress', [ 'offset' => 0, 'log' => [] ] );
+        if ( $reset ) {
+            $progress = [ 'offset' => 0, 'log' => [] ];
+        }
+        $offset = (int) $progress['offset'];
+        $log    = (array) $progress['log'];
+
+        $query = new WP_Query(
+            [
+                'post_type'      => 'product',
+                'post_status'    => 'publish',
+                'posts_per_page' => 50,
+                'offset'         => $offset,
+                'orderby'        => 'ID',
+                'order'          => 'ASC',
+                'fields'         => 'ids',
+            ]
+        );
+
+        $items = [];
+        foreach ( $query->posts as $product_id ) {
+            $product = wc_get_product( $product_id );
+            if ( ! $product ) {
+                continue;
+            }
+
+            wp_set_object_terms( $product_id, [], 'product_cat', false );
+
+            $items[] = [
+                'sku'   => $product->get_sku(),
+                'title' => $product->get_name(),
+            ];
+            $log[] = $product->get_sku() . ' - ' . $product->get_name() . ' => reset';
+        }
+
+        $new_offset = $offset + count( $query->posts );
+        $done       = $new_offset >= $query->found_posts || empty( $query->posts );
+
+        if ( $done ) {
+            delete_option( 'gm2_reset_progress' );
+        } else {
+            update_option( 'gm2_reset_progress', [ 'offset' => $new_offset, 'log' => $log ] );
+        }
+
+        wp_send_json_success( [ 'offset' => $new_offset, 'done' => $done, 'items' => $items ] );
     }
 
     /**
