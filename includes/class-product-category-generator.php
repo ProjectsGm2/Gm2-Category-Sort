@@ -116,6 +116,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $cats  = [];
         $words = preg_split( '/\s+/', $lower );
         $word_count = count( $words );
+        $lug_hole_candidates = [];
         foreach ( $mapping as $term => $path ) {
             $matched = false;
             if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
@@ -145,13 +146,34 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 if ( $neg ) {
                     continue;
                 }
-                foreach ( $path as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
+                if ( in_array( 'By Lug/Hole Configuration', $path, true ) ) {
+                    if ( ! isset( $lug_hole_candidates[ $term ] ) ) {
+                        $lug_hole_candidates[ $term ] = $path;
+                    }
+                } else {
+                    foreach ( $path as $cat ) {
+                        if ( ! in_array( $cat, $cats, true ) ) {
+                            $cats[] = $cat;
+                        }
                     }
                 }
             }
         }
+        if ( $lug_hole_candidates ) {
+            uksort(
+                $lug_hole_candidates,
+                static function ( $a, $b ) {
+                    return strlen( $b ) <=> strlen( $a );
+                }
+            );
+            $path = reset( $lug_hole_candidates );
+            foreach ( $path as $cat ) {
+                if ( ! in_array( $cat, $cats, true ) ) {
+                    $cats[] = $cat;
+                }
+            }
+        }
+
         return $cats;
     }
 }
