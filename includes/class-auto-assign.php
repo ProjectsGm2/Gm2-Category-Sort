@@ -138,7 +138,7 @@ class Gm2_Category_Sort_Auto_Assign {
             <ul id="gm2-product-list" style="background:#fff;border:1px solid #ccc;padding:5px;max-height:200px;overflow:auto;"></ul>
             <p>
                 <label for="gm2-category-select"><?php esc_html_e( 'Categories', 'gm2-category-sort' ); ?></label><br>
-                <select id="gm2-category-select" multiple style="min-width:220px;min-height:120px;">
+                <select id="gm2-category-select" multiple style="width:800px;height:300px;">
                     <?php echo self::get_category_option_tree(); ?>
                 </select>
             </p>
