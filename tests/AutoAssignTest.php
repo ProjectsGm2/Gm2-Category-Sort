@@ -296,5 +296,17 @@ class AutoAssignTest extends TestCase {
         $this->assertSame( [ $term['term_id'] ], $calls[0]['terms'] );
         $this->assertTrue( $calls[0]['append'] );
     }
+
+    public function test_reset_clears_progress_option() {
+        $GLOBALS['gm2_options']['gm2_auto_assign_progress'] = [ 'offset' => 1, 'log' => [ 'a' ] ];
+
+        $_POST['nonce'] = 't';
+        $_POST['reset'] = '1';
+
+        Gm2_Category_Sort_Auto_Assign::ajax_reset_product_categories();
+
+        $this->assertTrue( $GLOBALS['gm2_json_result']['success'] );
+        $this->assertArrayNotHasKey( 'gm2_auto_assign_progress', $GLOBALS['gm2_options'] );
+    }
 }
 }

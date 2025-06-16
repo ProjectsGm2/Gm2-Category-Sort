@@ -437,6 +437,7 @@ class Gm2_Category_Sort_Auto_Assign {
         $progress = get_option( 'gm2_reset_progress', [ 'offset' => 0 ] );
         if ( $reset ) {
             $progress = [ 'offset' => 0 ];
+            delete_option( 'gm2_auto_assign_progress' );
             wp_defer_term_counting( true );
         }
 
@@ -461,6 +462,9 @@ class Gm2_Category_Sort_Auto_Assign {
                     "DELETE FROM {$wpdb->term_relationships} WHERE object_id IN (" . implode( ',', array_map( 'absint', $ids ) ) . ") AND term_taxonomy_id IN (" . implode( ',', array_map( 'absint', $tax_ids ) ) . ")"
                 );
             }
+            if ( function_exists( "clean_object_term_cache" ) ) {
+                clean_object_term_cache( $ids, "product" );
+            }
         }
 
         $new_offset = $offset + count( $ids );
@@ -468,6 +472,7 @@ class Gm2_Category_Sort_Auto_Assign {
 
         if ( $done ) {
             delete_option( 'gm2_reset_progress' );
+            delete_option( 'gm2_auto_assign_progress' );
             wp_defer_term_counting( false );
         } else {
             update_option( 'gm2_reset_progress', [ 'offset' => $new_offset ] );

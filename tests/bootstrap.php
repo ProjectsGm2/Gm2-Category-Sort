@@ -109,11 +109,27 @@ if ( ! function_exists( 'delete_option' ) ) {
     }
 }
 
+if ( ! function_exists( 'wp_defer_term_counting' ) ) {
+    function wp_defer_term_counting( $defer = false ) { return true; }
+}
+
 if ( ! function_exists( 'wp_count_posts' ) ) {
     function wp_count_posts( $post_type ) {
         $count = isset( $GLOBALS['gm2_product_objects'] ) ? count( $GLOBALS['gm2_product_objects'] ) : 0;
         return (object) [ 'publish' => $count ];
     }
+}
+
+if ( ! isset( $GLOBALS['wpdb'] ) ) {
+    class WPDBStub {
+        public $posts = 'wp_posts';
+        public $term_taxonomy = 'wp_term_taxonomy';
+        public $term_relationships = 'wp_term_relationships';
+        public function prepare( $query, ...$args ) { return $query; }
+        public function get_col( $query ) { return []; }
+        public function query( $query ) { return 0; }
+    }
+    $GLOBALS['wpdb'] = new WPDBStub();
 }
 
 // Basic stubs for renderer tests and others.

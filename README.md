@@ -146,7 +146,8 @@ temporarily disabled.) Run the tool from
 **Add categories** or **Overwrite categories** before clicking **Start Auto
 Assign**. Use the **Reset All Categories** button to remove every product's
 assigned categories before starting a fresh assignment. A progress bar shows
-the status while products are being cleared. As each product is processed it
+the status while products are being cleared. The previous auto-assign log is
+cleared so each run begins fresh. As each product is processed it
 appears in the log window:
 
 ```
