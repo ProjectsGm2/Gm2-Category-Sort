@@ -127,6 +127,11 @@ class Gm2_Category_Sort_Product_Category_Generator {
             $brand_idx = array_search( 'By Brand & Model', $path, true );
             if ( $brand_idx !== false ) {
                 if ( isset( $path[ $brand_idx + 1 ] ) && ! isset( $path[ $brand_idx + 2 ] ) ) {
+                      // Skip numeric-only synonyms when matching brands to avoid
+                    // confusing model numbers with the brand itself.
+                    if ( ! preg_match( '/[a-z]/i', $term ) ) {
+                        continue;
+                    }
                     $brand = $path[ $brand_idx + 1 ];
                     if ( ! isset( $brands[ $brand ] ) ) {
                         $brands[ $brand ] = [];
@@ -157,6 +162,48 @@ class Gm2_Category_Sort_Product_Category_Generator {
         }
 
         $brand_matches = [];
+        foreach ( $brands as $brand => $entries ) {
+            foreach ( $entries as $entry ) {
+                $term    = $entry['term'];
+                $matched = false;
+                if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
+                    $matched = true;
+                } elseif ( $fuzzy ) {
+                    $term_words = preg_split( '/\s+/', $term );
+                    $n = count( $term_words );
+                    for ( $i = 0; $i <= $word_count - $n; $i++ ) {
+                        $segment = implode( ' ', array_slice( $words, $i, $n ) );
+                        similar_text( $term, $segment, $percent );
+                        if ( $percent >= $threshold ) {
+                            $matched = true;
+                            break;
+                        }
+                    }
+                }
+                if ( ! $matched ) {
+                    continue;
+                }
+                $neg = false;
+                foreach ( self::$negation_patterns as $pattern ) {
+                    $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
+                    if ( preg_match( $regex, $lower ) ) {
+                        $neg = true;
+                        break;
+                    }
+                }
+                if ( $neg ) {
+                    continue;
+                }
+                $brand_matches[ $brand ] = $term;
+                foreach ( $entry['path'] as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
+                    }
+                }
+                break;
+            }
+        }
+      
         foreach ( $other_mapping as $term => $path ) {
             $matched = false;
             if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
@@ -211,49 +258,6 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 }
             }
         }
-
-        foreach ( $brands as $brand => $entries ) {
-            foreach ( $entries as $entry ) {
-                $term    = $entry['term'];
-                $matched = false;
-                if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
-                    $matched = true;
-                } elseif ( $fuzzy ) {
-                    $term_words = preg_split( '/\s+/', $term );
-                    $n = count( $term_words );
-                    for ( $i = 0; $i <= $word_count - $n; $i++ ) {
-                        $segment = implode( ' ', array_slice( $words, $i, $n ) );
-                        similar_text( $term, $segment, $percent );
-                        if ( $percent >= $threshold ) {
-                            $matched = true;
-                            break;
-                        }
-                    }
-                }
-                if ( ! $matched ) {
-                    continue;
-                }
-                $neg = false;
-                foreach ( self::$negation_patterns as $pattern ) {
-                    $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
-                    if ( preg_match( $regex, $lower ) ) {
-                        $neg = true;
-                        break;
-                    }
-                }
-                if ( $neg ) {
-                    continue;
-                }
-                $brand_matches[ $brand ] = $term;
-                foreach ( $entry['path'] as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
-                    }
-                }
-                break;
-            }
-        }
-
         foreach ( $brand_matches as $brand => $brand_term ) {
             if ( empty( $brand_models[ $brand ] ) ) {
                 continue;
@@ -295,7 +299,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
                         break;
                     }
                 }
-                if ( ! $neg ) {
+              if ( ! $neg ) {
                     foreach ( [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators' ] as $cat ) {
                         if ( ! in_array( $cat, $cats, true ) ) {
                             $cats[] = $cat;

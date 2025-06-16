@@ -278,15 +278,7 @@ class Gm2_Category_Sort_Auto_Assign {
                 continue;
             }
 
-            $text  = $product->get_name() . ' ' . $product->get_description() . ' ' . $product->get_short_description();
-            foreach ( $product->get_attributes() as $attr ) {
-                if ( $attr->is_taxonomy() ) {
-                    $names = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'names' ] );
-                    $text .= ' ' . implode( ' ', $names );
-                } else {
-                    $text .= ' ' . implode( ' ', array_map( 'sanitize_text_field', $attr->get_options() ) );
-                }
-            }
+            $text  = $product->get_name();
 
             $cats      = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy );
             $term_ids  = [];
@@ -537,15 +529,7 @@ class Gm2_Category_Sort_Auto_Assign {
                     continue;
                 }
 
-                $text = $product->get_name() . ' ' . $product->get_description() . ' ' . $product->get_short_description();
-                foreach ( $product->get_attributes() as $attr ) {
-                    if ( $attr->is_taxonomy() ) {
-                        $names = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'names' ] );
-                        $text .= ' ' . implode( ' ', $names );
-                    } else {
-                        $text .= ' ' . implode( ' ', array_map( 'sanitize_text_field', $attr->get_options() ) );
-                    }
-                }
+                $text = $product->get_name();
 
                 $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy );
                 $term_ids = [];
