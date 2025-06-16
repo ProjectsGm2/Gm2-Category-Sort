@@ -154,7 +154,7 @@
 .elementor-widget-gm2-category-sort.gm2-synonym-pos-below .gm2-synonyms-container {
     margin-left: 0;
     margin-top: 5px;
-    width: 100%;
+    flex-basis: 100%;
     order: 3;
 }
 
