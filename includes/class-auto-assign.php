@@ -126,6 +126,8 @@ class Gm2_Category_Sort_Auto_Assign {
                 </select>
                 <input type="text" id="gm2-search-terms" style="width:200px;" />
                 <button id="gm2-search-btn" class="button"><?php esc_html_e( 'Search', 'gm2-category-sort' ); ?></button>
+                &nbsp;
+                <button id="gm2-reset-search-btn" class="button"><?php esc_html_e( 'Reset Search', 'gm2-category-sort' ); ?></button>
             </p>
             <p><progress id="gm2-search-progress" value="0" max="100" style="display:none;width:100%;"></progress></p>
             <p style="position:relative;">
@@ -137,17 +139,43 @@ class Gm2_Category_Sort_Auto_Assign {
             <p>
                 <label for="gm2-category-select"><?php esc_html_e( 'Categories', 'gm2-category-sort' ); ?></label><br>
                 <select id="gm2-category-select" multiple style="min-width:220px;min-height:120px;">
-                    <?php
-                    $cats = get_terms( [ 'taxonomy' => 'product_cat', 'hide_empty' => false ] );
-                    foreach ( $cats as $cat ) {
-                        echo '<option value="' . esc_attr( $cat->term_id ) . '">' . esc_html( $cat->name ) . '</option>';
-                    }
-                    ?>
+                    <?php echo self::get_category_option_tree(); ?>
                 </select>
             </p>
             <p><button id="gm2-assign-btn" class="button button-primary"><?php esc_html_e( 'Assign', 'gm2-category-sort' ); ?></button></p>
         </div>
         <?php
+    }
+
+    /**
+     * Generate option elements for the product category dropdown in a tree structure.
+     *
+     * @param int $parent Parent term ID.
+     * @param int $depth  Current tree depth.
+     * @return string
+     */
+    protected static function get_category_option_tree( $parent = 0, $depth = 0 ) {
+        $terms = get_terms(
+            [
+                'taxonomy'   => 'product_cat',
+                'hide_empty' => false,
+                'parent'     => $parent,
+                'orderby'    => 'name',
+            ]
+        );
+
+        if ( is_wp_error( $terms ) ) {
+            return '';
+        }
+
+        $html = '';
+        foreach ( $terms as $term ) {
+            $indent = $depth > 0 ? str_repeat( '&nbsp;', $depth * 3 ) . '&#8211; ' : '';
+            $html  .= '<option value="' . esc_attr( $term->term_id ) . '">' . $indent . esc_html( $term->name ) . '</option>';
+            $html  .= self::get_category_option_tree( $term->term_id, $depth + 1 );
+        }
+
+        return $html;
     }
 
     /**
@@ -461,6 +489,7 @@ class Gm2_Category_Sort_Auto_Assign {
             ]
         );
     }
+
 
     /**
      * Handle WP-CLI auto assignment.

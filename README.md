@@ -169,7 +169,8 @@ Add `--overwrite` to replace existing categories instead of appending.
 Below the log the page provides a search form to manually select products.
 Choose which fields to search (title, description or attributes), enter a
 keyword and click **Search** to build a list of matching products. Additional
-products can be looked up by SKU or title in the second search box. After
+products can be looked up by SKU or title in the second search box. Use the
+**Reset Search** button to clear the results when starting a new query. After
 selecting one or more categories from the list, click **Assign** to apply them
 to all products in the list.
 
