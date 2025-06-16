@@ -174,13 +174,17 @@ if ( ! function_exists( 'add_query_arg' ) ) {
 
 namespace Elementor {
     class Icons_Manager {
-        public static function render_icon( $icon, $attrs = [] ) {
+        public static function render_icon( $icon, $attrs = [], $tag = null, $should_echo = true ) {
             $value = $icon['value'] ?? '';
             $attr_str = '';
             foreach ( $attrs as $k => $v ) {
                 $attr_str .= ' ' . $k . '="' . $v . '"';
             }
-            if ( isset( $icon['library'] ) && $icon['library'] === 'svg' ) {
+            $markup = '<i class="' . $value . '"' . $attr_str . '></i>';
+            if ( $should_echo ) {
+                echo $markup;
+            }
+            return $markup;
                 return '<svg' . $attr_str . '><path d="' . $value . '"></path></svg>';
             }
             return '<i class="' . $value . '"' . $attr_str . '></i>';
