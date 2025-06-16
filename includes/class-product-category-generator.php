@@ -16,6 +16,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
         'wheel-simulator' => 'wheel simulator',
         'wheel-simulators'=> 'wheel simulator',
         'over-lug'        => 'over lug',
+        'rimliner'        => 'rim liner',
+        'rim-liner'       => 'rim liner',
+        'rim liners'      => 'rim liner',
     ];
 
     /** @var string[] */
@@ -170,6 +173,28 @@ class Gm2_Category_Sort_Product_Category_Generator {
             foreach ( $path as $cat ) {
                 if ( ! in_array( $cat, $cats, true ) ) {
                     $cats[] = $cat;
+                }
+            }
+        }
+      
+        $brand_terms = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
+        foreach ( $brand_terms as $term ) {
+            if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
+                $neg = false;
+                foreach ( self::$negation_patterns as $pattern ) {
+                    $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
+                    if ( preg_match( $regex, $lower ) ) {
+                        $neg = true;
+                        break;
+                    }
+                }
+                if ( ! $neg ) {
+                    foreach ( [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators' ] as $cat ) {
+                        if ( ! in_array( $cat, $cats, true ) ) {
+                            $cats[] = $cat;
+                        }
+                    }
+                    break;
                 }
             }
         }
