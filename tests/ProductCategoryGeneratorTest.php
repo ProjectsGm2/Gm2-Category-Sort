@@ -128,7 +128,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertSame( [ 'Wheel' ], $cats );
     }
 
-    public function test_only_one_lug_hole_category_matches() {
+     public function test_only_one_lug_hole_category_matches() {
         $root = wp_insert_term( 'By Lug/Hole Configuration', 'product_cat' );
         wp_insert_term( '10 Lug', 'product_cat', [ 'parent' => $root['term_id'] ] );
         wp_insert_term( '10 Lug 2 Hole', 'product_cat', [ 'parent' => $root['term_id'] ] );
@@ -151,7 +151,7 @@ class ProductCategoryGeneratorTest extends TestCase {
             $cats
         );
     }
-  
+
     public function test_eagle_flight_brand_rule() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
         $brands = wp_insert_term( 'Brands', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
@@ -165,7 +165,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertSame( [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators' ], $cats );
     }
 
-  public function test_brand_model_requires_brand_word() {
+    public function test_brand_model_requires_brand_word() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
         $branch = wp_insert_term( 'By Brand & Model', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
 
@@ -193,5 +193,19 @@ class ProductCategoryGeneratorTest extends TestCase {
             ],
             $cats
         );
+    }
+
+    public function test_model_not_assigned_when_brand_far_apart() {
+        $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
+        $branch = wp_insert_term( 'By Brand & Model', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
+        $dodge  = wp_insert_term( 'Dodge', 'product_cat', [ 'parent' => $branch['term_id'] ] );
+        wp_insert_term( 'Ram 4500', 'product_cat', [ 'parent' => $dodge['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = 'Dodge ... ' . str_repeat( 'x ', 30 ) . 'Ram 4500 truck';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame( [ 'Wheel Simulators', 'By Brand & Model', 'Dodge' ], $cats );
     }
 }

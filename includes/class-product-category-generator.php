@@ -103,7 +103,6 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 }
             }
         }
-
         return $mapping;
     }
 
@@ -120,21 +119,47 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $words = preg_split( '/\s+/', $lower );
         $word_count = count( $words );
         $lug_hole_candidates = [];
-        $brand_matches       = [];
-        $model_map           = [];
+        $brands        = [];
+        $brand_models  = [];
+        $other_mapping = [];
+
         foreach ( $mapping as $term => $path ) {
             $brand_idx = array_search( 'By Brand & Model', $path, true );
-            if ( $brand_idx !== false && isset( $path[ $brand_idx + 2 ] ) ) {
-                $model_name = self::normalize_text( $path[ $brand_idx + 2 ] );
-                $model_map[ $model_name ] = [
-                    'brand'       => $path[ $brand_idx + 1 ],
-                    'path'        => $path,
-                    'model_words' => preg_split( '/\s+/', $model_name ),
-                ];
+            if ( $brand_idx !== false ) {
+                if ( isset( $path[ $brand_idx + 1 ] ) && ! isset( $path[ $brand_idx + 2 ] ) ) {
+                    $brand = $path[ $brand_idx + 1 ];
+                    if ( ! isset( $brands[ $brand ] ) ) {
+                        $brands[ $brand ] = [];
+                    }
+                    $brands[ $brand ][] = [ 'term' => $term, 'path' => $path ];
+                    continue;
+                }
+                if ( isset( $path[ $brand_idx + 2 ] ) ) {
+                    $brand       = $path[ $brand_idx + 1 ];
+                    $model_name  = self::normalize_text( $path[ $brand_idx + 2 ] );
+                    $m_words     = preg_split( '/\s+/', $model_name );
+                    $m_words     = array_values( array_filter( $m_words, static function ( $w ) {
+                        return ! in_array( $w, [ 'wheel', 'wheels', 'simulator', 'simulators', 'rim', 'liner', 'cover', 'covers', 'hubcap', 'hubcaps' ], true );
+                    } ) );
+                    if ( ! isset( $brand_models[ $brand ] ) ) {
+                        $brand_models[ $brand ] = [];
+                    }
+                    $brand_models[ $brand ][] = [
+                        'term'        => $term,
+                        'path'        => $path,
+                        'model_words' => $m_words,
+                    ];
+                    continue;
+                }
             }
 
+            $other_mapping[ $term ] = $path;
+        }
+
+        $brand_matches = [];
+        foreach ( $other_mapping as $term => $path ) {
             $matched = false;
-            if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
+            if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
                 $matched = true;
             } elseif ( $fuzzy ) {
                 $term_words = preg_split( '/\s+/', $term );
@@ -148,8 +173,66 @@ class Gm2_Category_Sort_Product_Category_Generator {
                     }
                 }
             }
+            if ( ! $matched ) {
+                continue;
+            }
+            $neg = false;
+            foreach ( self::$negation_patterns as $pattern ) {
+                $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
+                if ( preg_match( $regex, $lower ) ) {
+                    $neg = true;
+                    break;
+                }
+            }
+            if ( $neg ) {
+                continue;
+            }
+            if ( in_array( 'By Lug/Hole Configuration', $path, true ) ) {
+                if ( ! isset( $lug_hole_candidates[ $term ] ) ) {
+                    $lug_hole_candidates[ $term ] = $path;
+                }
+            } else {
+                foreach ( $path as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
+                    }
+                }
+            }
+        }
 
-            if ( $matched ) {
+        if ( $lug_hole_candidates ) {
+            uksort( $lug_hole_candidates, static function ( $a, $b ) {
+                return strlen( $b ) <=> strlen( $a );
+            } );
+            $path = reset( $lug_hole_candidates );
+            foreach ( $path as $cat ) {
+                if ( ! in_array( $cat, $cats, true ) ) {
+                    $cats[] = $cat;
+                }
+            }
+        }
+
+        foreach ( $brands as $brand => $entries ) {
+            foreach ( $entries as $entry ) {
+                $term    = $entry['term'];
+                $matched = false;
+                if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
+                    $matched = true;
+                } elseif ( $fuzzy ) {
+                    $term_words = preg_split( '/\s+/', $term );
+                    $n = count( $term_words );
+                    for ( $i = 0; $i <= $word_count - $n; $i++ ) {
+                        $segment = implode( ' ', array_slice( $words, $i, $n ) );
+                        similar_text( $term, $segment, $percent );
+                        if ( $percent >= $threshold ) {
+                            $matched = true;
+                            break;
+                        }
+                    }
+                }
+                if ( ! $matched ) {
+                    continue;
+                }
                 $neg = false;
                 foreach ( self::$negation_patterns as $pattern ) {
                     $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
@@ -161,63 +244,39 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 if ( $neg ) {
                     continue;
                 }
-                $brand_idx = array_search( 'By Brand & Model', $path, true );
-                if ( $brand_idx !== false ) {
-                    if ( isset( $path[ $brand_idx + 1 ] ) && ! isset( $path[ $brand_idx + 2 ] ) ) {
-                        $brand_matches[ $path[ $brand_idx + 1 ] ] = true;
-                        foreach ( $path as $cat ) {
-                            if ( ! in_array( $cat, $cats, true ) ) {
-                                $cats[] = $cat;
-                            }
-                        }
-                        continue;
-                    }
-                    if ( isset( $path[ $brand_idx + 2 ] ) ) {
-                        // handled later via $model_map
-                        continue;
+                $brand_matches[ $brand ] = $term;
+                foreach ( $entry['path'] as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
                     }
                 }
-                if ( in_array( 'By Lug/Hole Configuration', $path, true ) ) {
-                    if ( ! isset( $lug_hole_candidates[ $term ] ) ) {
-                        $lug_hole_candidates[ $term ] = $path;
-                    }
-                } else {
-                    foreach ( $path as $cat ) {
-                        if ( ! in_array( $cat, $cats, true ) ) {
-                            $cats[] = $cat;
-                        }
-                    }
-                }
+                break;
             }
         }
-        if ( $lug_hole_candidates ) {
-            uksort(
-                $lug_hole_candidates,
-                static function ( $a, $b ) {
-                    return strlen( $b ) <=> strlen( $a );
-                }
-            );
-            $path = reset( $lug_hole_candidates );
-            foreach ( $path as $cat ) {
-                if ( ! in_array( $cat, $cats, true ) ) {
-                    $cats[] = $cat;
-                }
-            }
-        }
-        
-        foreach ( $model_map as $model => $candidate ) {
-            if ( ! isset( $brand_matches[ $candidate['brand'] ] ) ) {
+
+        foreach ( $brand_matches as $brand => $brand_term ) {
+            if ( empty( $brand_models[ $brand ] ) ) {
                 continue;
             }
-            $all_present = true;
-            foreach ( $candidate['model_words'] as $word ) {
-                if ( strpos( $lower, $word ) === false ) {
-                    $all_present = false;
-                    break;
+            foreach ( $brand_models[ $brand ] as $model ) {
+                $all_present = true;
+                foreach ( $model['model_words'] as $word ) {
+                    if ( strpos( $lower, $word ) === false ) {
+                        $all_present = false;
+                        break;
+                    }
                 }
-            }
-            if ( $all_present ) {
-                foreach ( $candidate['path'] as $cat ) {
+                if ( ! $all_present ) {
+                    continue;
+                }
+                $brand_norm     = self::normalize_text( $brand_term );
+                $first_word     = $model['model_words'][0] ?? '';
+                $close_pattern  = '/\b' . preg_quote( $brand_norm, '/' ) . '\b.{0,40}\b' . preg_quote( $first_word, '/' ) . '/';
+                $reverse_pattern = '/\b' . preg_quote( $first_word, '/' ) . '\b.{0,40}\b' . preg_quote( $brand_norm, '/' ) . '/';
+                if ( ! preg_match( $close_pattern, $lower ) && ! preg_match( $reverse_pattern, $lower ) ) {
+                    continue;
+                }
+                foreach ( $model['path'] as $cat ) {
                     if ( ! in_array( $cat, $cats, true ) ) {
                         $cats[] = $cat;
                     }
@@ -227,7 +286,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
 
         $brand_terms = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
         foreach ( $brand_terms as $term ) {
-            if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
+            if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
                 $neg = false;
                 foreach ( self::$negation_patterns as $pattern ) {
                     $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
@@ -246,7 +305,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 }
             }
         }
-      
+
         return $cats;
     }
 }
