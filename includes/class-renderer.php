@@ -117,6 +117,7 @@ class Gm2_Category_Sort_Renderer {
                 ]);
                 $icon_html = '';
                 if ( ! empty( $this->settings['synonym_icon']['value'] ) ) {
+                      $icon_html = \Elementor\Icons_Manager::render_icon( $this->settings['synonym_icon'], [ 'aria-hidden' => 'true', 'class' => 'gm2-synonym-icon' ] );
                     $icon_html = \Elementor\Icons_Manager::try_get_icon_html(
                         $this->settings['synonym_icon'],
                         [ 'aria-hidden' => 'true', 'class' => 'gm2-synonym-icon' ]
@@ -142,7 +143,10 @@ class Gm2_Category_Sort_Renderer {
             if ( $expand_class ) {
                 $icon_markup  = \Elementor\Icons_Manager::try_get_icon_html(
                     $this->settings['expand_icon'],
-                    [ 'aria-hidden' => 'true' ]
+                    [ 'aria-hidden' => 'true' ],
+                    null,
+                    null,
+                    false
                 );
                 $expand_html  = '<span class="gm2-expand-icon">' . $icon_markup . '</span>';
             } else {
@@ -152,7 +156,10 @@ class Gm2_Category_Sort_Renderer {
             if ( $collapse_class ) {
                 $icon_markup   = \Elementor\Icons_Manager::try_get_icon_html(
                     $this->settings['collapse_icon'],
-                    [ 'aria-hidden' => 'true' ]
+                    [ 'aria-hidden' => 'true' ],
+                    null,
+                    null,
+                    false
                 );
                 $collapse_html = '<span class="gm2-collapse-icon" style="display:none;">' . $icon_markup . '</span>';
             } else {
