@@ -73,6 +73,18 @@ function gm2_category_sort_init() {
     
     add_filter('pre_get_document_title', 'gm2_category_sort_modify_title');
     add_action('wp_head', 'gm2_category_sort_meta_description');
+
+    // Enqueue icon styles early when widget is used on the page.
+    add_action(
+        'elementor/frontend/widget/before_render',
+        function( $widget ) {
+            if ( $widget instanceof Gm2_Category_Sort_Widget ) {
+                add_action( 'wp_enqueue_scripts', [ $widget, 'enqueue_icon_styles' ] );
+            }
+        },
+        10,
+        1
+    );
     
     // Register widget for both modern and legacy Elementor hooks
     add_action('elementor/widgets/register', 'gm2_register_widget');

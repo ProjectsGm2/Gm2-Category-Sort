@@ -838,7 +838,7 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
         }
         return $options;
     }
-    
+
     protected function render() {
         $settings = $this->get_settings_for_display();
 

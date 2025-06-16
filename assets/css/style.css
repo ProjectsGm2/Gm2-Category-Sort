@@ -219,6 +219,14 @@
     background-color: var(--gm2-expand-icon-active-bg, var(--gm2-expand-icon-bg, transparent));
 }
 
+.gm2-expand-icon i,
+.gm2-collapse-icon i {
+    font-size: inherit;
+    width: inherit;
+    height: inherit;
+    line-height: 1;
+}
+
 .gm2-collapse-icon {
     font-size: var(--gm2-collapse-icon-size, 16px);
     width: var(--gm2-collapse-icon-size, 16px);
@@ -230,6 +238,18 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
+}
+
+.gm2-expand-button .gm2-collapse-icon {
+    display: none;
+}
+
+.gm2-expand-button[data-expanded="true"] .gm2-expand-icon {
+    display: none;
+}
+
+.gm2-expand-button[data-expanded="true"] .gm2-collapse-icon {
+    display: inline-block;
 }
 
 .gm2-expand-button:hover .gm2-collapse-icon {

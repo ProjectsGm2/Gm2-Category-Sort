@@ -106,12 +106,12 @@ jQuery(document).ready(function($) {
 
         if (isExpanded) {
             $childContainer.slideUp();
-            $expandIcon.show();
+        $expandIcon.show();
             $collapseIcon.hide();
             $button.data('expanded', 'false').removeClass('gm2-expanded');
         } else {
             $childContainer.slideDown();
-            $expandIcon.hide();
+        $expandIcon.hide();
             $collapseIcon.show();
             $button.data('expanded', 'true').addClass('gm2-expanded');
         }
