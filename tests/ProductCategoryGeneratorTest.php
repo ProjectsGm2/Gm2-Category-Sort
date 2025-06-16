@@ -124,4 +124,32 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $this->assertSame( [ 'Wheel' ], $cats );
     }
+
+    public function test_only_one_lug_hole_category_matches() {
+        $root = wp_insert_term( 'By Lug/Hole Configuration', 'product_cat' );
+        wp_insert_term( '10 Lug', 'product_cat', [ 'parent' => $root['term_id'] ] );
+        wp_insert_term( '10 Lug 2 Hole', 'product_cat', [ 'parent' => $root['term_id'] ] );
+        wp_insert_term( '10 Lug 4 Hole', 'product_cat', [ 'parent' => $root['term_id'] ] );
+        wp_insert_term( '10 Lug 5 Hole', 'product_cat', [ 'parent' => $root['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = '19.5" Dodge Ram 4500 5500 2008 Wheel Rim Liner Hubcap Covers 10 Lug 5 Hole';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame( [ 'By Lug/Hole Configuration', '10 Lug 5 Hole' ], $cats );
+    }
+
+    public function test_eagle_flight_brand_rule() {
+        $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
+        $brands = wp_insert_term( 'Brands', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
+        wp_insert_term( 'Eagle Flight Wheel Simulators', 'product_cat', [ 'parent' => $brands['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = 'Premium rim liner kit for trucks';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame( [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators' ], $cats );
+    }
 }

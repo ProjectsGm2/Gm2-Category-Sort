@@ -16,6 +16,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
         'wheel-simulator' => 'wheel simulator',
         'wheel-simulators'=> 'wheel simulator',
         'over-lug'        => 'over lug',
+        'rimliner'        => 'rim liner',
+        'rim-liner'       => 'rim liner',
+        'rim liners'      => 'rim liner',
     ];
 
     /** @var string[] */
@@ -116,6 +119,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $cats  = [];
         $words = preg_split( '/\s+/', $lower );
         $word_count = count( $words );
+        $lug_hole_candidates = [];
         foreach ( $mapping as $term => $path ) {
             $matched = false;
             if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
@@ -145,13 +149,56 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 if ( $neg ) {
                     continue;
                 }
-                foreach ( $path as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
+                if ( in_array( 'By Lug/Hole Configuration', $path, true ) ) {
+                    if ( ! isset( $lug_hole_candidates[ $term ] ) ) {
+                        $lug_hole_candidates[ $term ] = $path;
+                    }
+                } else {
+                    foreach ( $path as $cat ) {
+                        if ( ! in_array( $cat, $cats, true ) ) {
+                            $cats[] = $cat;
+                        }
                     }
                 }
             }
         }
+        if ( $lug_hole_candidates ) {
+            uksort(
+                $lug_hole_candidates,
+                static function ( $a, $b ) {
+                    return strlen( $b ) <=> strlen( $a );
+                }
+            );
+            $path = reset( $lug_hole_candidates );
+            foreach ( $path as $cat ) {
+                if ( ! in_array( $cat, $cats, true ) ) {
+                    $cats[] = $cat;
+                }
+            }
+        }
+
+        $brand_terms = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
+        foreach ( $brand_terms as $term ) {
+            if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
+                $neg = false;
+                foreach ( self::$negation_patterns as $pattern ) {
+                    $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
+                    if ( preg_match( $regex, $lower ) ) {
+                        $neg = true;
+                        break;
+                    }
+                }
+                if ( ! $neg ) {
+                    foreach ( [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators' ] as $cat ) {
+                        if ( ! in_array( $cat, $cats, true ) ) {
+                            $cats[] = $cat;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
         return $cats;
     }
 }
