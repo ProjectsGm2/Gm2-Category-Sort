@@ -82,6 +82,10 @@ function gm2_category_sort_init() {
 
 // Register widget callback
 function gm2_register_widget($widgets_manager) {
+    if ( ! class_exists('\\Elementor\\Widget_Base') ) {
+        return;
+    }
+
     require_once GM2_CAT_SORT_PATH . 'includes/class-widget.php';
     $widgets_manager->register(new Gm2_Category_Sort_Widget());
 }

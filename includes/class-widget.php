@@ -337,7 +337,7 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'size_units' => ['px'],
             'range' => [ 'px' => ['min' => 8, 'max' => 60] ],
             'selectors' => [
-                '{{WRAPPER}} .gm2-expand-button i, {{WRAPPER}} .gm2-expand-button svg' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+                '{{WRAPPER}} .gm2-expand-button i, {{WRAPPER}} .gm2-expand-button svg, {{WRAPPER}} .gm2-expand-button .gm2-expand-icon' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
             ],
         ]);
         $this->add_responsive_control('expand_icon_hover_size', [
@@ -346,7 +346,7 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'size_units' => ['px'],
             'range' => [ 'px' => ['min' => 8, 'max' => 60] ],
             'selectors' => [
-                '{{WRAPPER}} .gm2-expand-button:hover i, {{WRAPPER}} .gm2-expand-button:hover svg' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+                '{{WRAPPER}} .gm2-expand-button:hover i, {{WRAPPER}} .gm2-expand-button:hover svg, {{WRAPPER}} .gm2-expand-button:hover .gm2-expand-icon' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
             ],
         ]);
         $this->add_responsive_control('expand_icon_active_size', [
@@ -355,7 +355,7 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'size_units' => ['px'],
             'range' => [ 'px' => ['min' => 8, 'max' => 60] ],
             'selectors' => [
-                '{{WRAPPER}} .gm2-expand-button.gm2-expanded i, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] i, {{WRAPPER}} .gm2-expand-button.gm2-expanded svg, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] svg' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+                '{{WRAPPER}} .gm2-expand-button.gm2-expanded i, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] i, {{WRAPPER}} .gm2-expand-button.gm2-expanded svg, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] svg, {{WRAPPER}} .gm2-expand-button.gm2-expanded .gm2-expand-icon, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] .gm2-expand-icon' => 'font-size: {{SIZE}}{{UNIT}}; width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
             ],
         ]);
 
@@ -363,7 +363,7 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'label' => __('Icon Spacing', 'gm2-category-sort'),
             'type'  => \Elementor\Controls_Manager::DIMENSIONS,
             'selectors' => [
-                '{{WRAPPER}} .gm2-expand-button i, {{WRAPPER}} .gm2-expand-button svg' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                '{{WRAPPER}} .gm2-expand-button i, {{WRAPPER}} .gm2-expand-button svg, {{WRAPPER}} .gm2-expand-button .gm2-expand-icon' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
             ],
         ]);
 
@@ -371,21 +371,21 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'label' => __('Icon Background', 'gm2-category-sort'),
             'type'  => \Elementor\Controls_Manager::COLOR,
             'selectors' => [
-                '{{WRAPPER}} .gm2-expand-button i, {{WRAPPER}} .gm2-expand-button svg' => 'background-color: {{VALUE}};',
+                '{{WRAPPER}} .gm2-expand-button i, {{WRAPPER}} .gm2-expand-button svg, {{WRAPPER}} .gm2-expand-button .gm2-expand-icon' => 'background-color: {{VALUE}};',
             ],
         ]);
         $this->add_control('expand_icon_hover_bg', [
             'label' => __('Icon Hover Background', 'gm2-category-sort'),
             'type'  => \Elementor\Controls_Manager::COLOR,
             'selectors' => [
-                '{{WRAPPER}} .gm2-expand-button:hover i, {{WRAPPER}} .gm2-expand-button:hover svg' => 'background-color: {{VALUE}};',
+                '{{WRAPPER}} .gm2-expand-button:hover i, {{WRAPPER}} .gm2-expand-button:hover svg, {{WRAPPER}} .gm2-expand-button:hover .gm2-expand-icon' => 'background-color: {{VALUE}};',
             ],
         ]);
         $this->add_control('expand_icon_active_bg', [
             'label' => __('Icon Active Background', 'gm2-category-sort'),
             'type'  => \Elementor\Controls_Manager::COLOR,
             'selectors' => [
-                '{{WRAPPER}} .gm2-expand-button.gm2-expanded i, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] i, {{WRAPPER}} .gm2-expand-button.gm2-expanded svg, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] svg' => 'background-color: {{VALUE}};',
+                '{{WRAPPER}} .gm2-expand-button.gm2-expanded i, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] i, {{WRAPPER}} .gm2-expand-button.gm2-expanded svg, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] svg, {{WRAPPER}} .gm2-expand-button.gm2-expanded .gm2-expand-icon, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] .gm2-expand-icon' => 'background-color: {{VALUE}};',
             ],
         ]);
 
@@ -393,7 +393,7 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'label' => __('Icon Color', 'gm2-category-sort'),
             'type'  => \Elementor\Controls_Manager::COLOR,
             'selectors' => [
-                '{{WRAPPER}} .gm2-expand-button i' => 'color: {{VALUE}};',
+                '{{WRAPPER}} .gm2-expand-button i, {{WRAPPER}} .gm2-expand-button .gm2-expand-icon' => 'color: {{VALUE}};',
             ],
         ]);
 
@@ -401,7 +401,7 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'label' => __('Icon Hover Color', 'gm2-category-sort'),
             'type'  => \Elementor\Controls_Manager::COLOR,
             'selectors' => [
-                '{{WRAPPER}} .gm2-expand-button:hover i' => 'color: {{VALUE}};',
+                '{{WRAPPER}} .gm2-expand-button:hover i, {{WRAPPER}} .gm2-expand-button:hover .gm2-expand-icon' => 'color: {{VALUE}};',
             ],
         ]);
 
@@ -409,8 +409,8 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'label' => __('Icon Active Color', 'gm2-category-sort'),
             'type'  => \Elementor\Controls_Manager::COLOR,
             'selectors' => [
-                '{{WRAPPER}} .gm2-expand-button.gm2-expanded i' => 'color: {{VALUE}};',
-                '{{WRAPPER}} .gm2-expand-button[data-expanded="true"] i' => 'color: {{VALUE}};',
+                '{{WRAPPER}} .gm2-expand-button.gm2-expanded i, {{WRAPPER}} .gm2-expand-button.gm2-expanded .gm2-expand-icon' => 'color: {{VALUE}};',
+                '{{WRAPPER}} .gm2-expand-button[data-expanded="true"] i, {{WRAPPER}} .gm2-expand-button[data-expanded="true"] .gm2-expand-icon' => 'color: {{VALUE}};',
             ],
         ]);
 
@@ -847,6 +847,9 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
         }
         if ( ! empty( $settings['collapse_icon'] ) ) {
             \Elementor\Icons_Manager::enqueue_shim( $settings['collapse_icon'] );
+        }
+        if ( ! empty( $settings['synonym_icon'] ) ) {
+            \Elementor\Icons_Manager::enqueue_shim( $settings['synonym_icon'] );
         }
 
         // Only render on WooCommerce pages

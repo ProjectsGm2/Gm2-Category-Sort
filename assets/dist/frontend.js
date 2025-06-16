@@ -112,24 +112,17 @@ jQuery(document).ready(function ($) {
     var $button = $(this);
     var $childContainer = $button.closest('.gm2-category-node').find('> .gm2-child-categories');
     var isExpanded = $button.data('expanded') === 'true';
-    var $icon = $button.find('i').first();
-    var expandClass = $button.data('expand-class');
-    var collapseClass = $button.data('collapse-class');
+    var $expandIcon = $button.find('.gm2-expand-icon').first();
+    var $collapseIcon = $button.find('.gm2-collapse-icon').first();
     if (isExpanded) {
       $childContainer.slideUp();
-      if ($icon.length && expandClass && collapseClass) {
-        $icon.removeClass(collapseClass).addClass(expandClass);
-      } else {
-        $button.text('+');
-      }
+      $expandIcon.show();
+      $collapseIcon.hide();
       $button.data('expanded', 'false').removeClass('gm2-expanded');
     } else {
       $childContainer.slideDown();
-      if ($icon.length && expandClass && collapseClass) {
-        $icon.removeClass(expandClass).addClass(collapseClass);
-      } else {
-        $button.text('-');
-      }
+      $expandIcon.hide();
+      $collapseIcon.show();
       $button.data('expanded', 'true').addClass('gm2-expanded');
     }
   });
