@@ -839,21 +839,18 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
         return $options;
     }
 
-    /**
-     * Enqueue icon libraries used by this widget.
-     */
-    public function enqueue_icon_styles() {
-        $settings = $this->get_settings_for_display();
-
-        foreach ( [ 'expand_icon', 'collapse_icon', 'synonym_icon' ] as $key ) {
-            if ( ! empty( $settings[ $key ] ) ) {
-                \Elementor\Icons_Manager::enqueue_shim( $settings[ $key ] );
-            }
-        }
-    }
-    
     protected function render() {
         $settings = $this->get_settings_for_display();
+
+        if ( ! empty( $settings['expand_icon'] ) ) {
+            \Elementor\Icons_Manager::enqueue_shim( $settings['expand_icon'] );
+        }
+        if ( ! empty( $settings['collapse_icon'] ) ) {
+            \Elementor\Icons_Manager::enqueue_shim( $settings['collapse_icon'] );
+        }
+        if ( ! empty( $settings['synonym_icon'] ) ) {
+            \Elementor\Icons_Manager::enqueue_shim( $settings['synonym_icon'] );
+        }
 
         // Only render on WooCommerce pages
         if (!is_shop() && !is_product_category() && !is_product_taxonomy() && !is_search()) {

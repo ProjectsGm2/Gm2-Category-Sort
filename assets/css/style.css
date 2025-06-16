@@ -154,7 +154,7 @@
 .elementor-widget-gm2-category-sort.gm2-synonym-pos-below .gm2-synonyms-container {
     margin-left: 0;
     margin-top: 5px;
-    width: 100%;
+    flex-basis: 100%;
     order: 3;
 }
 
@@ -196,6 +196,10 @@
     margin: var(--gm2-expand-icon-spacing, 0);
     background-color: var(--gm2-expand-icon-bg, transparent);
     transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
 }
 
 .gm2-expand-button:hover i,
@@ -230,6 +234,10 @@
     margin: var(--gm2-collapse-icon-spacing, 0);
     background-color: var(--gm2-collapse-icon-bg, transparent);
     transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
 }
 
 .gm2-expand-button .gm2-collapse-icon {

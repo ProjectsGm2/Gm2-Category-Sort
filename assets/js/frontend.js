@@ -101,18 +101,18 @@ jQuery(document).ready(function($) {
         const $button = $(this);
         const $childContainer = $button.closest('.gm2-category-node').find('> .gm2-child-categories');
         const isExpanded = $button.data('expanded') === 'true';
-        const $expand = $button.find('.gm2-expand-icon');
-        const $collapse = $button.find('.gm2-collapse-icon');
+        const $expandIcon = $button.find('.gm2-expand-icon').first();
+        const $collapseIcon = $button.find('.gm2-collapse-icon').first();
 
         if (isExpanded) {
             $childContainer.slideUp();
-            $collapse.css('display', 'none');
-            $expand.css('display', '');
+        $expandIcon.show();
+            $collapseIcon.hide();
             $button.data('expanded', 'false').removeClass('gm2-expanded');
         } else {
             $childContainer.slideDown();
-            $expand.css('display', 'none');
-            $collapse.css('display', '');
+        $expandIcon.hide();
+            $collapseIcon.show();
             $button.data('expanded', 'true').addClass('gm2-expanded');
         }
     });
