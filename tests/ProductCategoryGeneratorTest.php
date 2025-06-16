@@ -194,4 +194,18 @@ class ProductCategoryGeneratorTest extends TestCase {
             $cats
         );
     }
+
+    public function test_model_not_assigned_when_brand_far_apart() {
+        $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
+        $branch = wp_insert_term( 'By Brand & Model', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
+        $dodge  = wp_insert_term( 'Dodge', 'product_cat', [ 'parent' => $branch['term_id'] ] );
+        wp_insert_term( 'Ram 4500', 'product_cat', [ 'parent' => $dodge['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = 'Dodge ... ' . str_repeat( 'x ', 30 ) . 'Ram 4500 truck';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame( [ 'Wheel Simulators', 'By Brand & Model', 'Dodge' ], $cats );
+    }
 }

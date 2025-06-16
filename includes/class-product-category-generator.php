@@ -126,7 +126,10 @@ class Gm2_Category_Sort_Product_Category_Generator {
             $brand_idx = array_search( 'By Brand & Model', $path, true );
             if ( $brand_idx !== false && isset( $path[ $brand_idx + 2 ] ) ) {
                 $model_name = self::normalize_text( $path[ $brand_idx + 2 ] );
-                $model_map[ $model_name ] = [
+                if ( ! isset( $model_map[ $model_name ] ) ) {
+                    $model_map[ $model_name ] = [];
+                }
+                $model_map[ $model_name ][] = [
                     'brand'       => $path[ $brand_idx + 1 ],
                     'path'        => $path,
                     'model_words' => preg_split( '/\s+/', $model_name ),
@@ -204,17 +207,26 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 }
             }
         }
-        
-        foreach ( $model_map as $model => $candidate ) {
-            if ( ! isset( $brand_matches[ $candidate['brand'] ] ) ) {
-                continue;
-            }
-            $all_present = true;
-            foreach ( $candidate['model_words'] as $word ) {
-                if ( strpos( $lower, $word ) === false ) {
-                    $all_present = false;
-                    break;
+        foreach ( $model_map as $model => $candidates ) {
+            foreach ( $candidates as $candidate ) {
+                if ( ! isset( $brand_matches[ $candidate['brand'] ] ) ) {
+                    continue;
                 }
+                $all_present = true;
+                foreach ( $candidate['model_words'] as $word ) {
+                    if ( strpos( $lower, $word ) === false ) {
+                        $all_present = false;
+                        break;
+                    }
+                }
+                if ( ! $all_present ) {
+                    continue;
+                }
+                $brand_norm = self::normalize_text( $candidate['brand'] );
+                $close_pattern = '/\b' . preg_quote( $brand_norm, '/' ) . '\b.{0,40}\b' . preg_quote( $candidate['model_words'][0], '/' ) . '/';
+                $reverse_pattern = '/\b' . preg_quote( $candidate['model_words'][0], '/' ) . '\b.{0,40}\b' . preg_quote( $brand_norm, '/' ) . '/';
+                if ( ! preg_match( $close_pattern, $lower ) && ! preg_match( $reverse_pattern, $lower ) ) {
+                    continue;
             }
             if ( $all_present ) {
                 foreach ( $candidate['path'] as $cat ) {
