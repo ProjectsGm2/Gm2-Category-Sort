@@ -174,7 +174,7 @@ if ( ! function_exists( 'add_query_arg' ) ) {
 
 namespace Elementor {
     class Icons_Manager {
-          public static function try_get_icon_html( $icon, $attrs = [], $tag = null ) {
+        public static function try_get_icon_html( $icon, $attrs = [], $tag = null, $echo = false ) {
             $value     = $icon['value'] ?? '';
             $attr_str  = '';
             foreach ( $attrs as $k => $v ) {
