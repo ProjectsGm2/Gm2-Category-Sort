@@ -174,22 +174,21 @@ if ( ! function_exists( 'add_query_arg' ) ) {
 
 namespace Elementor {
     class Icons_Manager {
-        public static function render_icon( $icon, $attrs = [], $tag = null, $is_new = null, $echo = false ) {
+        public static function try_get_icon_html( $icon, $attrs = [], $tag = null ) {
             $value     = $icon['value'] ?? '';
             $attr_str  = '';
             foreach ( $attrs as $k => $v ) {
                 $attr_str .= ' ' . $k . '="' . $v . '"';
             }
             if ( isset( $icon['library'] ) && $icon['library'] === 'svg' ) {
-                $markup = '<svg' . $attr_str . '><path d="' . $value . '"></path></svg>';
-            } else {
-                $markup = '<i class="' . $value . '"' . $attr_str . '></i>';
+                return '<svg' . $attr_str . '><path d="' . $value . '"></path></svg>';
             }
-            if ( $echo ) {
-                echo $markup;
-                return null;
-            }
-            return $markup;
+            return '<i class="' . $value . '"' . $attr_str . '></i>';
+        }
+
+        public static function render_icon( $icon, $attrs = [], $tag = null ) {
+            echo self::try_get_icon_html( $icon, $attrs, $tag );
+            return true;
         }
         public static function enqueue_shim( $icon ) {}
     }
