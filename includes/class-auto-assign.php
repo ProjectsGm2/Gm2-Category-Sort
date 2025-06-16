@@ -445,32 +445,38 @@ class Gm2_Category_Sort_Auto_Assign {
         $progress = get_option( 'gm2_reset_progress', [ 'offset' => 0 ] );
         if ( $reset ) {
             $progress = [ 'offset' => 0 ];
+            wp_defer_term_counting( true );
         }
 
-        $offset = (int) $progress['offset'];
-        $total  = (int) wp_count_posts( 'product' )->publish;
+        $offset     = (int) $progress['offset'];
+        $total      = (int) wp_count_posts( 'product' )->publish;
+        $batch_size = 500;
 
-        $query = new WP_Query(
-            [
-                'post_type'      => 'product',
-                'post_status'    => 'publish',
-                'fields'         => 'ids',
-                'posts_per_page' => 50,
-                'offset'         => $offset,
-                'orderby'        => 'ID',
-                'order'          => 'ASC',
-            ]
+        global $wpdb;
+
+        $ids = $wpdb->get_col(
+            $wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts} WHERE post_type='product' AND post_status='publish' ORDER BY ID ASC LIMIT %d OFFSET %d",
+                $batch_size,
+                $offset
+            )
         );
 
-        foreach ( $query->posts as $product_id ) {
-            wp_set_object_terms( $product_id, [], 'product_cat', false );
+        if ( $ids ) {
+            $tax_ids = $wpdb->get_col( "SELECT term_taxonomy_id FROM {$wpdb->term_taxonomy} WHERE taxonomy='product_cat'" );
+            if ( $tax_ids ) {
+                $wpdb->query(
+                    "DELETE FROM {$wpdb->term_relationships} WHERE object_id IN (" . implode( ',', array_map( 'absint', $ids ) ) . ") AND term_taxonomy_id IN (" . implode( ',', array_map( 'absint', $tax_ids ) ) . ")"
+                );
+            }
         }
 
-        $new_offset = $offset + count( $query->posts );
-        $done       = $new_offset >= $total || empty( $query->posts );
+        $new_offset = $offset + count( $ids );
+        $done       = $new_offset >= $total || empty( $ids );
 
         if ( $done ) {
             delete_option( 'gm2_reset_progress' );
+            wp_defer_term_counting( false );
         } else {
             update_option( 'gm2_reset_progress', [ 'offset' => $new_offset ] );
         }
@@ -483,6 +489,7 @@ class Gm2_Category_Sort_Auto_Assign {
             ]
         );
     }
+
 
     /**
      * Handle WP-CLI auto assignment.
