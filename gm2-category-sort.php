@@ -58,6 +58,7 @@ function gm2_category_sort_init() {
     require_once GM2_CAT_SORT_PATH . 'includes/class-category-importer.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-product-category-generator.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-product-category-importer.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-attribute-fixer.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-auto-assign.php';
     
     // Initialize components
@@ -69,6 +70,7 @@ function gm2_category_sort_init() {
     Gm2_Category_Sort_Term_Meta::init();
     Gm2_Category_Sort_Category_Importer::init();
     Gm2_Category_Sort_Product_Category_Importer::init();
+    Gm2_Category_Sort_Attribute_Fixer::init();
     Gm2_Category_Sort_Auto_Assign::init();
     
     add_filter('pre_get_document_title', 'gm2_category_sort_modify_title');
