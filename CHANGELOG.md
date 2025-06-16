@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+- Reset search button on the Auto Assign Categories page to clear previous results.
+
 ## [1.0.15] - 2025-06-15
 ### Added
 - Icon size, spacing and background controls for expand, collapse and synonym icons.
