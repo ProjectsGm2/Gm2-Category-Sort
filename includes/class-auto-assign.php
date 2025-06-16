@@ -278,15 +278,7 @@ class Gm2_Category_Sort_Auto_Assign {
                 continue;
             }
 
-            $text  = $product->get_name() . ' ' . $product->get_description() . ' ' . $product->get_short_description();
-            foreach ( $product->get_attributes() as $attr ) {
-                if ( $attr->is_taxonomy() ) {
-                    $names = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'names' ] );
-                    $text .= ' ' . implode( ' ', $names );
-                } else {
-                    $text .= ' ' . implode( ' ', array_map( 'sanitize_text_field', $attr->get_options() ) );
-                }
-            }
+            $text  = $product->get_name();
 
             $cats      = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy );
             $term_ids  = [];
@@ -445,6 +437,7 @@ class Gm2_Category_Sort_Auto_Assign {
         $progress = get_option( 'gm2_reset_progress', [ 'offset' => 0 ] );
         if ( $reset ) {
             $progress = [ 'offset' => 0 ];
+            delete_option( 'gm2_auto_assign_progress' );
             wp_defer_term_counting( true );
         }
 
@@ -469,6 +462,9 @@ class Gm2_Category_Sort_Auto_Assign {
                     "DELETE FROM {$wpdb->term_relationships} WHERE object_id IN (" . implode( ',', array_map( 'absint', $ids ) ) . ") AND term_taxonomy_id IN (" . implode( ',', array_map( 'absint', $tax_ids ) ) . ")"
                 );
             }
+            if ( function_exists( "clean_object_term_cache" ) ) {
+                clean_object_term_cache( $ids, "product" );
+            }
         }
 
         $new_offset = $offset + count( $ids );
@@ -476,6 +472,7 @@ class Gm2_Category_Sort_Auto_Assign {
 
         if ( $done ) {
             delete_option( 'gm2_reset_progress' );
+            delete_option( 'gm2_auto_assign_progress' );
             wp_defer_term_counting( false );
         } else {
             update_option( 'gm2_reset_progress', [ 'offset' => $new_offset ] );
@@ -537,15 +534,7 @@ class Gm2_Category_Sort_Auto_Assign {
                     continue;
                 }
 
-                $text = $product->get_name() . ' ' . $product->get_description() . ' ' . $product->get_short_description();
-                foreach ( $product->get_attributes() as $attr ) {
-                    if ( $attr->is_taxonomy() ) {
-                        $names = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'names' ] );
-                        $text .= ' ' . implode( ' ', $names );
-                    } else {
-                        $text .= ' ' . implode( ' ', array_map( 'sanitize_text_field', $attr->get_options() ) );
-                    }
-                }
+                $text = $product->get_name();
 
                 $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy );
                 $term_ids = [];

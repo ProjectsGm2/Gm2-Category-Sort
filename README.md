@@ -140,12 +140,14 @@ remove the BOM before reading the headers.
 ## Auto Assign Categories
 
 The plugin can analyze existing products and automatically assign categories
-based on their titles, descriptions and attribute values. Run the tool from
+based on their titles. (Matching on descriptions and attributes has been
+temporarily disabled.) Run the tool from
 **Tools → Auto Assign Categories** in the admin area and choose whether to
 **Add categories** or **Overwrite categories** before clicking **Start Auto
 Assign**. Use the **Reset All Categories** button to remove every product's
 assigned categories before starting a fresh assignment. A progress bar shows
-the status while products are being cleared. As each product is processed it
+the status while products are being cleared. The previous auto-assign log is
+cleared so each run begins fresh. As each product is processed it
 appears in the log window:
 
 ```
