@@ -3,7 +3,9 @@
 Gm2 Category Sort adds a product category sorting widget for WooCommerce shops when using Elementor. Visitors can filter products by category through a collapsible tree of categories.
 
 ## Requirements
-- PHP 7.0 or higher
+- PHP 7.3 or higher
+- Node.js and npm
+- Composer
 - WordPress 5.0 or higher
 - [WooCommerce](https://woocommerce.com/)
 - [Elementor](https://elementor.com/)
@@ -230,6 +232,13 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 ## Testing
 
+Before running the tests or build tasks, install dependencies:
+
+```bash
+npm install
+composer install
+```
+
 To run the test suite:
 
 1. Install PHP 7.3 or newer and ensure it is available in your `$PATH`. The
@@ -248,8 +257,9 @@ The tests use stubbed WordPress functions so no WordPress installation is requir
 
 ## Build
 
-The frontend script is written with modern JavaScript syntax. To generate an ES5
-compatible build for legacy browsers run:
+The frontend script is written with modern JavaScript syntax. Make sure all
+dependencies are installed with `npm install` and `composer install` before
+building. To generate an ES5 compatible build for legacy browsers run:
 
 ```bash
 npm install
