@@ -139,6 +139,28 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $this->assertSame( [ 'By Lug/Hole Configuration', '10 Lug 5 Hole' ], $cats );
     }
+
+    public function test_brand_model_requires_brand_word() {
+        $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
+        $branch = wp_insert_term( 'By Brand & Model', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
+
+        $dodge = wp_insert_term( 'Dodge', 'product_cat', [ 'parent' => $branch['term_id'] ] );
+        wp_insert_term( 'Ram 4500', 'product_cat', [ 'parent' => $dodge['term_id'] ] );
+        wp_insert_term( 'Ram 5500', 'product_cat', [ 'parent' => $dodge['term_id'] ] );
+
+        $gmc = wp_insert_term( 'GMC', 'product_cat', [ 'parent' => $branch['term_id'] ] );
+        wp_insert_term( '4500', 'product_cat', [ 'parent' => $gmc['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = '19.5" Dodge Ram 4500 5500 2008 Wheel Rim Liner Hubcap Covers';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame(
+            [ 'Wheel Simulators', 'By Brand & Model', 'Dodge', 'Ram 4500', 'Ram 5500' ],
+            $cats
+        );
+    }
   
     public function test_eagle_flight_brand_rule() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );

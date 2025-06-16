@@ -120,6 +120,8 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $words = preg_split( '/\s+/', $lower );
         $word_count = count( $words );
         $lug_hole_candidates = [];
+        $brand_matches       = [];
+        $model_candidates    = [];
         foreach ( $mapping as $term => $path ) {
             $matched = false;
             if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
@@ -149,6 +151,25 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 if ( $neg ) {
                     continue;
                 }
+                $brand_idx = array_search( 'By Brand & Model', $path, true );
+                if ( $brand_idx !== false ) {
+                    if ( isset( $path[ $brand_idx + 1 ] ) && ! isset( $path[ $brand_idx + 2 ] ) ) {
+                        $brand_matches[ $path[ $brand_idx + 1 ] ] = true;
+                        foreach ( $path as $cat ) {
+                            if ( ! in_array( $cat, $cats, true ) ) {
+                                $cats[] = $cat;
+                            }
+                        }
+                        continue;
+                    }
+                    if ( isset( $path[ $brand_idx + 2 ] ) ) {
+                        $model_candidates[] = [
+                            'brand' => $path[ $brand_idx + 1 ],
+                            'path'  => $path,
+                        ];
+                        continue;
+                    }
+                }
                 if ( in_array( 'By Lug/Hole Configuration', $path, true ) ) {
                     if ( ! isset( $lug_hole_candidates[ $term ] ) ) {
                         $lug_hole_candidates[ $term ] = $path;
@@ -176,6 +197,16 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 }
             }
         }
+        foreach ( $model_candidates as $candidate ) {
+            if ( isset( $brand_matches[ $candidate['brand'] ] ) ) {
+                foreach ( $candidate['path'] as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
+                    }
+                }
+            }
+        }
+
       
         $brand_terms = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
         foreach ( $brand_terms as $term ) {
