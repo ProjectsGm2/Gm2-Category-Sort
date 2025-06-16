@@ -1,6 +1,8 @@
 jQuery(function($){
     var log = $('#gm2-auto-assign-log');
     var btn = $('#gm2-auto-assign-start');
+    var resetBtn = $('#gm2-reset-categories');
+    var resetProgress = $('#gm2-reset-progress');
     if(!btn.length) return;
 
     function append(lines){
@@ -34,12 +36,47 @@ jQuery(function($){
         });
     }
 
+    function resetStep(offset, reset){
+        $.post(ajaxurl, {
+            action: 'gm2_reset_product_categories',
+            nonce: gm2AutoAssign.nonce,
+            offset: offset,
+            reset: reset ? 1 : 0
+        }).done(function(resp){
+            if(!resp.success){
+                resetProgress.hide();
+                log.append('<div class="error">'+ gm2AutoAssign.error +'</div>');
+                return;
+            }
+            if(resp.data.total){
+                var percent = Math.round((resp.data.offset/resp.data.total)*100);
+                resetProgress.attr('value', percent).show();
+            }
+            if(!resp.data.done){
+                resetStep(resp.data.offset, false);
+            }else{
+                resetProgress.hide();
+                log.append('<div>'+ gm2AutoAssign.resetDone +'</div>');
+            }
+        }).fail(function(){
+            resetProgress.hide();
+            log.append('<div class="error">'+ gm2AutoAssign.error +'</div>');
+        });
+    }
+
     btn.on('click', function(e){
         e.preventDefault();
         log.empty();
         var overwrite = $('input[name="gm2_overwrite"]:checked').val();
         var fuzzy = $('#gm2_fuzzy').is(':checked');
         step(0, true, overwrite, fuzzy);
+    });
+
+    resetBtn.on('click', function(e){
+        e.preventDefault();
+        log.empty();
+        resetProgress.attr('value',0).show();
+        resetStep(0, true);
     });
 
     // --- Manual search and assign ---

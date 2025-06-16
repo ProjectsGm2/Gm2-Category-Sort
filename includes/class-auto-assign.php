@@ -14,6 +14,7 @@ class Gm2_Category_Sort_Auto_Assign {
         add_action( 'wp_ajax_gm2_auto_assign_step', [ __CLASS__, 'ajax_step' ] );
         add_action( 'wp_ajax_gm2_auto_assign_search', [ __CLASS__, 'ajax_search_products' ] );
         add_action( 'wp_ajax_gm2_auto_assign_selected', [ __CLASS__, 'ajax_assign_selected' ] );
+        add_action( 'wp_ajax_gm2_reset_product_categories', [ __CLASS__, 'ajax_reset_product_categories' ] );
     }
 
     /**
@@ -64,6 +65,7 @@ class Gm2_Category_Sort_Auto_Assign {
                 'nonce'     => wp_create_nonce( 'gm2_auto_assign' ),
                 'completed' => __( 'Auto assign complete.', 'gm2-category-sort' ),
                 'error'     => __( 'Error assigning categories.', 'gm2-category-sort' ),
+                'resetDone' => __( 'All categories reset.', 'gm2-category-sort' ),
             ]
         );
     }
@@ -98,7 +100,16 @@ class Gm2_Category_Sort_Auto_Assign {
                     <?php esc_html_e( 'Use fuzzy matching', 'gm2-category-sort' ); ?>
                 </label>
             </p>
-            <p><button id="gm2-auto-assign-start" class="button button-primary"><?php esc_html_e( 'Start Auto Assign', 'gm2-category-sort' ); ?></button></p>
+            <p>
+                <button id="gm2-auto-assign-start" class="button button-primary">
+                    <?php esc_html_e( 'Start Auto Assign', 'gm2-category-sort' ); ?>
+                </button>
+                &nbsp;
+                <button id="gm2-reset-categories" class="button">
+                    <?php esc_html_e( 'Reset All Categories', 'gm2-category-sort' ); ?>
+                </button>
+            </p>
+            <p><progress id="gm2-reset-progress" value="0" max="100" style="display:none;width:100%;"></progress></p>
             <div id="gm2-auto-assign-log" style="background:#fff;border:1px solid #ccc;padding:10px;max-height:400px;overflow:auto;">
                 <?php foreach ( $log as $line ) : ?>
                     <div><?php echo esc_html( $line ); ?></div>
@@ -390,6 +401,65 @@ class Gm2_Category_Sort_Auto_Assign {
         }
 
         wp_send_json_success();
+    }
+
+    /**
+     * Remove all categories from products in batches.
+     */
+    public static function ajax_reset_product_categories() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( 'unauthorized' );
+        }
+
+        check_ajax_referer( 'gm2_auto_assign', 'nonce' );
+
+        $reset    = ! empty( $_POST['reset'] );
+        $progress = get_option( 'gm2_reset_progress', [ 'offset' => 0 ] );
+        if ( $reset ) {
+            $progress = [ 'offset' => 0 ];
+            wp_defer_term_counting( true );
+        }
+
+        $offset     = (int) $progress['offset'];
+        $total      = (int) wp_count_posts( 'product' )->publish;
+        $batch_size = 500;
+
+        global $wpdb;
+
+        $ids = $wpdb->get_col(
+            $wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts} WHERE post_type='product' AND post_status='publish' ORDER BY ID ASC LIMIT %d OFFSET %d",
+                $batch_size,
+                $offset
+            )
+        );
+
+        if ( $ids ) {
+            $tax_ids = $wpdb->get_col( "SELECT term_taxonomy_id FROM {$wpdb->term_taxonomy} WHERE taxonomy='product_cat'" );
+            if ( $tax_ids ) {
+                $wpdb->query(
+                    "DELETE FROM {$wpdb->term_relationships} WHERE object_id IN (" . implode( ',', array_map( 'absint', $ids ) ) . ") AND term_taxonomy_id IN (" . implode( ',', array_map( 'absint', $tax_ids ) ) . ")"
+                );
+            }
+        }
+
+        $new_offset = $offset + count( $ids );
+        $done       = $new_offset >= $total || empty( $ids );
+
+        if ( $done ) {
+            delete_option( 'gm2_reset_progress' );
+            wp_defer_term_counting( false );
+        } else {
+            update_option( 'gm2_reset_progress', [ 'offset' => $new_offset ] );
+        }
+
+        wp_send_json_success(
+            [
+                'offset' => $new_offset,
+                'total'  => $total,
+                'done'   => $done,
+            ]
+        );
     }
 
     /**

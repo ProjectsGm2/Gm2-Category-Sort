@@ -143,7 +143,10 @@ The plugin can analyze existing products and automatically assign categories
 based on their titles, descriptions and attribute values. Run the tool from
 **Tools → Auto Assign Categories** in the admin area and choose whether to
 **Add categories** or **Overwrite categories** before clicking **Start Auto
-Assign**. As each product is processed it appears in the log window:
+Assign**. Use the **Reset All Categories** button to remove every product's
+assigned categories before starting a fresh assignment. A progress bar shows
+the status while products are being cleared. As each product is processed it
+appears in the log window:
 
 ```
 SKU123 - Sample Product => Accessories, Wheel Covers
