@@ -127,7 +127,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
             $brand_idx = array_search( 'By Brand & Model', $path, true );
             if ( $brand_idx !== false ) {
                 if ( isset( $path[ $brand_idx + 1 ] ) && ! isset( $path[ $brand_idx + 2 ] ) ) {
-                    // Skip numeric-only synonyms when matching brands to avoid
+                      // Skip numeric-only synonyms when matching brands to avoid
                     // confusing model numbers with the brand itself.
                     if ( ! preg_match( '/[a-z]/i', $term ) ) {
                         continue;
@@ -203,7 +203,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 break;
             }
         }
-
+      
         foreach ( $other_mapping as $term => $path ) {
             $matched = false;
             if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
@@ -299,7 +299,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
                         break;
                     }
                 }
-                if ( ! $neg ) {
+              if ( ! $neg ) {
                     foreach ( [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators' ] as $cat ) {
                         if ( ! in_array( $cat, $cats, true ) ) {
                             $cats[] = $cat;

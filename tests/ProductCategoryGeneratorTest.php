@@ -127,8 +127,8 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $this->assertSame( [ 'Wheel' ], $cats );
     }
-
-    public function test_only_one_lug_hole_category_matches() {
+  
+  public function test_only_one_lug_hole_category_matches() {
         $root = wp_insert_term( 'By Lug/Hole Configuration', 'product_cat' );
         wp_insert_term( '10 Lug', 'product_cat', [ 'parent' => $root['term_id'] ] );
         wp_insert_term( '10 Lug 2 Hole', 'product_cat', [ 'parent' => $root['term_id'] ] );
