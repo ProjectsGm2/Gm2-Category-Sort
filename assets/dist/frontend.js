@@ -116,7 +116,7 @@ jQuery(document).ready(function ($) {
     var $collapseIcon = $button.find('.gm2-collapse-icon').first();
     if (isExpanded) {
       $childContainer.slideUp();
-    $expandIcon.show();
+      $expandIcon.show();
       $collapseIcon.hide();
       $button.data('expanded', 'false').removeClass('gm2-expanded');
     } else {

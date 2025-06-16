@@ -174,7 +174,7 @@ if ( ! function_exists( 'add_query_arg' ) ) {
 
 namespace Elementor {
     class Icons_Manager {
-        public static function render_icon( $icon, $attrs = [], $tag = null, $is_new = null, $echo = false ) {
+          public static function try_get_icon_html( $icon, $attrs = [], $tag = null ) {
             $value     = $icon['value'] ?? '';
             $attr_str  = '';
             foreach ( $attrs as $k => $v ) {
@@ -190,6 +190,11 @@ namespace Elementor {
                 return null;
             }
             return $markup;
+        }
+
+        public static function render_icon( $icon, $attrs = [], $tag = null ) {
+            echo self::try_get_icon_html( $icon, $attrs, $tag );
+            return true;
         }
         public static function enqueue_shim( $icon ) {}
     }
