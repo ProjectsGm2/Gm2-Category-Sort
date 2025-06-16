@@ -149,8 +149,8 @@ class AutoAssignTest extends TestCase {
     }
 
     private function create_products() {
-        $p1 = new TestProduct( 1, 'Prod One', 'Contains alt keyword', 'SKU1' );
-        $p2 = new TestProduct( 2, 'Prod Two', 'Some main text', 'SKU2' );
+        $p1 = new TestProduct( 1, 'Prod One Alt', 'Contains alt keyword', 'SKU1' );
+        $p2 = new TestProduct( 2, 'Prod Two Main', 'Some main text', 'SKU2' );
         $GLOBALS['gm2_product_objects'][1] = $p1;
         $GLOBALS['gm2_product_objects'][2] = $p2;
     }
@@ -216,9 +216,9 @@ class AutoAssignTest extends TestCase {
         $wheel = wp_insert_term( 'Wheel', 'product_cat' );
         update_term_meta( $wheel['term_id'], 'gm2_synonyms', '10 lug 2 hole' );
 
-        $GLOBALS['gm2_product_objects'][1] = new TestProduct( 1, 'Prod A', 'Contains alt keyword', 'S1' );
-        $GLOBALS['gm2_product_objects'][2] = new TestProduct( 2, 'Prod B', 'Not for alt items', 'S2' );
-        $GLOBALS['gm2_product_objects'][3] = new TestProduct( 3, 'Prod C', '10 lugs 2 hh kit', 'S3' );
+        $GLOBALS['gm2_product_objects'][1] = new TestProduct( 1, 'Prod A Alt', 'Contains alt keyword', 'S1' );
+        $GLOBALS['gm2_product_objects'][2] = new TestProduct( 2, 'Prod B not for alt items', 'Not for alt items', 'S2' );
+        $GLOBALS['gm2_product_objects'][3] = new TestProduct( 3, 'Prod C 10 lugs 2 hh kit', '10 lugs 2 hh kit', 'S3' );
 
         Gm2_Category_Sort_Auto_Assign::cli_run( [], [] );
 
@@ -245,7 +245,7 @@ class AutoAssignTest extends TestCase {
         $term = wp_insert_term( 'Over-Lug', 'product_cat' );
         update_term_meta( $term['term_id'], 'gm2_synonyms', 'Over Lug,Over the Lug' );
 
-        $GLOBALS['gm2_product_objects'][1] = new TestProduct( 1, 'Prod X', 'Works over the lug', 'S3' );
+        $GLOBALS['gm2_product_objects'][1] = new TestProduct( 1, 'Prod X works over the lug', 'Works over the lug', 'S3' );
 
         Gm2_Category_Sort_Auto_Assign::cli_run( [], [] );
 
@@ -257,7 +257,7 @@ class AutoAssignTest extends TestCase {
     public function test_cli_fuzzy_matching() {
         $wheel = wp_insert_term( 'Wheel', 'product_cat' );
 
-        $GLOBALS['gm2_product_objects'][1] = new TestProduct( 1, 'Prod F', 'Stylish wheell kit', 'S1' );
+        $GLOBALS['gm2_product_objects'][1] = new TestProduct( 1, 'Prod F Stylish wheell kit', 'Stylish wheell kit', 'S1' );
 
         Gm2_Category_Sort_Auto_Assign::cli_run( [], [ 'fuzzy' => 1 ] );
 
