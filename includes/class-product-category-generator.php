@@ -287,8 +287,8 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 }
             }
         }
-
-        $brand_terms = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
+      
+      $brand_terms = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
         foreach ( $brand_terms as $term ) {
             if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
                 $neg = false;
