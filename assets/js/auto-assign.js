@@ -81,6 +81,7 @@ jQuery(function($){
 
     // --- Manual search and assign ---
     var searchBtn = $('#gm2-search-btn');
+    var resetSearchBtn = $('#gm2-reset-search-btn');
     var searchFields = $('#gm2-search-fields');
     var searchTerms = $('#gm2-search-terms');
     var productList = $('#gm2-product-list');
@@ -154,6 +155,17 @@ jQuery(function($){
             renderList();
             searchProgress.attr('value',0).show();
             runSearch(fields, term, 0);
+        });
+
+        resetSearchBtn.on('click', function(e){
+            e.preventDefault();
+            products = {};
+            renderList();
+            searchTerms.val('');
+            productSearch.val('');
+            searchDropdown.empty().hide();
+            liveSpinner.hide();
+            searchProgress.hide();
         });
 
         var debounceTimer = null;

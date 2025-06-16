@@ -126,6 +126,8 @@ class Gm2_Category_Sort_Auto_Assign {
                 </select>
                 <input type="text" id="gm2-search-terms" style="width:200px;" />
                 <button id="gm2-search-btn" class="button"><?php esc_html_e( 'Search', 'gm2-category-sort' ); ?></button>
+                &nbsp;
+                <button id="gm2-reset-search-btn" class="button"><?php esc_html_e( 'Reset Search', 'gm2-category-sort' ); ?></button>
             </p>
             <p><progress id="gm2-search-progress" value="0" max="100" style="display:none;width:100%;"></progress></p>
             <p style="position:relative;">
