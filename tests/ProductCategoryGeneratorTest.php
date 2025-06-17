@@ -209,7 +209,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertSame( [ 'Wheel Simulators', 'By Brand & Model', 'Dodge' ], $cats );
     }
 
-    public function test_exports_brand_and_model_csv() {
+  public function test_exports_brand_and_model_csv() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
         $branch = wp_insert_term( 'By Brand & Model', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
         $dodge  = wp_insert_term( 'Dodge', 'product_cat', [ 'parent' => $branch['term_id'] ] );
