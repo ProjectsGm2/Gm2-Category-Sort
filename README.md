@@ -166,6 +166,10 @@ Success: Auto assign complete.
 ```
 Add `--overwrite` to replace existing categories instead of appending.
 
+Each run also writes out two CSV files in `mapping-logs/` listing the brands
+and models considered during matching. Review `brands.csv` and `models.csv`
+to verify the exact words being checked.
+
 ### Manual Search and Assign
 
 Below the log the page provides a search form to manually select products.

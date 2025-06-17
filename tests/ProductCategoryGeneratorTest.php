@@ -208,4 +208,50 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $this->assertSame( [ 'Wheel Simulators', 'By Brand & Model', 'Dodge' ], $cats );
     }
+
+    public function test_exports_brand_and_model_csv() {
+        $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
+        $branch = wp_insert_term( 'By Brand & Model', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
+        $dodge  = wp_insert_term( 'Dodge', 'product_cat', [ 'parent' => $branch['term_id'] ] );
+        wp_insert_term( 'Ram 4500', 'product_cat', [ 'parent' => $dodge['term_id'] ] );
+        $gmc = wp_insert_term( 'GMC', 'product_cat', [ 'parent' => $branch['term_id'] ] );
+        wp_insert_term( '4500', 'product_cat', [ 'parent' => $gmc['term_id'] ] );
+        update_term_meta( $dodge['term_id'], 'gm2_synonyms', 'Dodge Truck' );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $dir = sys_get_temp_dir() . '/gm2_csv_test';
+        if ( file_exists( $dir ) ) {
+            foreach ( glob( $dir . '/*' ) as $file ) { unlink( $file ); }
+            rmdir( $dir );
+        }
+
+        Gm2_Category_Sort_Product_Category_Generator::export_brand_model_csv( $mapping, $dir );
+
+        $this->assertFileExists( $dir . '/brands.csv' );
+        $this->assertFileExists( $dir . '/models.csv' );
+
+        $brands = array_map( 'str_getcsv', file( $dir . '/brands.csv' ) );
+        $header = array_shift( $brands );
+        $this->assertSame( [ 'Brand', 'Terms' ], $header );
+        $found = false;
+        foreach ( $brands as $row ) {
+            if ( $row[0] === 'Dodge' ) {
+                $found = true;
+                $this->assertStringContainsString( 'dodge truck', strtolower( $row[1] ) );
+            }
+        }
+        $this->assertTrue( $found );
+
+        $models = array_map( 'str_getcsv', file( $dir . '/models.csv' ) );
+        $header = array_shift( $models );
+        $this->assertSame( [ 'Brand', 'Model', 'Terms' ], $header );
+        $found = false;
+        foreach ( $models as $row ) {
+            if ( $row[0] === 'Dodge' && $row[1] === 'Ram 4500' ) {
+                $found = true;
+                $this->assertStringContainsString( 'ram 4500', strtolower( $row[2] ) );
+            }
+        }
+        $this->assertTrue( $found );
+    }
 }

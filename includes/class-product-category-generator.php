@@ -287,6 +287,58 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 }
             }
         }
+
+    /**
+     * Export brand and model lists used for matching to CSV files.
+     *
+     * @param array  $mapping Mapping from build_mapping_from_globals() or build_mapping().
+     * @param string $dir     Directory path for CSV output.
+     * @return void
+     */
+    public static function export_brand_model_csv( array $mapping, $dir ) {
+        if ( ! is_dir( $dir ) ) {
+            @mkdir( $dir, 0777, true );
+        }
+
+        $brands = [];
+        $models = [];
+        foreach ( $mapping as $term => $path ) {
+            $idx = array_search( 'By Brand & Model', $path, true );
+            if ( $idx === false ) {
+                continue;
+            }
+            $brand = $path[ $idx + 1 ] ?? '';
+            $model = $path[ $idx + 2 ] ?? '';
+            if ( $brand && ! $model ) {
+                $brands[ $brand ][] = $term;
+            } elseif ( $brand && $model ) {
+                if ( ! isset( $models[ $brand ] ) ) {
+                    $models[ $brand ] = [];
+                }
+                $models[ $brand ][ $model ][] = $term;
+            }
+        }
+
+        $brand_file = rtrim( $dir, '/' ) . '/brands.csv';
+        if ( $fh = fopen( $brand_file, 'w' ) ) {
+            fputcsv( $fh, [ 'Brand', 'Terms' ] );
+            foreach ( $brands as $brand => $terms ) {
+                fputcsv( $fh, [ $brand, implode( ' | ', array_unique( $terms ) ) ] );
+            }
+            fclose( $fh );
+        }
+
+        $model_file = rtrim( $dir, '/' ) . '/models.csv';
+        if ( $fh = fopen( $model_file, 'w' ) ) {
+            fputcsv( $fh, [ 'Brand', 'Model', 'Terms' ] );
+            foreach ( $models as $brand => $mset ) {
+                foreach ( $mset as $model => $terms ) {
+                    fputcsv( $fh, [ $brand, $model, implode( ' | ', array_unique( $terms ) ) ] );
+                }
+            }
+            fclose( $fh );
+        }
+    }
       
       $brand_terms = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
         foreach ( $brand_terms as $term ) {

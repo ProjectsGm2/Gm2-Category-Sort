@@ -260,6 +260,8 @@ class Gm2_Category_Sort_Auto_Assign {
         $log    = (array) $progress['log'];
 
         $mapping = self::build_mapping();
+        $export_dir = dirname( __DIR__ ) . '/mapping-logs';
+        Gm2_Category_Sort_Product_Category_Generator::export_brand_model_csv( $mapping, $export_dir );
 
         $query = new WP_Query( [
             'post_type'      => 'product',
@@ -498,6 +500,8 @@ class Gm2_Category_Sort_Auto_Assign {
         $overwrite = ! empty( $assoc_args['overwrite'] );
         $fuzzy     = ! empty( $assoc_args['fuzzy'] );
         $mapping   = self::build_mapping();
+        $export_dir = dirname( __DIR__ ) . '/mapping-logs';
+        Gm2_Category_Sort_Product_Category_Generator::export_brand_model_csv( $mapping, $export_dir );
 
         $total    = wp_count_posts( 'product' )->publish;
         $progress = null;
