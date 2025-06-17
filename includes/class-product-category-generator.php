@@ -249,7 +249,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $words = preg_split( '/\s+/', $lower );
         $wheel_size = null;
         if ( preg_match(
-            '/^\s*(\d{1,2}(?:\.\d+)?)(?=[\s"\'\xE2\x80\x9C\xE2\x80\x9D\xE2\x80\x99\xE2\x80\xB2\xE2\x80\xB3xX]|$)/u',
+            '/^\s*(\d{1,2}(?:\.\d+)?)(?=[\s"\'\x{201C}\x{201D}\x{2019}\x{2032}\x{2033}xX]|$)/u',
             $text,
             $m
         ) ) {
