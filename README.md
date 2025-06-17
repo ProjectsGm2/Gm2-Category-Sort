@@ -194,6 +194,13 @@ During analysis common negative phrases such as `not for`, `does not fit` or
 basic stemming so minor wording differences like `lugs` vs `lug`,
 `holes`/`hh` vs `hole` still map to the correct terms.
 
+### Branch Rules
+
+Use **Tools → Branch Rules** to set include and exclude keywords for each
+category branch. When a product text contains any include term and none of the
+exclude terms, that branch is added to the detected categories. These settings
+are stored in the `gm2_branch_rules` option.
+
 ## SEO Improvements
 
 When active filters are applied, the plugin outputs a canonical link pointing to

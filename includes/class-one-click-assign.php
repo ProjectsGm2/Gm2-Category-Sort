@@ -139,7 +139,7 @@ class Gm2_Category_Sort_One_Click_Assign {
      * @param string $file Path to category-tree.csv.
      * @return array<string,array>
      */
-    protected static function build_branch_map( $file ) {
+    public static function build_branch_map( $file ) {
         $rows     = array_map( 'str_getcsv', file( $file ) );
         $branches = [];
         foreach ( $rows as $row ) {
