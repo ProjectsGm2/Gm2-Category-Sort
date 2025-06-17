@@ -192,6 +192,37 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertContains( 'By Wheel Size', $cats );
         $this->assertContains( '19.5"', $cats );
     }
+
+    public function test_wheel_size_prefix_various_sizes() {
+        $root  = wp_insert_term( 'By Wheel Size', 'product_cat' );
+        $sizes = [ '15', '16', '16.5', '17', '17.5', '22.5', '24.5' ];
+        foreach ( $sizes as $s ) {
+            wp_insert_term( $s . '"', 'product_cat', [ 'parent' => $root['term_id'] ] );
+        }
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        foreach ( $sizes as $s ) {
+            foreach ( [ $s . '" wheel cover', $s . "' wheel cover" ] as $text ) {
+                $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+                $this->assertContains( 'By Wheel Size', $cats );
+                $this->assertContains( $s . '"', $cats );
+            }
+        }
+    }
+
+    public function test_wheel_size_category_curly_quote() {
+        $root = wp_insert_term( 'By Wheel Size', 'product_cat' );
+        wp_insert_term( "19.5\xE2\x80\xB3", 'product_cat', [ 'parent' => $root['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = '19.5" rim liner kit';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertContains( 'By Wheel Size', $cats );
+        $this->assertContains( "19.5\xE2\x80\xB3", $cats );
+    }
   
     public function test_eagle_flight_brand_rule() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
