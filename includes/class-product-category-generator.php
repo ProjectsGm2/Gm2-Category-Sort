@@ -47,6 +47,25 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /**
+     * Locate the index of the brand branch within a category path.
+     *
+     * The tree may use different wording like "Brands" or "By Brand & Model". Any
+     * segment containing the word "brand" (case-insensitive) is treated as the
+     * start of the branch.
+     *
+     * @param array $path Category names from root to leaf.
+     * @return int|false Index of the brand branch or false when absent.
+     */
+    protected static function find_brand_index( array $path ) {
+        foreach ( $path as $i => $segment ) {
+            if ( stripos( $segment, 'brand' ) !== false ) {
+                return $i;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Build a mapping of category and synonym terms to their full hierarchy.
      *
      * This uses the globals populated by the test stubs.
@@ -124,7 +143,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $other_mapping = [];
 
         foreach ( $mapping as $term => $path ) {
-            $brand_idx = array_search( 'By Brand & Model', $path, true );
+            $brand_idx = self::find_brand_index( $path );
             if ( $brand_idx !== false ) {
                 if ( isset( $path[ $brand_idx + 1 ] ) && ! isset( $path[ $brand_idx + 2 ] ) ) {
                     // Skip numeric-only synonyms when matching brands to avoid
@@ -328,7 +347,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $brands = [];
         $models = [];
         foreach ( $mapping as $term => $path ) {
-            $idx = array_search( 'By Brand & Model', $path, true );
+            $idx = self::find_brand_index( $path );
             if ( $idx === false ) {
                 continue;
             }
