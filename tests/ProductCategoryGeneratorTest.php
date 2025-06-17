@@ -223,7 +223,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertContains( 'By Wheel Size', $cats );
         $this->assertContains( "19.5\xE2\x80\xB3", $cats );
     }
-
+  
     public function test_eagle_flight_brand_rule() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
         $brands = wp_insert_term( 'Brands', 'product_cat', [ 'parent' => $wheel['term_id'] ] );

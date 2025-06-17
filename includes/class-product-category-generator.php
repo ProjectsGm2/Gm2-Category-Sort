@@ -489,7 +489,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
         }
 
-        if ( $brand_found && $wheel_size_num ) {
+      if ( $brand_found && $wheel_size_num ) {
             $found_child = false;
             $candidates  = [
                 $wheel_size_num . '"',
