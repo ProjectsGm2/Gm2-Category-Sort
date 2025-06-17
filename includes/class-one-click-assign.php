@@ -118,7 +118,14 @@ class Gm2_Category_Sort_One_Click_Assign {
         ob_start();
         echo '<ul>';
         foreach ( $branches as $parent => $children ) {
-            echo '<li><strong>' . esc_html( $parent ) . '</strong>: ' . esc_html( implode( ', ', $children ) ) . '</li>';
+            $clean_parent   = preg_replace( '/\s*\([^\)]*\)/', '', $parent );
+            $clean_children = array_map(
+                function( $child ) {
+                    return preg_replace( '/\s*\([^\)]*\)/', '', $child );
+                },
+                $children
+            );
+            echo '<li><strong>' . esc_html( $clean_parent ) . '</strong>: ' . esc_html( implode( ', ', $clean_children ) ) . '</li>';
         }
         echo '</ul>';
         $html = ob_get_clean();
