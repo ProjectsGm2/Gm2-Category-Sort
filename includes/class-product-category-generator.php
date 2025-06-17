@@ -19,6 +19,12 @@ class Gm2_Category_Sort_Product_Category_Generator {
         'rimliner'        => 'rim liner',
         'rim-liner'       => 'rim liner',
         'rim liners'      => 'rim liner',
+        "\xE2\x80\xB2"       => "'", // prime
+        "\xE2\x80\xB3"       => '"', // double prime
+        "\xE2\x80\x98"       => "'", // left single quote
+        "\xE2\x80\x99"       => "'", // right single quote
+        "\xE2\x80\x9C"       => '"', // left double quote
+        "\xE2\x80\x9D"       => '"', // right double quote
     ];
 
     /** @var string[] */
@@ -304,7 +310,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $wheel_size_num = null;
         $wheel_size     = null;
         if ( preg_match(
-            '/^\s*(\d{1,2}(?:\.\d+)?)(?=[\s"\'\x{201C}\x{201D}\x{2019}\x{2032}\x{2033}xX]|$)/u',
+            '/(?<!\d)(\d{1,2}(?:\.\d+)?)(?=[\s"\'\x{201C}\x{201D}\x{2019}\x{2032}\x{2033}xX]|$)/u',
             $text,
             $m
         ) ) {

@@ -211,6 +211,24 @@ class ProductCategoryGeneratorTest extends TestCase {
         }
     }
 
+    public function test_wheel_size_not_at_start() {
+        $root = wp_insert_term( 'By Wheel Size', 'product_cat' );
+        wp_insert_term( '19.5"', 'product_cat', [ 'parent' => $root['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        $texts = [
+            'Chrome wheel simulator 19.5" set',
+            "Hubcap for 19.5\xE2\x80\xB3 trucks",
+        ];
+
+        foreach ( $texts as $text ) {
+            $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+            $this->assertContains( 'By Wheel Size', $cats );
+            $this->assertContains( '19.5"', $cats );
+        }
+    }
+
     public function test_wheel_size_category_curly_quote() {
         $root = wp_insert_term( 'By Wheel Size', 'product_cat' );
         wp_insert_term( "19.5\xE2\x80\xB3", 'product_cat', [ 'parent' => $root['term_id'] ] );
