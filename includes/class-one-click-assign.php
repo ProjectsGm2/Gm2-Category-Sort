@@ -11,6 +11,7 @@ class Gm2_Category_Sort_One_Click_Assign {
         add_action( 'admin_menu', [ __CLASS__, 'register_admin_page' ] );
         add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin_assets' ] );
         add_action( 'wp_ajax_gm2_one_click_assign', [ __CLASS__, 'ajax_assign' ] );
+        add_action( 'wp_ajax_gm2_one_click_branches', [ __CLASS__, 'ajax_branches' ] );
     }
 
     /**
@@ -49,10 +50,11 @@ class Gm2_Category_Sort_One_Click_Assign {
             'gm2-one-click-assign',
             'gm2OneClickAssign',
             [
-                'nonce'     => wp_create_nonce( 'gm2_one_click_assign' ),
-                'running'   => __( 'Processing...', 'gm2-category-sort' ),
-                'completed' => __( 'Category CSV files generated.', 'gm2-category-sort' ),
-                'error'     => __( 'Error generating files.', 'gm2-category-sort' ),
+                'nonce'           => wp_create_nonce( 'gm2_one_click_assign' ),
+                'running'         => __( 'Processing...', 'gm2-category-sort' ),
+                'completed'       => __( 'Category CSV files generated.', 'gm2-category-sort' ),
+                'loadingBranches' => __( 'Loading categories...', 'gm2-category-sort' ),
+                'error'           => __( 'Error generating files.', 'gm2-category-sort' ),
             ]
         );
     }
@@ -70,6 +72,7 @@ class Gm2_Category_Sort_One_Click_Assign {
                 </button>
             </p>
             <div id="gm2-one-click-message"></div>
+            <div id="gm2-branch-results" style="margin-top:15px;"></div>
         </div>
         <?php
     }
@@ -91,6 +94,66 @@ class Gm2_Category_Sort_One_Click_Assign {
         self::export_branch_csvs( $dir );
 
         wp_send_json_success();
+    }
+
+    /**
+     * Return branch categories and their direct children as HTML.
+     */
+    public static function ajax_branches() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( 'unauthorized' );
+        }
+
+        check_ajax_referer( 'gm2_one_click_assign', 'nonce' );
+
+        $upload = wp_upload_dir();
+        $dir    = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        $file   = rtrim( $dir, '/' ) . '/category-tree.csv';
+        if ( ! file_exists( $file ) ) {
+            wp_send_json_error( __( 'CSV files not found.', 'gm2-category-sort' ) );
+        }
+
+        $branches = self::build_branch_map( $file );
+
+        ob_start();
+        echo '<ul>';
+        foreach ( $branches as $parent => $children ) {
+            echo '<li><strong>' . esc_html( $parent ) . '</strong>: ' . esc_html( implode( ', ', $children ) ) . '</li>';
+        }
+        echo '</ul>';
+        $html = ob_get_clean();
+
+        wp_send_json_success( [ 'html' => $html ] );
+    }
+
+    /**
+     * Build mapping of parent categories to their children from a CSV file.
+     *
+     * @param string $file Path to category-tree.csv.
+     * @return array<string,array>
+     */
+    protected static function build_branch_map( $file ) {
+        $rows     = array_map( 'str_getcsv', file( $file ) );
+        $branches = [];
+        foreach ( $rows as $row ) {
+            $prev = null;
+            foreach ( $row as $segment ) {
+                $segment = trim( $segment );
+                if ( $segment === '' ) {
+                    continue;
+                }
+                if ( $prev !== null ) {
+                    if ( ! isset( $branches[ $prev ] ) ) {
+                        $branches[ $prev ] = [];
+                    }
+                    if ( ! in_array( $segment, $branches[ $prev ], true ) ) {
+                        $branches[ $prev ][] = $segment;
+                    }
+                }
+                $prev = $segment;
+            }
+        }
+        return $branches;
     }
 
     /**
