@@ -223,6 +223,33 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertContains( 'By Wheel Size', $cats );
         $this->assertContains( "19.5\xE2\x80\xB3", $cats );
     }
+
+    public function test_wheel_size_category_in_subtree() {
+        $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
+        $brands = wp_insert_term( 'Brands', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
+        wp_insert_term( 'Eagle Flight Wheel Simulators', 'product_cat', [ 'parent' => $brands['term_id'] ] );
+
+        $acc   = wp_insert_term( 'Accessories', 'product_cat' );
+        $root  = wp_insert_term( 'By Wheel Size', 'product_cat', [ 'parent' => $acc['term_id'] ] );
+        wp_insert_term( '19.5"', 'product_cat', [ 'parent' => $root['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = '19.5" wheel simulator cover';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame(
+            [
+                'Wheel Simulators',
+                'Brands',
+                'Eagle Flight Wheel Simulators',
+                'Accessories',
+                'By Wheel Size',
+                '19.5"',
+            ],
+            $cats
+        );
+    }
   
     public function test_eagle_flight_brand_rule() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
