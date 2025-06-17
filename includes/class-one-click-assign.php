@@ -199,44 +199,35 @@ class Gm2_Category_Sort_One_Click_Assign {
     }
 
     /**
-     * Retrieve readable branch paths from the category-tree.csv file.
+     * Retrieve readable branch paths from generated CSV files.
      *
-     * @param string $dir Directory containing category-tree.csv.
+     * @param string $dir Directory containing branch CSVs.
      * @return array[] List of branch info arrays with path and parent name.
      */
     protected static function get_branch_paths( $dir ) {
-        $tree_file = rtrim( $dir, '/' ) . '/category-tree.csv';
-        if ( ! file_exists( $tree_file ) ) {
-            return [];
-        }
-
-        $rows  = array_map( 'str_getcsv', file( $tree_file ) );
+        $files = glob( rtrim( $dir, '/' ) . '/*.csv' );
         $paths = [];
-        foreach ( $rows as $row ) {
-            if ( empty( $row ) ) {
+
+        foreach ( $files as $file ) {
+            if ( basename( $file ) === 'category-tree.csv' ) {
                 continue;
             }
-            $slugs = [];
-            $names = [];
-            $last  = count( $row ) - 1;
-            foreach ( $row as $i => $segment ) {
-                $segment = trim( $segment );
-                if ( $segment === '' ) {
-                    continue;
-                }
-                $slugs[] = sanitize_title( $segment );
-                $names[] = $segment;
-                if ( $i < $last ) {
-                    $paths[ implode( '-', $slugs ) ] = implode( ' > ', $names );
-                }
+            $fh  = fopen( $file, 'r' );
+            $row = $fh ? fgetcsv( $fh ) : false;
+            if ( $fh ) {
+                fclose( $fh );
             }
+            if ( ! $row ) {
+                continue;
+            }
+
+            $slug        = basename( $file, '.csv' );
+            $paths[ $slug ] = implode( ' > ', array_filter( array_map( 'trim', $row ) ) );
         }
 
         $branches = [];
         foreach ( $paths as $slug => $path ) {
-            $parts = explode( '-', $slug );
-            array_pop( $parts );
-            $parent_slug = implode( '-', $parts );
+            $parent_slug = preg_replace( '/-[^-]+$/', '', $slug );
             $parent      = isset( $paths[ $parent_slug ] ) ? $paths[ $parent_slug ] : '';
             $branches[]  = [
                 'path'   => $path,
