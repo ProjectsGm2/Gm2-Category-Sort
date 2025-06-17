@@ -171,6 +171,14 @@ directory at `wp-content/uploads/gm2-category-sort/mapping-logs`. Review the
 `brands.csv`, `models.csv` and `wheel-sizes.csv` files there to verify the
 exact words being checked.
 
+## One Click Categories Assignment
+
+This tool exports the full category tree and individual branch files in one step.
+Open **Tools → One Click Categories Assignment** and click **Assign Categories**.
+The plugin saves `category-tree.csv` plus separate CSVs for each category that
+has child terms under `wp-content/uploads/gm2-category-sort/categories-structure`.
+Use these files to review or modify the structure of specific sections.
+
 ### Manual Search and Assign
 
 Below the log the page provides a search form to manually select products.
