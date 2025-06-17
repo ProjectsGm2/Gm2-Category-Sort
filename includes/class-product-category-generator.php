@@ -246,7 +246,17 @@ class Gm2_Category_Sort_Product_Category_Generator {
     public static function assign_categories( $text, array $mapping, $fuzzy = false, $threshold = 85, $csv_dir = null ) {
         $lower = self::normalize_text( $text );
         $cats  = [];
-        $words = preg_split( '/\s+/', $lower );
+        $words          = preg_split( '/\s+/', $lower );
+        $wheel_size_num = null;
+        $wheel_size     = null;
+        if ( preg_match(
+            '/^\s*(\d{1,2}(?:\.\d+)?)(?=[\s"\'\x{201C}\x{201D}\x{2019}\x{2032}\x{2033}xX]|$)/u',
+            $text,
+            $m
+        ) ) {
+            $wheel_size_num = $m[1];
+            $wheel_size     = $wheel_size_num . '"';
+        }
         $word_count = count( $words );
         $lug_hole_candidates = [];
         $brands        = [];
@@ -455,7 +465,8 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
         }
 
-      $brand_terms = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
+        $brand_terms  = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
+        $brand_found  = false;
         foreach ( $brand_terms as $term ) {
             if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
                 $neg = false;
@@ -472,7 +483,36 @@ class Gm2_Category_Sort_Product_Category_Generator {
                             $cats[] = $cat;
                         }
                     }
+                    $brand_found = true;
                     break;
+                }
+            }
+        }
+
+        if ( $brand_found && $wheel_size_num ) {
+            $found_child = false;
+            $candidates  = [
+                $wheel_size_num . '"',
+                $wheel_size_num . "\xE2\x80\xB3",
+                $wheel_size_num,
+            ];
+            foreach ( $candidates as $cand ) {
+                $key = self::normalize_text( $cand );
+                if ( isset( $mapping[ $key ] ) ) {
+                    foreach ( $mapping[ $key ] as $cat ) {
+                        if ( ! in_array( $cat, $cats, true ) ) {
+                            $cats[] = $cat;
+                        }
+                    }
+                    $found_child = true;
+                    break;
+                }
+            }
+            if ( ! $found_child ) {
+                foreach ( [ 'By Wheel Size', $wheel_size ] as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
+                    }
                 }
             }
         }
