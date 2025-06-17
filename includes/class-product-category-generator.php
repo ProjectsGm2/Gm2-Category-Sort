@@ -231,6 +231,389 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /**
+     * Filter a term mapping to only entries containing a specific branch name.
+     *
+     * @param array  $mapping Full mapping from term => category path.
+     * @param string $segment Branch label to search for.
+     * @return array<string,array>
+     */
+    protected static function filter_by_segment( array $mapping, $segment ) {
+        $result = [];
+        foreach ( $mapping as $term => $path ) {
+            if ( in_array( $segment, $path, true ) ) {
+                $result[ $term ] = $path;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Basic term matching helper used by many category checks.
+     *
+     * @param string $lower    Normalized text.
+     * @param array  $words    Tokenized words from $lower.
+     * @param array  $mapping  Filtered mapping to check.
+     * @param bool   $fuzzy    Whether to allow fuzzy matching.
+     * @param int    $threshold Fuzzy matching threshold.
+     * @return array List of category names to assign.
+     */
+    protected static function match_terms( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+        $cats       = [];
+        $word_count = count( $words );
+        foreach ( $mapping as $term => $path ) {
+            $matched = false;
+            if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
+                $matched = true;
+            } elseif ( $fuzzy ) {
+                $term_words = preg_split( '/\\s+/', $term );
+                $n          = count( $term_words );
+                for ( $i = 0; $i <= $word_count - $n; $i++ ) {
+                    $segment = implode( ' ', array_slice( $words, $i, $n ) );
+                    similar_text( $term, $segment, $percent );
+                    if ( $percent >= $threshold ) {
+                        $matched = true;
+                        break;
+                    }
+                }
+            }
+            if ( ! $matched ) {
+                continue;
+            }
+            $neg = false;
+            foreach ( self::$negation_patterns as $pattern ) {
+                $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
+                if ( preg_match( $regex, $lower ) ) {
+                    $neg = true;
+                    break;
+                }
+            }
+            if ( $neg ) {
+                continue;
+            }
+            foreach ( $path as $cat ) {
+                if ( ! in_array( $cat, $cats, true ) ) {
+                    $cats[] = $cat;
+                }
+            }
+        }
+        return $cats;
+    }
+
+    /** Helper for root wheel simulator keywords. */
+    protected static function check_wheel_simulators( $lower ) {
+        $cats        = [];
+        $brand_terms = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
+        foreach ( $brand_terms as $term ) {
+            if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
+                $neg = false;
+                foreach ( self::$negation_patterns as $pattern ) {
+                    $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
+                    if ( preg_match( $regex, $lower ) ) {
+                        $neg = true;
+                        break;
+                    }
+                }
+                if ( ! $neg ) {
+                    foreach ( [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators' ] as $cat ) {
+                        if ( ! in_array( $cat, $cats, true ) ) {
+                            $cats[] = $cat;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        return $cats;
+    }
+
+    /** Brand and model branch logic. */
+    protected static function check_brand_model( $lower, array $words, array $mapping, $fuzzy, $threshold, $csv_dir ) {
+        $brands       = [];
+        $brand_models = [];
+
+        if ( $csv_dir ) {
+            list( $csv_brands, $csv_models ) = self::load_brand_model_csv( $csv_dir );
+            foreach ( $mapping as $term => $path ) {
+                $brand_idx = self::find_brand_index( $path );
+                if ( $brand_idx === false ) {
+                    continue;
+                }
+                $brand = $path[ $brand_idx + 1 ] ?? '';
+                $model = $path[ $brand_idx + 2 ] ?? '';
+                if ( $brand && isset( $csv_brands[ $brand ] ) && ! $model ) {
+                    foreach ( $csv_brands[ $brand ] as $bterm ) {
+                        if ( ! isset( $brands[ $brand ] ) ) {
+                            $brands[ $brand ] = [];
+                        }
+                        $brands[ $brand ][] = [ 'term' => self::normalize_text( $bterm ), 'path' => $path ];
+                    }
+                } elseif ( $brand && $model && isset( $csv_models[ $brand ][ $model ] ) ) {
+                    $model_words = preg_split( '/\\s+/', self::normalize_text( $model ) );
+                    $model_words = array_values( array_filter( $model_words, static function ( $w ) {
+                        return ! in_array( $w, [ 'wheel', 'wheels', 'simulator', 'simulators', 'rim', 'liner', 'cover', 'covers', 'hubcap', 'hubcaps' ], true );
+                    } ) );
+                    foreach ( $csv_models[ $brand ][ $model ] as $mterm ) {
+                        if ( ! isset( $brand_models[ $brand ] ) ) {
+                            $brand_models[ $brand ] = [];
+                        }
+                        $brand_models[ $brand ][] = [
+                            'term'        => self::normalize_text( $mterm ),
+                            'path'        => $path,
+                            'model_words' => $model_words,
+                        ];
+                    }
+                }
+            }
+        } else {
+            foreach ( $mapping as $term => $path ) {
+                $brand_idx = self::find_brand_index( $path );
+                if ( $brand_idx === false ) {
+                    continue;
+                }
+                if ( isset( $path[ $brand_idx + 1 ] ) && ! isset( $path[ $brand_idx + 2 ] ) ) {
+                    if ( ! preg_match( '/[a-z]/i', $term ) ) {
+                        continue;
+                    }
+                    $brand = $path[ $brand_idx + 1 ];
+                    if ( ! isset( $brands[ $brand ] ) ) {
+                        $brands[ $brand ] = [];
+                    }
+                    $brands[ $brand ][] = [ 'term' => $term, 'path' => $path ];
+                    continue;
+                }
+                if ( isset( $path[ $brand_idx + 2 ] ) ) {
+                    $brand      = $path[ $brand_idx + 1 ];
+                    $model_name = self::normalize_text( $path[ $brand_idx + 2 ] );
+                    $m_words    = preg_split( '/\\s+/', $model_name );
+                    $m_words    = array_values( array_filter( $m_words, static function ( $w ) {
+                        return ! in_array( $w, [ 'wheel', 'wheels', 'simulator', 'simulators', 'rim', 'liner', 'cover', 'covers', 'hubcap', 'hubcaps' ], true );
+                    } ) );
+                    if ( ! isset( $brand_models[ $brand ] ) ) {
+                        $brand_models[ $brand ] = [];
+                    }
+                    $brand_models[ $brand ][] = [
+                        'term'        => $term,
+                        'path'        => $path,
+                        'model_words' => $m_words,
+                    ];
+                    continue;
+                }
+            }
+        }
+
+        $cats         = [];
+        $brand_matches = [];
+        $word_count    = count( $words );
+
+        foreach ( $brands as $brand => $entries ) {
+            foreach ( $entries as $entry ) {
+                $term    = $entry['term'];
+                $matched = false;
+                if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
+                    $matched = true;
+                } elseif ( $fuzzy ) {
+                    $term_words = preg_split( '/\\s+/', $term );
+                    $n          = count( $term_words );
+                    for ( $i = 0; $i <= $word_count - $n; $i++ ) {
+                        $segment = implode( ' ', array_slice( $words, $i, $n ) );
+                        similar_text( $term, $segment, $percent );
+                        if ( $percent >= $threshold ) {
+                            $matched = true;
+                            break;
+                        }
+                    }
+                }
+                if ( ! $matched ) {
+                    continue;
+                }
+                $neg = false;
+                foreach ( self::$negation_patterns as $pattern ) {
+                    $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
+                    if ( preg_match( $regex, $lower ) ) {
+                        $neg = true;
+                        break;
+                    }
+                }
+                if ( $neg ) {
+                    continue;
+                }
+                $brand_matches[ $brand ] = $term;
+                foreach ( $entry['path'] as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
+                    }
+                }
+                break;
+            }
+        }
+
+        foreach ( $brand_matches as $brand => $brand_term ) {
+            if ( empty( $brand_models[ $brand ] ) ) {
+                continue;
+            }
+            foreach ( $brand_models[ $brand ] as $model ) {
+                $all_present = true;
+                foreach ( $model['model_words'] as $word ) {
+                    if ( strpos( $lower, $word ) === false ) {
+                        $all_present = false;
+                        break;
+                    }
+                }
+                if ( ! $all_present ) {
+                    continue;
+                }
+                $brand_norm      = self::normalize_text( $brand_term );
+                $first_word      = $model['model_words'][0] ?? '';
+                $close_pattern   = '/\\b' . preg_quote( $brand_norm, '/' ) . '\\b.{0,40}\\b' . preg_quote( $first_word, '/' ) . '/';
+                $reverse_pattern = '/\\b' . preg_quote( $first_word, '/' ) . '\\b.{0,40}\\b' . preg_quote( $brand_norm, '/' ) . '/';
+                if ( ! preg_match( $close_pattern, $lower ) && ! preg_match( $reverse_pattern, $lower ) ) {
+                    continue;
+                }
+                foreach ( $model['path'] as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
+                    }
+                }
+            }
+        }
+
+        return $cats;
+    }
+
+    /** Wheel size branch logic. */
+    protected static function check_wheel_size( $lower, array $mapping, $wheel_size_num, $wheel_size, $brand_found ) {
+        if ( ! $brand_found || ! $wheel_size_num ) {
+            return [];
+        }
+        $cats           = [];
+        $wheel_size_map = self::extract_wheel_size_map( $mapping );
+        $candidates     = [
+            $wheel_size_num . '"',
+            $wheel_size_num . "\xE2\x80\xB3",
+            $wheel_size_num,
+        ];
+        $found_child = false;
+        foreach ( $candidates as $cand ) {
+            $key = self::normalize_text( $cand );
+            if ( isset( $wheel_size_map[ $key ] ) ) {
+                foreach ( $wheel_size_map[ $key ] as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
+                    }
+                }
+                $found_child = true;
+                break;
+            }
+        }
+        if ( ! $found_child ) {
+            foreach ( [ 'By Wheel Size', $wheel_size ] as $cat ) {
+                if ( ! in_array( $cat, $cats, true ) ) {
+                    $cats[] = $cat;
+                }
+            }
+        }
+        return $cats;
+    }
+
+    /** Lug/Hole configuration branch logic. */
+    protected static function check_lug_hole( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+        $subset      = self::filter_by_segment( $mapping, 'By Lug/Hole Configuration' );
+        $candidates  = [];
+        $word_count  = count( $words );
+        foreach ( $subset as $term => $path ) {
+            $matched = false;
+            if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
+                $matched = true;
+            } elseif ( $fuzzy ) {
+                $term_words = preg_split( '/\\s+/', $term );
+                $n          = count( $term_words );
+                for ( $i = 0; $i <= $word_count - $n; $i++ ) {
+                    $segment = implode( ' ', array_slice( $words, $i, $n ) );
+                    similar_text( $term, $segment, $percent );
+                    if ( $percent >= $threshold ) {
+                        $matched = true;
+                        break;
+                    }
+                }
+            }
+            if ( ! $matched ) {
+                continue;
+            }
+            $neg = false;
+            foreach ( self::$negation_patterns as $pattern ) {
+                $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
+                if ( preg_match( $regex, $lower ) ) {
+                    $neg = true;
+                    break;
+                }
+            }
+            if ( $neg ) {
+                continue;
+            }
+            if ( ! isset( $candidates[ $term ] ) ) {
+                $candidates[ $term ] = $path;
+            }
+        }
+        if ( ! $candidates ) {
+            return [];
+        }
+        uksort( $candidates, static function ( $a, $b ) {
+            return strlen( $b ) <=> strlen( $a );
+        } );
+        $path = reset( $candidates );
+        return array_values( array_unique( $path ) );
+    }
+
+    /** Generic helpers for additional branches. */
+    protected static function check_wheel_type( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Wheel Type' ), $fuzzy, $threshold );
+    }
+
+    protected static function check_set_sizes( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Wheel Set Sizes' ), $fuzzy, $threshold );
+    }
+
+    protected static function check_fit_type( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Fit Type' ), $fuzzy, $threshold );
+    }
+
+    protected static function check_vehicle_type( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Vehicle Type' ), $fuzzy, $threshold );
+    }
+
+    protected static function check_ring_mount( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Ring Mount' ), $fuzzy, $threshold );
+    }
+
+    protected static function check_dayton_spoke( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Dayton Spoke' ), $fuzzy, $threshold );
+    }
+
+    protected static function check_wheel_center_caps( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Wheel Center Caps' ), $fuzzy, $threshold );
+    }
+
+    protected static function check_wheel_cover_parts( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Wheel Cover Parts' ), $fuzzy, $threshold );
+    }
+
+    protected static function check_seat_covers( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Seat Covers' ), $fuzzy, $threshold );
+    }
+
+    protected static function check_coverking_accessories( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Coverking Accessories' ), $fuzzy, $threshold );
+    }
+
+    protected static function check_accessories_hardware( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Accessories & Hardware' ), $fuzzy, $threshold );
+    }
+
+    protected static function check_brands( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Brands' ), $fuzzy, $threshold );
+    }
+
+    /**
      * Build a mapping of category and synonym terms to their full hierarchy.
      *
      * This uses the globals populated by the test stubs.
@@ -311,270 +694,157 @@ class Gm2_Category_Sort_Product_Category_Generator {
             $wheel_size_num = $m[1];
             $wheel_size     = $wheel_size_num . '"';
         }
-        $word_count = count( $words );
-        $lug_hole_candidates = [];
-        $brands        = [];
-        $brand_models  = [];
-        $other_mapping = [];
+        $brand_found = false;
 
-        if ( $csv_dir ) {
-            list( $csv_brands, $csv_models ) = self::load_brand_model_csv( $csv_dir );
-            foreach ( $mapping as $term => $path ) {
-                $brand_idx = self::find_brand_index( $path );
-                if ( $brand_idx === false ) {
-                    if ( in_array( 'By Wheel Size', $path, true ) ) {
-                        continue;
-                    }
-                    $other_mapping[ $term ] = $path;
-                    continue;
-                }
-                $brand = $path[ $brand_idx + 1 ] ?? '';
-                $model = $path[ $brand_idx + 2 ] ?? '';
-                if ( $brand && isset( $csv_brands[ $brand ] ) && ! $model ) {
-                    foreach ( $csv_brands[ $brand ] as $bterm ) {
-                        if ( ! isset( $brands[ $brand ] ) ) {
-                            $brands[ $brand ] = [];
-                        }
-                        $brands[ $brand ][] = [ 'term' => self::normalize_text( $bterm ), 'path' => $path ];
-                    }
-                } elseif ( $brand && $model && isset( $csv_models[ $brand ][ $model ] ) ) {
-                    $model_words = preg_split( '/\s+/', self::normalize_text( $model ) );
-                    $model_words = array_values( array_filter( $model_words, static function ( $w ) {
-                        return ! in_array( $w, [ 'wheel', 'wheels', 'simulator', 'simulators', 'rim', 'liner', 'cover', 'covers', 'hubcap', 'hubcaps' ], true );
-                    } ) );
-                    foreach ( $csv_models[ $brand ][ $model ] as $mterm ) {
-                        if ( ! isset( $brand_models[ $brand ] ) ) {
-                            $brand_models[ $brand ] = [];
-                        }
-                        $brand_models[ $brand ][] = [
-                            'term'        => self::normalize_text( $mterm ),
-                            'path'        => $path,
-                            'model_words' => $model_words,
-                        ];
-                    }
-                }
-            }
-        } else {
-            foreach ( $mapping as $term => $path ) {
-                $brand_idx = self::find_brand_index( $path );
-                if ( $brand_idx !== false ) {
-                    if ( isset( $path[ $brand_idx + 1 ] ) && ! isset( $path[ $brand_idx + 2 ] ) ) {
-                        // Skip numeric-only synonyms when matching brands to avoid
-                        // confusing model numbers with the brand itself.
-                        if ( ! preg_match( '/[a-z]/i', $term ) ) {
-                            continue;
-                        }
-                        $brand = $path[ $brand_idx + 1 ];
-                        if ( ! isset( $brands[ $brand ] ) ) {
-                            $brands[ $brand ] = [];
-                        }
-                        $brands[ $brand ][] = [ 'term' => $term, 'path' => $path ];
-                        continue;
-                    }
-                    if ( isset( $path[ $brand_idx + 2 ] ) ) {
-                        $brand       = $path[ $brand_idx + 1 ];
-                        $model_name  = self::normalize_text( $path[ $brand_idx + 2 ] );
-                        $m_words     = preg_split( '/\s+/', $model_name );
-                        $m_words     = array_values( array_filter( $m_words, static function ( $w ) {
-                            return ! in_array( $w, [ 'wheel', 'wheels', 'simulator', 'simulators', 'rim', 'liner', 'cover', 'covers', 'hubcap', 'hubcaps' ], true );
-                        } ) );
-                        if ( ! isset( $brand_models[ $brand ] ) ) {
-                            $brand_models[ $brand ] = [];
-                        }
-                        $brand_models[ $brand ][] = [
-                            'term'        => $term,
-                            'path'        => $path,
-                            'model_words' => $m_words,
-                        ];
-                        continue;
-                    }
-                }
+        $exclude_segments = [
+            'By Wheel Size',
+            'By Lug/Hole Configuration',
+            'By Wheel Type',
+            'By Wheel Set Sizes',
+            'By Fit Type',
+            'By Vehicle Type',
+            'Ring Mount',
+            'Dayton Spoke',
+            'Wheel Center Caps',
+            'Wheel Cover Parts',
+            'Seat Covers',
+            'Coverking Accessories',
+            'Accessories & Hardware',
+            'Brands',
+        ];
 
-                if ( in_array( 'By Wheel Size', $path, true ) ) {
-                    continue;
-                }
-                $other_mapping[ $term ] = $path;
-            }
-        }
-
-
-        $brand_matches = [];
-        foreach ( $brands as $brand => $entries ) {
-            foreach ( $entries as $entry ) {
-                $term    = $entry['term'];
-                $matched = false;
-                if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
-                    $matched = true;
-                } elseif ( $fuzzy ) {
-                    $term_words = preg_split( '/\s+/', $term );
-                    $n = count( $term_words );
-                    for ( $i = 0; $i <= $word_count - $n; $i++ ) {
-                        $segment = implode( ' ', array_slice( $words, $i, $n ) );
-                        similar_text( $term, $segment, $percent );
-                        if ( $percent >= $threshold ) {
-                            $matched = true;
-                            break;
-                        }
-                    }
-                }
-                if ( ! $matched ) {
-                    continue;
-                }
-                $neg = false;
-                foreach ( self::$negation_patterns as $pattern ) {
-                    $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
-                    if ( preg_match( $regex, $lower ) ) {
-                        $neg = true;
-                        break;
-                    }
-                }
-                if ( $neg ) {
-                    continue;
-                }
-                $brand_matches[ $brand ] = $term;
-                foreach ( $entry['path'] as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
-                    }
-                }
-                break;
-            }
-        }
-
-        foreach ( $other_mapping as $term => $path ) {
-            $matched = false;
-            if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
-                $matched = true;
-            } elseif ( $fuzzy ) {
-                $term_words = preg_split( '/\s+/', $term );
-                $n = count( $term_words );
-                for ( $i = 0; $i <= $word_count - $n; $i++ ) {
-                    $segment = implode( ' ', array_slice( $words, $i, $n ) );
-                    similar_text( $term, $segment, $percent );
-                    if ( $percent >= $threshold ) {
-                        $matched = true;
-                        break;
-                    }
-                }
-            }
-            if ( ! $matched ) {
+        $other_map = [];
+        foreach ( $mapping as $term => $path ) {
+            if ( self::find_brand_index( $path ) !== false ) {
                 continue;
             }
-            $neg = false;
-            foreach ( self::$negation_patterns as $pattern ) {
-                $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
-                if ( preg_match( $regex, $lower ) ) {
-                    $neg = true;
+            $skip = false;
+            foreach ( $exclude_segments as $seg ) {
+                if ( in_array( $seg, $path, true ) ) {
+                    $skip = true;
                     break;
                 }
             }
-            if ( $neg ) {
+            if ( $skip ) {
                 continue;
             }
-            if ( in_array( 'By Lug/Hole Configuration', $path, true ) ) {
-                if ( ! isset( $lug_hole_candidates[ $term ] ) ) {
-                    $lug_hole_candidates[ $term ] = $path;
+            $other_map[ $term ] = $path;
+        }
+
+        $cats = array_merge( $cats, self::match_terms( $lower, $words, $other_map, $fuzzy, $threshold ) );
+
+        $sim = self::check_wheel_simulators( $lower );
+        if ( $sim ) {
+            foreach ( $sim as $c ) {
+                if ( ! in_array( $c, $cats, true ) ) {
+                    $cats[] = $c;
                 }
-            } else {
-                foreach ( $path as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
-                    }
-                }
+            }
+            $brand_found = true;
+        }
+
+        $bm = self::check_brand_model( $lower, $words, $mapping, $fuzzy, $threshold, $csv_dir );
+        foreach ( $bm as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
             }
         }
 
-        if ( $lug_hole_candidates ) {
-            uksort( $lug_hole_candidates, static function ( $a, $b ) {
-                return strlen( $b ) <=> strlen( $a );
-            } );
-            $path = reset( $lug_hole_candidates );
-            foreach ( $path as $cat ) {
-                if ( ! in_array( $cat, $cats, true ) ) {
-                    $cats[] = $cat;
-                }
-            }
-        }
-        foreach ( $brand_matches as $brand => $brand_term ) {
-            if ( empty( $brand_models[ $brand ] ) ) {
-                continue;
-            }
-            foreach ( $brand_models[ $brand ] as $model ) {
-                $all_present = true;
-                foreach ( $model['model_words'] as $word ) {
-                    if ( strpos( $lower, $word ) === false ) {
-                        $all_present = false;
-                        break;
-                    }
-                }
-                if ( ! $all_present ) {
-                    continue;
-                }
-                $brand_norm     = self::normalize_text( $brand_term );
-                $first_word     = $model['model_words'][0] ?? '';
-                $close_pattern  = '/\b' . preg_quote( $brand_norm, '/' ) . '\b.{0,40}\b' . preg_quote( $first_word, '/' ) . '/';
-                $reverse_pattern = '/\b' . preg_quote( $first_word, '/' ) . '\b.{0,40}\b' . preg_quote( $brand_norm, '/' ) . '/';
-                if ( ! preg_match( $close_pattern, $lower ) && ! preg_match( $reverse_pattern, $lower ) ) {
-                    continue;
-                }
-                foreach ( $model['path'] as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
-                    }
-                }
+        $ws = self::check_wheel_size( $lower, $mapping, $wheel_size_num, $wheel_size, $brand_found );
+        foreach ( $ws as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
             }
         }
 
-        $brand_terms  = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
-        $brand_found  = false;
-        foreach ( $brand_terms as $term ) {
-            if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
-                $neg = false;
-                foreach ( self::$negation_patterns as $pattern ) {
-                    $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
-                    if ( preg_match( $regex, $lower ) ) {
-                        $neg = true;
-                        break;
-                    }
-                }
-                if ( ! $neg ) {
-                    foreach ( [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators' ] as $cat ) {
-                        if ( ! in_array( $cat, $cats, true ) ) {
-                            $cats[] = $cat;
-                        }
-                    }
-                    $brand_found = true;
-                    break;
-                }
+        $lh = self::check_lug_hole( $lower, $words, $mapping, $fuzzy, $threshold );
+        foreach ( $lh as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
             }
         }
 
-        if ( $brand_found && $wheel_size_num ) {
-            $found_child    = false;
-            $wheel_size_map = self::extract_wheel_size_map( $mapping );
-            $candidates     = [
-                $wheel_size_num . '"',
-                $wheel_size_num . "\xE2\x80\xB3",
-                $wheel_size_num,
-            ];
-            foreach ( $candidates as $cand ) {
-                $key = self::normalize_text( $cand );
-                if ( isset( $wheel_size_map[ $key ] ) ) {
-                    foreach ( $wheel_size_map[ $key ] as $cat ) {
-                        if ( ! in_array( $cat, $cats, true ) ) {
-                            $cats[] = $cat;
-                        }
-                    }
-                    $found_child = true;
-                    break;
-                }
+        $wt = self::check_wheel_type( $lower, $words, $mapping, $fuzzy, $threshold );
+        foreach ( $wt as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
             }
-            if ( ! $found_child ) {
-                foreach ( [ 'By Wheel Size', $wheel_size ] as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
-                    }
-                }
+        }
+
+        $ss = self::check_set_sizes( $lower, $words, $mapping, $fuzzy, $threshold );
+        foreach ( $ss as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
+            }
+        }
+
+        $ft = self::check_fit_type( $lower, $words, $mapping, $fuzzy, $threshold );
+        foreach ( $ft as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
+            }
+        }
+
+        $vt = self::check_vehicle_type( $lower, $words, $mapping, $fuzzy, $threshold );
+        foreach ( $vt as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
+            }
+        }
+
+        $rm = self::check_ring_mount( $lower, $words, $mapping, $fuzzy, $threshold );
+        foreach ( $rm as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
+            }
+        }
+
+        $ds = self::check_dayton_spoke( $lower, $words, $mapping, $fuzzy, $threshold );
+        foreach ( $ds as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
+            }
+        }
+
+        $cap = self::check_wheel_center_caps( $lower, $words, $mapping, $fuzzy, $threshold );
+        foreach ( $cap as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
+            }
+        }
+
+        $wcp = self::check_wheel_cover_parts( $lower, $words, $mapping, $fuzzy, $threshold );
+        foreach ( $wcp as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
+            }
+        }
+
+        $sc = self::check_seat_covers( $lower, $words, $mapping, $fuzzy, $threshold );
+        foreach ( $sc as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
+            }
+        }
+
+        $cka = self::check_coverking_accessories( $lower, $words, $mapping, $fuzzy, $threshold );
+        foreach ( $cka as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
+            }
+        }
+
+        $ah = self::check_accessories_hardware( $lower, $words, $mapping, $fuzzy, $threshold );
+        foreach ( $ah as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
+            }
+        }
+
+        $br = self::check_brands( $lower, $words, $mapping, $fuzzy, $threshold );
+        foreach ( $br as $c ) {
+            if ( ! in_array( $c, $cats, true ) ) {
+                $cats[] = $c;
             }
         }
 

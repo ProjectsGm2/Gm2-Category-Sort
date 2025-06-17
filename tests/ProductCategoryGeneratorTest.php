@@ -166,13 +166,13 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $this->assertSame(
             [
-                'By Lug/Hole Configuration',
-                '10 Lug 5 Hole',
                 'Wheel Simulators',
                 'Brands',
                 'Eagle Flight Wheel Simulators',
                 'By Wheel Size',
                 '19.5"',
+                'By Lug/Hole Configuration',
+                '10 Lug 5 Hole',
             ],
             $cats
         );
@@ -310,12 +310,12 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertSame(
             [
                 'Wheel Simulators',
+                'Brands',
+                'Eagle Flight Wheel Simulators',
                 'By Brand & Model',
                 'Dodge',
                 'Ram 4500',
                 'Ram 5500',
-                'Brands',
-                'Eagle Flight Wheel Simulators',
                 'By Wheel Size',
                 '19.5"',
             ],
@@ -510,5 +510,47 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $this->assertContains( 'Dodge', $cats );
         $this->assertContains( 'Ram 3500', $cats );
+    }
+
+    public function test_helper_check_wheel_simulators() {
+        $ref    = new ReflectionClass( Gm2_Category_Sort_Product_Category_Generator::class );
+        $method = $ref->getMethod( 'check_wheel_simulators' );
+        $method->setAccessible( true );
+        $lower = Gm2_Category_Sort_Product_Category_Generator::normalize_text( 'Chrome hubcap' );
+        $cats  = $method->invoke( null, $lower );
+        $this->assertSame( [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators' ], $cats );
+    }
+
+    public function test_helper_check_lug_hole() {
+        $root = wp_insert_term( 'By Lug/Hole Configuration', 'product_cat' );
+        wp_insert_term( '10 Lug', 'product_cat', [ 'parent' => $root['term_id'] ] );
+        wp_insert_term( '10 Lug 4 Hole', 'product_cat', [ 'parent' => $root['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $ref     = new ReflectionClass( Gm2_Category_Sort_Product_Category_Generator::class );
+        $method  = $ref->getMethod( 'check_lug_hole' );
+        $method->setAccessible( true );
+        $lower = Gm2_Category_Sort_Product_Category_Generator::normalize_text( 'Fits 10 lug 4 hole wheels' );
+        $words = preg_split( '/\s+/', $lower );
+        $cats  = $method->invoke( null, $lower, $words, $mapping, false, 85 );
+        $this->assertSame( [ 'By Lug/Hole Configuration', '10 Lug 4 Hole' ], $cats );
+    }
+
+    public function test_helper_priority_order() {
+        $wheel   = wp_insert_term( 'Wheel Simulators', 'product_cat' );
+        $branch  = wp_insert_term( 'By Brand & Model', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
+        $dodge   = wp_insert_term( 'Dodge', 'product_cat', [ 'parent' => $branch['term_id'] ] );
+        wp_insert_term( 'Ram 4500', 'product_cat', [ 'parent' => $dodge['term_id'] ] );
+        $size    = wp_insert_term( 'By Wheel Size', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
+        wp_insert_term( '19.5"', 'product_cat', [ 'parent' => $size['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = '19.5" Dodge Ram 4500 wheel simulator';
+        $cats    = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame(
+            [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators', 'By Brand & Model', 'Dodge', 'Ram 4500', 'By Wheel Size', '19.5"' ],
+            $cats
+        );
     }
 }
