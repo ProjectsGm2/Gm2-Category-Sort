@@ -209,7 +209,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertSame( [ 'Wheel Simulators', 'By Brand & Model', 'Dodge' ], $cats );
     }
 
-  public function test_exports_brand_and_model_csv() {
+    public function test_exports_brand_and_model_csv() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
         $branch = wp_insert_term( 'By Brand & Model', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
         $dodge  = wp_insert_term( 'Dodge', 'product_cat', [ 'parent' => $branch['term_id'] ] );
@@ -253,5 +253,24 @@ class ProductCategoryGeneratorTest extends TestCase {
             }
         }
         $this->assertTrue( $found );
+    }
+
+    public function test_exports_category_tree_csv() {
+        $parent = wp_insert_term( 'Top', 'product_cat' );
+        update_term_meta( $parent['term_id'], 'gm2_synonyms', 'T' );
+        $child = wp_insert_term( 'Sub', 'product_cat', [ 'parent' => $parent['term_id'] ] );
+        update_term_meta( $child['term_id'], 'gm2_synonyms', 'S1,S2' );
+
+        $dir = sys_get_temp_dir() . '/gm2_csv_tree';
+        if ( file_exists( $dir ) ) {
+            foreach ( glob( $dir . '/*' ) as $f ) { unlink( $f ); }
+            rmdir( $dir );
+        }
+
+        Gm2_Category_Sort_Product_Category_Generator::export_category_tree_csv( $dir );
+
+        $this->assertFileExists( $dir . '/category-tree.csv' );
+        $rows = array_map( 'str_getcsv', file( $dir . '/category-tree.csv' ) );
+        $this->assertContains( [ 'Top (T)', 'Sub (S1,S2)' ], $rows );
     }
 }

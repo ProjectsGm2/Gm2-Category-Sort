@@ -364,4 +364,76 @@ class Gm2_Category_Sort_Product_Category_Generator {
             fclose( $fh );
         }
     }
+
+    /**
+     * Export the full product category tree to a CSV file.
+     *
+     * Each row lists the hierarchy from root to leaf. Synonyms are included in
+     * parentheses after the category name.
+     *
+     * @param string $dir Directory path for CSV output.
+     * @return void
+     */
+    public static function export_category_tree_csv( $dir ) {
+        if ( ! is_dir( $dir ) ) {
+            @mkdir( $dir, 0777, true );
+        }
+
+        $terms = get_terms( [
+            'taxonomy'   => 'product_cat',
+            'hide_empty' => false,
+        ] );
+
+        if ( is_wp_error( $terms ) ) {
+            return;
+        }
+
+        $id_to_parent = [];
+        $id_to_name   = [];
+        $synonyms     = [];
+
+        foreach ( $terms as $term ) {
+            $id_to_parent[ $term->term_id ] = (int) $term->parent;
+            $id_to_name[ $term->term_id ]   = $term->name;
+            $syn = get_term_meta( $term->term_id, 'gm2_synonyms', true );
+            if ( $syn ) {
+                $synonyms[ $term->term_id ] = $syn;
+            }
+        }
+
+        $children = [];
+        foreach ( $id_to_parent as $id => $parent ) {
+            if ( ! isset( $children[ $parent ] ) ) {
+                $children[ $parent ] = [];
+            }
+            $children[ $parent ][] = $id;
+        }
+
+        $file = rtrim( $dir, '/' ) . '/category-tree.csv';
+        $fh   = fopen( $file, 'w' );
+        if ( ! $fh ) {
+            return;
+        }
+
+        $write = function ( $id, $path ) use ( &$write, &$children, &$id_to_name, &$synonyms, $fh ) {
+            $name = $id_to_name[ $id ] ?? '';
+            if ( isset( $synonyms[ $id ] ) && $synonyms[ $id ] !== '' ) {
+                $name .= ' (' . $synonyms[ $id ] . ')';
+            }
+            $path[] = $name;
+            if ( empty( $children[ $id ] ) ) {
+                fputcsv( $fh, $path );
+            } else {
+                foreach ( $children[ $id ] as $child ) {
+                    $write( $child, $path );
+                }
+            }
+        };
+
+        foreach ( $children[0] ?? [] as $root_id ) {
+            $write( $root_id, [] );
+        }
+
+        fclose( $fh );
+    }
 }
