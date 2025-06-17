@@ -211,30 +211,6 @@ class Gm2_Category_Sort_One_Click_Assign {
             return [];
         }
 
-        $rows  = array_map( 'str_getcsv', file( $tree_file ) );
-        $prefix_map = [];
-
-        foreach ( $rows as $row ) {
-            if ( empty( $row ) ) {
-                continue;
-            }
-
-            $path_slugs = [];
-            $path_names = [];
-            foreach ( $row as $segment ) {
-                $segment = trim( $segment );
-                if ( $segment === '' ) {
-                    continue;
-                }
-                $path_slugs[] = sanitize_title( $segment );
-                $path_names[]  = $segment;
-                $slug          = implode( '-', $path_slugs );
-                if ( ! isset( $prefix_map[ $slug ] ) ) {
-                    $prefix_map[ $slug ] = implode( ' > ', $path_names );
-                }
-            }
-        }
-
         $branches = [];
         foreach ( glob( rtrim( $dir, '/' ) . '/*.csv' ) as $file ) {
             $slug = basename( $file, '.csv' );
@@ -242,21 +218,24 @@ class Gm2_Category_Sort_One_Click_Assign {
                 continue;
             }
 
-            $path        = $prefix_map[ $slug ] ?? '';
-            if ( $path === '' ) {
-                $fh  = fopen( $file, 'r' );
-                $row = $fh ? fgetcsv( $fh ) : false;
-                if ( $fh ) {
-                    fclose( $fh );
-                }
-                if ( $row ) {
-                    $segments = array_slice( $row, 0, count( explode( '-', $slug ) ) );
-                    $path     = implode( ' > ', array_filter( array_map( 'trim', $segments ) ) );
-                }
+            $fh  = fopen( $file, 'r' );
+            $row = $fh ? fgetcsv( $fh ) : false;
+            if ( $fh ) {
+                fclose( $fh );
+            }
+            if ( ! $row ) {
+                continue;
             }
 
-            $parent_slug = preg_replace( '/-[^-]+$/', '', $slug );
-            $parent      = $prefix_map[ $parent_slug ] ?? '';
+            $depth    = count( explode( '-', $slug ) );
+            $segments = array_slice( $row, 0, $depth );
+            $segments = array_map( 'trim', $segments );
+
+            $path   = implode( ' > ', array_filter( $segments ) );
+            $parent = '';
+            if ( $depth > 1 ) {
+                $parent = implode( ' > ', array_slice( $segments, 0, $depth - 1 ) );
+            }
 
             $branches[] = [
                 'path'   => $path,
