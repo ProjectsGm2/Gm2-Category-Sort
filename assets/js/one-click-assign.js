@@ -20,6 +20,9 @@ jQuery(function($){
         });
     }
 
+    // Display existing branch list on initial page load if CSV files exist
+    loadBranches();
+
     btn.on('click', function(e){
         e.preventDefault();
         msg.text(gm2OneClickAssign.running);
