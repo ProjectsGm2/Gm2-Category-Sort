@@ -263,6 +263,7 @@ class Gm2_Category_Sort_Auto_Assign {
         $upload = function_exists( 'wp_upload_dir' ) ? wp_upload_dir() : [ 'basedir' => dirname( __DIR__ ) ];
         $export_dir = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/mapping-logs';
         Gm2_Category_Sort_Product_Category_Generator::export_brand_model_csv( $mapping, $export_dir );
+        Gm2_Category_Sort_Product_Category_Generator::export_category_tree_csv( $export_dir );
 
         $query = new WP_Query( [
             'post_type'      => 'product',
@@ -504,6 +505,7 @@ class Gm2_Category_Sort_Auto_Assign {
         $upload    = function_exists( 'wp_upload_dir' ) ? wp_upload_dir() : [ 'basedir' => dirname( __DIR__ ) ];
         $export_dir = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/mapping-logs';
         Gm2_Category_Sort_Product_Category_Generator::export_brand_model_csv( $mapping, $export_dir );
+        Gm2_Category_Sort_Product_Category_Generator::export_category_tree_csv( $export_dir );
 
         $total    = wp_count_posts( 'product' )->publish;
         $progress = null;
