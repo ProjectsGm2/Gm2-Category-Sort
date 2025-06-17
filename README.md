@@ -175,8 +175,9 @@ exact words being checked.
 
 This tool exports the full category tree and individual branch files in one step.
 Open **Tools → One Click Categories Assignment** and click **Study Category Tree Structure**.
-The plugin saves `category-tree.csv` plus separate CSVs for each category that
-has child terms under `wp-content/uploads/gm2-category-sort/categories-structure`.
+A progress bar shows the export status as the plugin saves `category-tree.csv` and
+separate branch files for every category that has child terms under
+`wp-content/uploads/gm2-category-sort/categories-structure`.
 Use these files to review or modify the structure of specific sections.
 
 ### Manual Search and Assign

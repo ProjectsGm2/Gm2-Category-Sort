@@ -69,6 +69,7 @@ class Gm2_Category_Sort_One_Click_Assign {
                     <?php esc_html_e( 'Study Category Tree Structure', 'gm2-category-sort' ); ?>
                 </button>
             </p>
+            <p><progress id="gm2-one-click-progress" value="0" max="100" style="display:none;width:100%;"></progress></p>
             <div id="gm2-one-click-message"></div>
         </div>
         <?php
@@ -84,13 +85,20 @@ class Gm2_Category_Sort_One_Click_Assign {
 
         check_ajax_referer( 'gm2_one_click_assign', 'nonce' );
 
+        $offset = isset( $_POST['offset'] ) ? max( 0, (int) $_POST['offset'] ) : 0;
+        $reset  = ! empty( $_POST['reset'] );
+
         $upload = wp_upload_dir();
         $dir    = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
 
-        Gm2_Category_Sort_Product_Category_Generator::export_category_tree_csv( $dir );
-        self::export_branch_csvs( $dir );
+        if ( $offset === 0 ) {
+            Gm2_Category_Sort_Product_Category_Generator::export_category_tree_csv( $dir );
+        }
 
-        wp_send_json_success();
+        $batch    = 100;
+        $progress = self::export_branch_csvs_step( $dir, $offset, $batch, $reset );
+
+        wp_send_json_success( $progress );
     }
 
     /**
@@ -102,13 +110,22 @@ class Gm2_Category_Sort_One_Click_Assign {
      * @param string $dir Directory containing category-tree.csv.
      * @return void
      */
-    protected static function export_branch_csvs( $dir ) {
+    protected static function export_branch_csvs_step( $dir, $offset, $batch, $reset = false ) {
         $tree_file = rtrim( $dir, '/' ) . '/category-tree.csv';
         if ( ! file_exists( $tree_file ) ) {
-            return;
+            return [ 'offset' => 0, 'total' => 0, 'done' => true ];
         }
 
-        $rows    = array_map( 'str_getcsv', file( $tree_file ) );
+        if ( $reset && $offset === 0 ) {
+            foreach ( glob( rtrim( $dir, '/' ) . '/*.csv' ) as $file ) {
+                if ( basename( $file ) !== 'category-tree.csv' ) {
+                    @unlink( $file );
+                }
+            }
+        }
+
+        $rows  = array_map( 'str_getcsv', file( $tree_file ) );
+        $total = count( $rows );
 
         // Determine which category path prefixes have children.
         $has_children = [];
@@ -116,7 +133,6 @@ class Gm2_Category_Sort_One_Click_Assign {
             if ( empty( $row ) ) {
                 continue;
             }
-
             $path_slugs = [];
             $last_index = count( $row ) - 1;
             foreach ( $row as $index => $segment ) {
@@ -124,48 +140,39 @@ class Gm2_Category_Sort_One_Click_Assign {
                 if ( $segment === '' ) {
                     continue;
                 }
-
                 $path_slugs[] = sanitize_title( $segment );
                 $slug         = implode( '-', $path_slugs );
-
-                // Only mark a slug if this row has a deeper level underneath it.
                 if ( $index < $last_index ) {
                     $has_children[ $slug ] = true;
                 }
             }
         }
 
+        $slice   = array_slice( $rows, $offset, $batch );
         $handles = [];
-        foreach ( $rows as $row ) {
+        foreach ( $slice as $row ) {
             if ( empty( $row ) ) {
                 continue;
             }
-
             $path_slugs = [];
             foreach ( $row as $segment ) {
                 $segment = trim( $segment );
                 if ( $segment === '' ) {
                     continue;
                 }
-
                 $path_slugs[] = sanitize_title( $segment );
                 $slug         = implode( '-', $path_slugs );
-
-                // Skip if this slug has no children in the overall tree.
                 if ( ! isset( $has_children[ $slug ] ) ) {
                     continue;
                 }
-
                 $file = rtrim( $dir, '/' ) . '/' . $slug . '.csv';
-
                 if ( ! isset( $handles[ $slug ] ) ) {
-                    $handles[ $slug ] = fopen( $file, 'w' );
+                    $handles[ $slug ] = fopen( $file, $offset === 0 ? 'w' : 'a' );
                     if ( ! $handles[ $slug ] ) {
                         unset( $handles[ $slug ] );
                         continue;
                     }
                 }
-
                 fputcsv( $handles[ $slug ], $row );
             }
         }
@@ -173,5 +180,14 @@ class Gm2_Category_Sort_One_Click_Assign {
         foreach ( $handles as $fh ) {
             fclose( $fh );
         }
+
+        $new_offset = $offset + count( $slice );
+        $done       = $new_offset >= $total;
+
+        return [
+            'offset' => $new_offset,
+            'total'  => $total,
+            'done'   => $done,
+        ];
     }
 }
