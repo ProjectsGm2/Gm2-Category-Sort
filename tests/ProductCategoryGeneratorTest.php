@@ -275,6 +275,9 @@ class ProductCategoryGeneratorTest extends TestCase {
         $gmc = wp_insert_term( 'GMC', 'product_cat', [ 'parent' => $branch['term_id'] ] );
         wp_insert_term( '4500', 'product_cat', [ 'parent' => $gmc['term_id'] ] );
 
+        $size_root = wp_insert_term( 'By Wheel Size', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
+        wp_insert_term( '19.5"', 'product_cat', [ 'parent' => $size_root['term_id'] ] );
+
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = '19.5" Dodge Ram 4500 5500 2008 Wheel Rim Liner Hubcap Covers';
 
@@ -330,6 +333,7 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $this->assertFileExists( $dir . '/brands.csv' );
         $this->assertFileExists( $dir . '/models.csv' );
+        $this->assertFileExists( $dir . '/wheel-sizes.csv' );
 
         $brands = array_map( 'str_getcsv', file( $dir . '/brands.csv' ) );
         $header = array_shift( $brands );
@@ -342,6 +346,10 @@ class ProductCategoryGeneratorTest extends TestCase {
             }
         }
         $this->assertTrue( $found );
+
+        $sizes = array_map( 'str_getcsv', file( $dir . '/wheel-sizes.csv' ) );
+        $header = array_shift( $sizes );
+        $this->assertSame( [ 'Size', 'Terms' ], $header );
 
         $models = array_map( 'str_getcsv', file( $dir . '/models.csv' ) );
         $header = array_shift( $models );
@@ -392,6 +400,11 @@ class ProductCategoryGeneratorTest extends TestCase {
             }
         }
         $this->assertTrue( $found );
+
+        $this->assertFileExists( $dir . '/wheel-sizes.csv' );
+        $sizes = array_map( 'str_getcsv', file( $dir . '/wheel-sizes.csv' ) );
+        $header = array_shift( $sizes );
+        $this->assertSame( [ 'Size', 'Terms' ], $header );
     }
 
     public function test_exports_category_tree_csv() {

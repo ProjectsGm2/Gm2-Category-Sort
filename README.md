@@ -166,10 +166,10 @@ Success: Auto assign complete.
 ```
 Add `--overwrite` to replace existing categories instead of appending.
 
-Each run also writes out two CSV files under your WordPress uploads
+Each run also writes out CSV files under your WordPress uploads
 directory at `wp-content/uploads/gm2-category-sort/mapping-logs`. Review the
-`brands.csv` and `models.csv` files there to verify the exact words being
-checked.
+`brands.csv`, `models.csv` and `wheel-sizes.csv` files there to verify the
+exact words being checked.
 
 ### Manual Search and Assign
 

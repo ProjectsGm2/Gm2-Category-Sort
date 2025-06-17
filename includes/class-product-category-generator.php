@@ -141,6 +141,39 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /**
+     * Build wheel size synonym list from a category tree CSV.
+     *
+     * @param string $file CSV file path.
+     * @return array<string,array>
+     */
+    protected static function build_wheel_sizes_from_tree( $file ) {
+        $sizes = [];
+        if ( ! file_exists( $file ) ) {
+            return $sizes;
+        }
+        $rows = array_map( 'str_getcsv', file( $file ) );
+        foreach ( $rows as $row ) {
+            $idx = array_search( 'By Wheel Size', $row, true );
+            if ( $idx === false ) {
+                continue;
+            }
+            $size_seg = $row[ $idx + 1 ] ?? '';
+            if ( $size_seg === '' ) {
+                continue;
+            }
+            list( $size_name, $size_syns ) = self::parse_segment( $size_seg );
+            if ( ! isset( $sizes[ $size_name ] ) ) {
+                $sizes[ $size_name ] = [];
+            }
+            $sizes[ $size_name ] = array_merge( $sizes[ $size_name ], [ $size_name ], $size_syns );
+        }
+        foreach ( $sizes as $s => $terms ) {
+            $sizes[ $s ] = array_values( array_unique( array_filter( $terms ) ) );
+        }
+        return $sizes;
+    }
+
+    /**
      * Load brand and model synonym lists from CSV files.
      *
      * @param string $dir Directory containing brands.csv and models.csv
@@ -580,6 +613,16 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 foreach ( $mset as $model => $terms ) {
                     fputcsv( $fh, [ $brand, $model, implode( ' | ', array_unique( $terms ) ) ] );
                 }
+            }
+            fclose( $fh );
+        }
+
+        $sizes = self::build_wheel_sizes_from_tree( $tree_file );
+        $size_file = rtrim( $dir, '/' ) . '/wheel-sizes.csv';
+        if ( $fh = fopen( $size_file, 'w' ) ) {
+            fputcsv( $fh, [ 'Size', 'Terms' ] );
+            foreach ( $sizes as $size => $terms ) {
+                fputcsv( $fh, [ $size, implode( ' | ', array_unique( $terms ) ) ] );
             }
             fclose( $fh );
         }
