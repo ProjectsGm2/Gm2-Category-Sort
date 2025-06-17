@@ -95,7 +95,9 @@ class Gm2_Category_Sort_Attribute_Fixer {
             if ( function_exists( 'wc_delete_attribute' ) ) {
                 $attr = self::get_attribute_by_slug( $slug );
                 if ( $attr ) {
-                    wc_delete_attribute( $attr->id );
+                    $id = isset( $attr->attribute_id ) ? $attr->attribute_id : $attr->id;
+                    wc_delete_attribute( $id );
+                    delete_transient( 'wc_attribute_taxonomies' );
                 }
             }
         }
