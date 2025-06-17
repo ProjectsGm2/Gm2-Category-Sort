@@ -255,7 +255,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertTrue( $found );
     }
 
-    public function test_exports_brand_model_csv_with_alternate_root() {
+  public function test_exports_brand_model_csv_with_alternate_root() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
         $branch = wp_insert_term( 'Brands', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
         $dodge  = wp_insert_term( 'Dodge', 'product_cat', [ 'parent' => $branch['term_id'] ] );
