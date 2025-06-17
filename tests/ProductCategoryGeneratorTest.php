@@ -211,6 +211,24 @@ class ProductCategoryGeneratorTest extends TestCase {
         }
     }
 
+    public function test_wheel_size_not_at_start() {
+        $root = wp_insert_term( 'By Wheel Size', 'product_cat' );
+        wp_insert_term( '19.5"', 'product_cat', [ 'parent' => $root['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        $texts = [
+            'Chrome wheel simulator 19.5" set',
+            "Hubcap for 19.5\xE2\x80\xB3 trucks",
+        ];
+
+        foreach ( $texts as $text ) {
+            $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+            $this->assertContains( 'By Wheel Size', $cats );
+            $this->assertContains( '19.5"', $cats );
+        }
+    }
+
     public function test_wheel_size_category_curly_quote() {
         $root = wp_insert_term( 'By Wheel Size', 'product_cat' );
         wp_insert_term( "19.5\xE2\x80\xB3", 'product_cat', [ 'parent' => $root['term_id'] ] );
@@ -222,6 +240,33 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $this->assertContains( 'By Wheel Size', $cats );
         $this->assertContains( "19.5\xE2\x80\xB3", $cats );
+    }
+
+    public function test_wheel_size_category_in_subtree() {
+        $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
+        $brands = wp_insert_term( 'Brands', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
+        wp_insert_term( 'Eagle Flight Wheel Simulators', 'product_cat', [ 'parent' => $brands['term_id'] ] );
+
+        $acc   = wp_insert_term( 'Accessories', 'product_cat' );
+        $root  = wp_insert_term( 'By Wheel Size', 'product_cat', [ 'parent' => $acc['term_id'] ] );
+        wp_insert_term( '19.5"', 'product_cat', [ 'parent' => $root['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = '19.5" wheel simulator cover';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame(
+            [
+                'Wheel Simulators',
+                'Brands',
+                'Eagle Flight Wheel Simulators',
+                'Accessories',
+                'By Wheel Size',
+                '19.5"',
+            ],
+            $cats
+        );
     }
   
     public function test_eagle_flight_brand_rule() {
@@ -247,6 +292,9 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $gmc = wp_insert_term( 'GMC', 'product_cat', [ 'parent' => $branch['term_id'] ] );
         wp_insert_term( '4500', 'product_cat', [ 'parent' => $gmc['term_id'] ] );
+
+        $size_root = wp_insert_term( 'By Wheel Size', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
+        wp_insert_term( '19.5"', 'product_cat', [ 'parent' => $size_root['term_id'] ] );
 
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = '19.5" Dodge Ram 4500 5500 2008 Wheel Rim Liner Hubcap Covers';
@@ -303,6 +351,7 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $this->assertFileExists( $dir . '/brands.csv' );
         $this->assertFileExists( $dir . '/models.csv' );
+        $this->assertFileExists( $dir . '/wheel-sizes.csv' );
 
         $brands = array_map( 'str_getcsv', file( $dir . '/brands.csv' ) );
         $header = array_shift( $brands );
@@ -315,6 +364,10 @@ class ProductCategoryGeneratorTest extends TestCase {
             }
         }
         $this->assertTrue( $found );
+
+        $sizes = array_map( 'str_getcsv', file( $dir . '/wheel-sizes.csv' ) );
+        $header = array_shift( $sizes );
+        $this->assertSame( [ 'Size', 'Terms' ], $header );
 
         $models = array_map( 'str_getcsv', file( $dir . '/models.csv' ) );
         $header = array_shift( $models );
@@ -365,6 +418,11 @@ class ProductCategoryGeneratorTest extends TestCase {
             }
         }
         $this->assertTrue( $found );
+
+        $this->assertFileExists( $dir . '/wheel-sizes.csv' );
+        $sizes = array_map( 'str_getcsv', file( $dir . '/wheel-sizes.csv' ) );
+        $header = array_shift( $sizes );
+        $this->assertSame( [ 'Size', 'Terms' ], $header );
     }
 
     public function test_exports_category_tree_csv() {
