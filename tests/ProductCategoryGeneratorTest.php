@@ -167,6 +167,32 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertContains( '19.5"', $cats );
     }
 
+    public function test_wheel_size_prefix_single_quote() {
+        $root = wp_insert_term( 'By Wheel Size', 'product_cat' );
+        wp_insert_term( '19.5"', 'product_cat', [ 'parent' => $root['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = "19.5' rim liner kit";
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertContains( 'By Wheel Size', $cats );
+        $this->assertContains( '19.5"', $cats );
+    }
+
+    public function test_wheel_size_prefix_no_symbol() {
+        $root = wp_insert_term( 'By Wheel Size', 'product_cat' );
+        wp_insert_term( '19.5"', 'product_cat', [ 'parent' => $root['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = '19.5 wheel cover';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertContains( 'By Wheel Size', $cats );
+        $this->assertContains( '19.5"', $cats );
+    }
+  
     public function test_eagle_flight_brand_rule() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
         $brands = wp_insert_term( 'Brands', 'product_cat', [ 'parent' => $wheel['term_id'] ] );

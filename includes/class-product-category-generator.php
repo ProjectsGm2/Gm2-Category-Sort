@@ -248,7 +248,11 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $cats  = [];
         $words = preg_split( '/\s+/', $lower );
         $wheel_size = null;
-        if ( preg_match( '/^\s*(\d+(?:\.\d+)?)(?=\s*(?:[xX]|["\'\xE2\x80\x9C\xE2\x80\x9D\xE2\x80\x99]))/u', $text, $m ) ) {
+        if ( preg_match(
+            '/^\s*(\d{1,2}(?:\.\d+)?)(?=[\s"\'\xE2\x80\x9C\xE2\x80\x9D\xE2\x80\x99\xE2\x80\xB2\xE2\x80\xB3xX]|$)/u',
+            $text,
+            $m
+        ) ) {
             $wheel_size = $m[1] . '"';
         }
         $word_count = count( $words );
