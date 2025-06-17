@@ -247,6 +247,10 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $lower = self::normalize_text( $text );
         $cats  = [];
         $words = preg_split( '/\s+/', $lower );
+        $wheel_size = null;
+        if ( preg_match( '/^\s*(\d+(?:\.\d+)?)(?=\s*(?:[xX]|["\'\xE2\x80\x9C\xE2\x80\x9D\xE2\x80\x99]))/u', $text, $m ) ) {
+            $wheel_size = $m[1] . '"';
+        }
         $word_count = count( $words );
         $lug_hole_candidates = [];
         $brands        = [];
@@ -455,7 +459,8 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
         }
 
-      $brand_terms = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
+        $brand_terms  = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
+        $brand_found  = false;
         foreach ( $brand_terms as $term ) {
             if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
                 $neg = false;
@@ -472,7 +477,16 @@ class Gm2_Category_Sort_Product_Category_Generator {
                             $cats[] = $cat;
                         }
                     }
+                    $brand_found = true;
                     break;
+                }
+            }
+        }
+
+        if ( $brand_found && $wheel_size ) {
+            foreach ( [ 'By Wheel Size', $wheel_size ] as $cat ) {
+                if ( ! in_array( $cat, $cats, true ) ) {
+                    $cats[] = $cat;
                 }
             }
         }
