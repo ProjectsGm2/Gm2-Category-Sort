@@ -186,6 +186,22 @@ if ( ! function_exists( 'add_query_arg' ) ) {
     }
 }
 
+if ( ! function_exists( 'trailingslashit' ) ) {
+    function trailingslashit( $path ) {
+        return rtrim( $path, '/\\' ) . '/';
+    }
+}
+
+if ( ! function_exists( 'wp_upload_dir' ) ) {
+    function wp_upload_dir() {
+        $base = sys_get_temp_dir() . '/uploads';
+        if ( ! is_dir( $base ) ) {
+            mkdir( $base, 0777, true );
+        }
+        return [ 'basedir' => $base, 'baseurl' => 'http://example.com/uploads' ];
+    }
+}
+
 }
 
 namespace Elementor {
