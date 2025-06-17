@@ -255,6 +255,44 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertTrue( $found );
     }
 
+  public function test_exports_brand_model_csv_with_alternate_root() {
+        $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
+        $branch = wp_insert_term( 'Brands', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
+        $dodge  = wp_insert_term( 'Dodge', 'product_cat', [ 'parent' => $branch['term_id'] ] );
+        wp_insert_term( 'Ram 4500', 'product_cat', [ 'parent' => $dodge['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $dir = sys_get_temp_dir() . '/gm2_csv_alt_root';
+        if ( file_exists( $dir ) ) {
+            foreach ( glob( $dir . '/*' ) as $f ) { unlink( $f ); }
+            rmdir( $dir );
+        }
+
+        Gm2_Category_Sort_Product_Category_Generator::export_brand_model_csv( $mapping, $dir );
+
+        $brands = array_map( 'str_getcsv', file( $dir . '/brands.csv' ) );
+        $header = array_shift( $brands );
+        $this->assertSame( [ 'Brand', 'Terms' ], $header );
+        $found = false;
+        foreach ( $brands as $row ) {
+            if ( $row[0] === 'Dodge' ) {
+                $found = true;
+            }
+        }
+        $this->assertTrue( $found );
+
+        $models = array_map( 'str_getcsv', file( $dir . '/models.csv' ) );
+        $header = array_shift( $models );
+        $this->assertSame( [ 'Brand', 'Model', 'Terms' ], $header );
+        $found = false;
+        foreach ( $models as $row ) {
+            if ( $row[0] === 'Dodge' && $row[1] === 'Ram 4500' ) {
+                $found = true;
+            }
+        }
+        $this->assertTrue( $found );
+    }
+
     public function test_exports_category_tree_csv() {
         $parent = wp_insert_term( 'Top', 'product_cat' );
         update_term_meta( $parent['term_id'], 'gm2_synonyms', 'T' );
@@ -272,5 +310,27 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertFileExists( $dir . '/category-tree.csv' );
         $rows = array_map( 'str_getcsv', file( $dir . '/category-tree.csv' ) );
         $this->assertContains( [ 'Top (T)', 'Sub (S1,S2)' ], $rows );
+    }
+
+    public function test_assign_categories_uses_csv_lists() {
+        $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
+        $branch = wp_insert_term( 'By Brand & Model', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
+        $dodge  = wp_insert_term( 'Dodge', 'product_cat', [ 'parent' => $branch['term_id'] ] );
+        wp_insert_term( 'Ram 3500', 'product_cat', [ 'parent' => $dodge['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $dir = sys_get_temp_dir() . '/gm2_csv_assign';
+        if ( file_exists( $dir ) ) {
+            foreach ( glob( "$dir/*" ) as $f ) { unlink( $f ); }
+            rmdir( $dir );
+        }
+
+        Gm2_Category_Sort_Product_Category_Generator::export_brand_model_csv( $mapping, $dir );
+
+        $text = 'Dodge Ram 3500 wheel simulator';
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, false, 85, $dir );
+
+        $this->assertContains( 'Dodge', $cats );
+        $this->assertContains( 'Ram 3500', $cats );
     }
 }

@@ -284,7 +284,7 @@ class Gm2_Category_Sort_Auto_Assign {
 
             $text  = $product->get_name();
 
-            $cats      = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy );
+            $cats      = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy, 85, $export_dir );
             $term_ids  = [];
             foreach ( $cats as $name ) {
                 $term = get_term_by( 'name', $name, 'product_cat' );
@@ -544,7 +544,7 @@ class Gm2_Category_Sort_Auto_Assign {
 
                 $text = $product->get_name();
 
-                $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy );
+                $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy, 85, $export_dir );
                 $term_ids = [];
                 foreach ( $cats as $name ) {
                     $term = get_term_by( 'name', $name, 'product_cat' );
