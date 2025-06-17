@@ -3,3 +3,4 @@
 vendor/
 !assets/vendor/
 node_modules/
+mapping-logs/
