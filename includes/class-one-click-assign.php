@@ -54,6 +54,7 @@ class Gm2_Category_Sort_One_Click_Assign {
                 'completed' => __( 'Category CSV files generated.', 'gm2-category-sort' ),
                 'error'     => __( 'Error generating files.', 'gm2-category-sort' ),
                 'branchesTitle' => __( 'Identified Branches', 'gm2-category-sort' ),
+                'parentLabel'   => __( 'Parent', 'gm2-category-sort' ),
             ]
         );
     }
@@ -201,7 +202,7 @@ class Gm2_Category_Sort_One_Click_Assign {
      * Retrieve readable branch paths from the category-tree.csv file.
      *
      * @param string $dir Directory containing category-tree.csv.
-     * @return string[] List of branch paths.
+     * @return array[] List of branch info arrays with path and parent name.
      */
     protected static function get_branch_paths( $dir ) {
         $tree_file = rtrim( $dir, '/' ) . '/category-tree.csv';
@@ -231,6 +232,18 @@ class Gm2_Category_Sort_One_Click_Assign {
             }
         }
 
-        return array_values( $paths );
+        $branches = [];
+        foreach ( $paths as $slug => $path ) {
+            $parts = explode( '-', $slug );
+            array_pop( $parts );
+            $parent_slug = implode( '-', $parts );
+            $parent      = isset( $paths[ $parent_slug ] ) ? $paths[ $parent_slug ] : '';
+            $branches[]  = [
+                'path'   => $path,
+                'parent' => $parent,
+            ];
+        }
+
+        return $branches;
     }
 }

@@ -30,8 +30,12 @@ jQuery(function($){
                 if(resp.data.branches && resp.data.branches.length){
                     branches.append('<h2>'+gm2OneClickAssign.branchesTitle+'</h2>');
                     var ul = $('<ul></ul>');
-                    resp.data.branches.forEach(function(path){
-                        ul.append($('<li></li>').text(path));
+                    resp.data.branches.forEach(function(item){
+                        var text = item.path;
+                        if(item.parent){
+                            text += ' ('+gm2OneClickAssign.parentLabel+': '+item.parent+')';
+                        }
+                        ul.append($('<li></li>').text(text));
                     });
                     branches.append(ul);
                 }
