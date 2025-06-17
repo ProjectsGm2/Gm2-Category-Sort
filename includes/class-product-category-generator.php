@@ -16,6 +16,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
         'wheel-simulator' => 'wheel simulator',
         'wheel-simulators'=> 'wheel simulator',
         'over-lug'        => 'over lug',
+        'rimliner'        => 'rim liner',
+        'rim-liner'       => 'rim liner',
+        'rim liners'      => 'rim liner',
     ];
 
     /** @var string[] */
@@ -100,7 +103,6 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 }
             }
         }
-
         return $mapping;
     }
 
@@ -116,9 +118,95 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $cats  = [];
         $words = preg_split( '/\s+/', $lower );
         $word_count = count( $words );
+        $lug_hole_candidates = [];
+        $brands        = [];
+        $brand_models  = [];
+        $other_mapping = [];
+
         foreach ( $mapping as $term => $path ) {
+            $brand_idx = array_search( 'By Brand & Model', $path, true );
+            if ( $brand_idx !== false ) {
+                if ( isset( $path[ $brand_idx + 1 ] ) && ! isset( $path[ $brand_idx + 2 ] ) ) {
+                    // Skip numeric-only synonyms when matching brands to avoid
+                    // confusing model numbers with the brand itself.
+                    if ( ! preg_match( '/[a-z]/i', $term ) ) {
+                        continue;
+                    }
+                    $brand = $path[ $brand_idx + 1 ];
+                    if ( ! isset( $brands[ $brand ] ) ) {
+                        $brands[ $brand ] = [];
+                    }
+                    $brands[ $brand ][] = [ 'term' => $term, 'path' => $path ];
+                    continue;
+                }
+                if ( isset( $path[ $brand_idx + 2 ] ) ) {
+                    $brand       = $path[ $brand_idx + 1 ];
+                    $model_name  = self::normalize_text( $path[ $brand_idx + 2 ] );
+                    $m_words     = preg_split( '/\s+/', $model_name );
+                    $m_words     = array_values( array_filter( $m_words, static function ( $w ) {
+                        return ! in_array( $w, [ 'wheel', 'wheels', 'simulator', 'simulators', 'rim', 'liner', 'cover', 'covers', 'hubcap', 'hubcaps' ], true );
+                    } ) );
+                    if ( ! isset( $brand_models[ $brand ] ) ) {
+                        $brand_models[ $brand ] = [];
+                    }
+                    $brand_models[ $brand ][] = [
+                        'term'        => $term,
+                        'path'        => $path,
+                        'model_words' => $m_words,
+                    ];
+                    continue;
+                }
+            }
+
+            $other_mapping[ $term ] = $path;
+        }
+
+        $brand_matches = [];
+        foreach ( $brands as $brand => $entries ) {
+            foreach ( $entries as $entry ) {
+                $term    = $entry['term'];
+                $matched = false;
+                if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
+                    $matched = true;
+                } elseif ( $fuzzy ) {
+                    $term_words = preg_split( '/\s+/', $term );
+                    $n = count( $term_words );
+                    for ( $i = 0; $i <= $word_count - $n; $i++ ) {
+                        $segment = implode( ' ', array_slice( $words, $i, $n ) );
+                        similar_text( $term, $segment, $percent );
+                        if ( $percent >= $threshold ) {
+                            $matched = true;
+                            break;
+                        }
+                    }
+                }
+                if ( ! $matched ) {
+                    continue;
+                }
+                $neg = false;
+                foreach ( self::$negation_patterns as $pattern ) {
+                    $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
+                    if ( preg_match( $regex, $lower ) ) {
+                        $neg = true;
+                        break;
+                    }
+                }
+                if ( $neg ) {
+                    continue;
+                }
+                $brand_matches[ $brand ] = $term;
+                foreach ( $entry['path'] as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
+                    }
+                }
+                break;
+            }
+        }
+
+        foreach ( $other_mapping as $term => $path ) {
             $matched = false;
-            if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
+            if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
                 $matched = true;
             } elseif ( $fuzzy ) {
                 $term_words = preg_split( '/\s+/', $term );
@@ -132,8 +220,77 @@ class Gm2_Category_Sort_Product_Category_Generator {
                     }
                 }
             }
+            if ( ! $matched ) {
+                continue;
+            }
+            $neg = false;
+            foreach ( self::$negation_patterns as $pattern ) {
+                $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
+                if ( preg_match( $regex, $lower ) ) {
+                    $neg = true;
+                    break;
+                }
+            }
+            if ( $neg ) {
+                continue;
+            }
+            if ( in_array( 'By Lug/Hole Configuration', $path, true ) ) {
+                if ( ! isset( $lug_hole_candidates[ $term ] ) ) {
+                    $lug_hole_candidates[ $term ] = $path;
+                }
+            } else {
+                foreach ( $path as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
+                    }
+                }
+            }
+        }
 
-            if ( $matched ) {
+        if ( $lug_hole_candidates ) {
+            uksort( $lug_hole_candidates, static function ( $a, $b ) {
+                return strlen( $b ) <=> strlen( $a );
+            } );
+            $path = reset( $lug_hole_candidates );
+            foreach ( $path as $cat ) {
+                if ( ! in_array( $cat, $cats, true ) ) {
+                    $cats[] = $cat;
+                }
+            }
+        }
+        foreach ( $brand_matches as $brand => $brand_term ) {
+            if ( empty( $brand_models[ $brand ] ) ) {
+                continue;
+            }
+            foreach ( $brand_models[ $brand ] as $model ) {
+                $all_present = true;
+                foreach ( $model['model_words'] as $word ) {
+                    if ( strpos( $lower, $word ) === false ) {
+                        $all_present = false;
+                        break;
+                    }
+                }
+                if ( ! $all_present ) {
+                    continue;
+                }
+                $brand_norm     = self::normalize_text( $brand_term );
+                $first_word     = $model['model_words'][0] ?? '';
+                $close_pattern  = '/\b' . preg_quote( $brand_norm, '/' ) . '\b.{0,40}\b' . preg_quote( $first_word, '/' ) . '/';
+                $reverse_pattern = '/\b' . preg_quote( $first_word, '/' ) . '\b.{0,40}\b' . preg_quote( $brand_norm, '/' ) . '/';
+                if ( ! preg_match( $close_pattern, $lower ) && ! preg_match( $reverse_pattern, $lower ) ) {
+                    continue;
+                }
+                foreach ( $model['path'] as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
+                    }
+                }
+            }
+        }
+
+        $brand_terms = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
+        foreach ( $brand_terms as $term ) {
+            if ( preg_match( '/(?<!\w)' . preg_quote( $term, '/' ) . '(?!\w)/', $lower ) ) {
                 $neg = false;
                 foreach ( self::$negation_patterns as $pattern ) {
                     $regex = '/' . sprintf( $pattern, preg_quote( $term, '/' ) ) . '/';
@@ -142,16 +299,69 @@ class Gm2_Category_Sort_Product_Category_Generator {
                         break;
                     }
                 }
-                if ( $neg ) {
-                    continue;
-                }
-                foreach ( $path as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
+                if ( ! $neg ) {
+                    foreach ( [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators' ] as $cat ) {
+                        if ( ! in_array( $cat, $cats, true ) ) {
+                            $cats[] = $cat;
+                        }
                     }
+                    break;
                 }
             }
         }
+
         return $cats;
+    }
+
+    /**
+     * Export brand and model lists used for matching to CSV files.
+     *
+     * @param array  $mapping Mapping from build_mapping_from_globals() or build_mapping().
+     * @param string $dir     Directory path for CSV output.
+     * @return void
+     */
+    public static function export_brand_model_csv( array $mapping, $dir ) {
+        if ( ! is_dir( $dir ) ) {
+            @mkdir( $dir, 0777, true );
+        }
+
+        $brands = [];
+        $models = [];
+        foreach ( $mapping as $term => $path ) {
+            $idx = array_search( 'By Brand & Model', $path, true );
+            if ( $idx === false ) {
+                continue;
+            }
+            $brand = $path[ $idx + 1 ] ?? '';
+            $model = $path[ $idx + 2 ] ?? '';
+            if ( $brand && ! $model ) {
+                $brands[ $brand ][] = $term;
+            } elseif ( $brand && $model ) {
+                if ( ! isset( $models[ $brand ] ) ) {
+                    $models[ $brand ] = [];
+                }
+                $models[ $brand ][ $model ][] = $term;
+            }
+        }
+
+        $brand_file = rtrim( $dir, '/' ) . '/brands.csv';
+        if ( $fh = fopen( $brand_file, 'w' ) ) {
+            fputcsv( $fh, [ 'Brand', 'Terms' ] );
+            foreach ( $brands as $brand => $terms ) {
+                fputcsv( $fh, [ $brand, implode( ' | ', array_unique( $terms ) ) ] );
+            }
+            fclose( $fh );
+        }
+
+        $model_file = rtrim( $dir, '/' ) . '/models.csv';
+        if ( $fh = fopen( $model_file, 'w' ) ) {
+            fputcsv( $fh, [ 'Brand', 'Model', 'Terms' ] );
+            foreach ( $models as $brand => $mset ) {
+                foreach ( $mset as $model => $terms ) {
+                    fputcsv( $fh, [ $brand, $model, implode( ' | ', array_unique( $terms ) ) ] );
+                }
+            }
+            fclose( $fh );
+        }
     }
 }
