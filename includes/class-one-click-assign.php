@@ -205,35 +205,67 @@ class Gm2_Category_Sort_One_Click_Assign {
      * @return array[] List of branch info arrays with path and parent name.
      */
     protected static function get_branch_paths( $dir ) {
-        $files = glob( rtrim( $dir, '/' ) . '/*.csv' );
-        $paths = [];
+        $tree_file = rtrim( $dir, '/' ) . '/category-tree.csv';
+        if ( ! file_exists( $tree_file ) ) {
+            return [];
+        }
 
-        foreach ( $files as $file ) {
-            if ( basename( $file ) === 'category-tree.csv' ) {
-                continue;
-            }
-            $fh  = fopen( $file, 'r' );
-            $row = $fh ? fgetcsv( $fh ) : false;
-            if ( $fh ) {
-                fclose( $fh );
-            }
-            if ( ! $row ) {
+        $rows  = array_map( 'str_getcsv', file( $tree_file ) );
+        $prefix_map = [];
+
+        foreach ( $rows as $row ) {
+            if ( empty( $row ) ) {
                 continue;
             }
 
-            $slug        = basename( $file, '.csv' );
-            $paths[ $slug ] = implode( ' > ', array_filter( array_map( 'trim', $row ) ) );
+            $path_slugs = [];
+            $path_names = [];
+            foreach ( $row as $segment ) {
+                $segment = trim( $segment );
+                if ( $segment === '' ) {
+                    continue;
+                }
+                $path_slugs[] = sanitize_title( $segment );
+                $path_names[]  = $segment;
+                $slug          = implode( '-', $path_slugs );
+                if ( ! isset( $prefix_map[ $slug ] ) ) {
+                    $prefix_map[ $slug ] = implode( ' > ', $path_names );
+                }
+            }
         }
 
         $branches = [];
-        foreach ( $paths as $slug => $path ) {
+        foreach ( glob( rtrim( $dir, '/' ) . '/*.csv' ) as $file ) {
+            $slug = basename( $file, '.csv' );
+            if ( $slug === 'category-tree' ) {
+                continue;
+            }
+
+            $path        = $prefix_map[ $slug ] ?? '';
+            if ( $path === '' ) {
+                $fh  = fopen( $file, 'r' );
+                $row = $fh ? fgetcsv( $fh ) : false;
+                if ( $fh ) {
+                    fclose( $fh );
+                }
+                if ( $row ) {
+                    $segments = array_slice( $row, 0, count( explode( '-', $slug ) ) );
+                    $path     = implode( ' > ', array_filter( array_map( 'trim', $segments ) ) );
+                }
+            }
+
             $parent_slug = preg_replace( '/-[^-]+$/', '', $slug );
-            $parent      = isset( $paths[ $parent_slug ] ) ? $paths[ $parent_slug ] : '';
-            $branches[]  = [
+            $parent      = $prefix_map[ $parent_slug ] ?? '';
+
+            $branches[] = [
                 'path'   => $path,
                 'parent' => $parent,
             ];
         }
+
+        usort( $branches, function( $a, $b ) {
+            return strcmp( $a['path'], $b['path'] );
+        } );
 
         return $branches;
     }
