@@ -298,7 +298,8 @@ class AutoAssignTest extends TestCase {
     }
 
     public function test_reset_clears_progress_option() {
-        $GLOBALS['gm2_options']['gm2_auto_assign_progress'] = [ 'offset' => 1, 'log' => [ 'a' ] ];
+        $GLOBALS['gm2_options']['gm2_auto_assign_progress'] = [ 'offset' => 1 ];
+        $GLOBALS['gm2_options']['gm2_auto_assign_log'] = [ 'a' ];
 
         $_POST['nonce'] = 't';
         $_POST['reset'] = '1';
@@ -307,6 +308,23 @@ class AutoAssignTest extends TestCase {
 
         $this->assertTrue( $GLOBALS['gm2_json_result']['success'] );
         $this->assertArrayNotHasKey( 'gm2_auto_assign_progress', $GLOBALS['gm2_options'] );
+        $this->assertArrayNotHasKey( 'gm2_auto_assign_log', $GLOBALS['gm2_options'] );
+    }
+
+    public function test_log_persists_after_run() {
+        list( $parent_id, $child_id ) = $this->create_categories();
+        $this->create_products();
+
+        $_POST['nonce'] = 't';
+        $_POST['reset'] = '1';
+
+        Gm2_Category_Sort_Auto_Assign::ajax_step();
+
+        $this->assertArrayNotHasKey( 'gm2_auto_assign_progress', $GLOBALS['gm2_options'] );
+        $log = $GLOBALS['gm2_options']['gm2_auto_assign_log'] ?? [];
+        $this->assertCount( 2, $log );
+        $this->assertStringContainsString( 'SKU1', $log[0] );
+        $this->assertStringContainsString( 'SKU2', $log[1] );
     }
 }
 }
