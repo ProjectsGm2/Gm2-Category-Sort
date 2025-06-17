@@ -4,6 +4,7 @@ jQuery(function($){
     var progress = $('#gm2-one-click-progress');
     var branches = $('#gm2-one-click-branches');
     if(!btn.length) return;
+    btn.text(gm2OneClickAssign.buttonLabel);
 
     function step(offset, reset){
         $.post(ajaxurl, {

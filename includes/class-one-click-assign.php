@@ -55,6 +55,7 @@ class Gm2_Category_Sort_One_Click_Assign {
                 'error'     => __( 'Error generating files.', 'gm2-category-sort' ),
                 'branchesTitle' => __( 'Identified Branches', 'gm2-category-sort' ),
                 'parentLabel'   => __( 'Parent', 'gm2-category-sort' ),
+                'buttonLabel'   => GM2_ONE_CLICK_LABEL,
             ]
         );
     }
@@ -68,7 +69,7 @@ class Gm2_Category_Sort_One_Click_Assign {
             <h1><?php esc_html_e( 'One Click Categories Assignment', 'gm2-category-sort' ); ?></h1>
             <p>
                 <button id="gm2-one-click-btn" class="button button-primary">
-                    <?php esc_html_e( 'Study Category Tree Structure', 'gm2-category-sort' ); ?>
+                    <?php echo esc_html( GM2_ONE_CLICK_LABEL ); ?>
                 </button>
             </p>
             <p><progress id="gm2-one-click-progress" value="0" max="100" style="display:none;width:100%;"></progress></p>

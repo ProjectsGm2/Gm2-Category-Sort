@@ -16,6 +16,7 @@ define('GM2_CAT_SORT_VERSION', '1.0.16');
 define('GM2_CAT_SORT_PATH', plugin_dir_path(__FILE__));
 define('GM2_CAT_SORT_URL', plugin_dir_url(__FILE__));
 define('GM2_CAT_SORT_CRON_HOOK', 'gm2_category_sort_generate_sitemap');
+define('GM2_ONE_CLICK_LABEL', 'Study Category Tree Structure');
 
 register_activation_hook( __FILE__, 'gm2_category_sort_activate' );
 register_deactivation_hook( __FILE__, 'gm2_category_sort_deactivate' );
