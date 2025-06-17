@@ -578,7 +578,82 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
         }
 
+        $branch_rules = get_option( 'gm2_branch_rules', [] );
+        if ( is_array( $branch_rules ) && $branch_rules ) {
+            foreach ( $branch_rules as $slug => $rule ) {
+                $includes = array_filter( array_map( 'trim', explode( ',', $rule['include'] ?? '' ) ) );
+                if ( ! $includes ) {
+                    continue;
+                }
+                $excludes = array_filter( array_map( 'trim', explode( ',', $rule['exclude'] ?? '' ) ) );
+
+                $has_include = false;
+                foreach ( $includes as $t ) {
+                    $t = self::normalize_text( $t );
+                    if ( $t !== '' && strpos( $lower, $t ) !== false ) {
+                        $has_include = true;
+                        break;
+                    }
+                }
+                if ( ! $has_include ) {
+                    continue;
+                }
+                $skip = false;
+                foreach ( $excludes as $t ) {
+                    $t = self::normalize_text( $t );
+                    if ( $t !== '' && strpos( $lower, $t ) !== false ) {
+                        $skip = true;
+                        break;
+                    }
+                }
+                if ( $skip ) {
+                    continue;
+                }
+                $path = self::path_from_branch_slug( $slug );
+                foreach ( $path as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
+                    }
+                }
+            }
+        }
+
         return $cats;
+    }
+
+    /**
+     * Get the category path represented by a branch slug.
+     *
+     * @param string $slug Branch slug from branch CSV filename.
+     * @return array<string>
+     */
+    protected static function path_from_branch_slug( $slug ) {
+        $upload = wp_upload_dir();
+        $dir    = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        $file   = rtrim( $dir, '/' ) . '/' . sanitize_key( $slug ) . '.csv';
+        if ( ! file_exists( $file ) ) {
+            return [];
+        }
+        $rows = array_map( 'str_getcsv', file( $file ) );
+        if ( empty( $rows ) ) {
+            return [];
+        }
+        $row   = $rows[0];
+        $path  = [];
+        $parts = [];
+        foreach ( $row as $segment ) {
+            $segment = trim( $segment );
+            if ( $segment === '' ) {
+                continue;
+            }
+            $clean  = preg_replace( '/\s*\([^\)]*\)/', '', $segment );
+            $path[] = $clean;
+            $parts[] = sanitize_title( $clean );
+            if ( implode( '-', $parts ) === $slug ) {
+                break;
+            }
+        }
+        return $path;
     }
 
     /**

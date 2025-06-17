@@ -61,6 +61,7 @@ function gm2_category_sort_init() {
     require_once GM2_CAT_SORT_PATH . 'includes/class-attribute-fixer.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-auto-assign.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-one-click-assign.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-branch-rules.php';
     
     // Initialize components
     Gm2_Category_Sort_Enqueuer::init();
@@ -74,6 +75,7 @@ function gm2_category_sort_init() {
     Gm2_Category_Sort_Attribute_Fixer::init();
     Gm2_Category_Sort_Auto_Assign::init();
     Gm2_Category_Sort_One_Click_Assign::init();
+    Gm2_Category_Sort_Branch_Rules::init();
     
     add_filter('pre_get_document_title', 'gm2_category_sort_modify_title');
     add_action('wp_head', 'gm2_category_sort_meta_description');
