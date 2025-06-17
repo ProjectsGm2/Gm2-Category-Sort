@@ -141,6 +141,39 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /**
+     * Build wheel size synonym list from a category tree CSV.
+     *
+     * @param string $file CSV file path.
+     * @return array<string,array>
+     */
+    protected static function build_wheel_sizes_from_tree( $file ) {
+        $sizes = [];
+        if ( ! file_exists( $file ) ) {
+            return $sizes;
+        }
+        $rows = array_map( 'str_getcsv', file( $file ) );
+        foreach ( $rows as $row ) {
+            $idx = array_search( 'By Wheel Size', $row, true );
+            if ( $idx === false ) {
+                continue;
+            }
+            $size_seg = $row[ $idx + 1 ] ?? '';
+            if ( $size_seg === '' ) {
+                continue;
+            }
+            list( $size_name, $size_syns ) = self::parse_segment( $size_seg );
+            if ( ! isset( $sizes[ $size_name ] ) ) {
+                $sizes[ $size_name ] = [];
+            }
+            $sizes[ $size_name ] = array_merge( $sizes[ $size_name ], [ $size_name ], $size_syns );
+        }
+        foreach ( $sizes as $s => $terms ) {
+            $sizes[ $s ] = array_values( array_unique( array_filter( $terms ) ) );
+        }
+        return $sizes;
+    }
+
+    /**
      * Load brand and model synonym lists from CSV files.
      *
      * @param string $dir Directory containing brands.csv and models.csv
@@ -174,6 +207,27 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
         }
         return [ $brands, $models ];
+    }
+
+    /**
+     * Extract mapping entries that belong to the "By Wheel Size" branch.
+     *
+     * This scans the full term mapping and returns a new array containing only
+     * the entries whose category path includes the "By Wheel Size" segment. It
+     * allows wheel size categories to be discovered regardless of where the
+     * branch sits in the overall hierarchy.
+     *
+     * @param array<string,array> $mapping Full term mapping.
+     * @return array<string,array> Filtered mapping for wheel size terms.
+     */
+    protected static function extract_wheel_size_map( array $mapping ) {
+        $result = [];
+        foreach ( $mapping as $term => $path ) {
+            if ( in_array( 'By Wheel Size', $path, true ) ) {
+                $result[ $term ] = $path;
+            }
+        }
+        return $result;
     }
 
     /**
@@ -268,6 +322,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
             foreach ( $mapping as $term => $path ) {
                 $brand_idx = self::find_brand_index( $path );
                 if ( $brand_idx === false ) {
+                    if ( in_array( 'By Wheel Size', $path, true ) ) {
+                        continue;
+                    }
                     $other_mapping[ $term ] = $path;
                     continue;
                 }
@@ -333,6 +390,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
                     }
                 }
 
+                if ( in_array( 'By Wheel Size', $path, true ) ) {
+                    continue;
+                }
                 $other_mapping[ $term ] = $path;
             }
         }
@@ -489,17 +549,18 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
         }
 
-      if ( $brand_found && $wheel_size_num ) {
-            $found_child = false;
-            $candidates  = [
+        if ( $brand_found && $wheel_size_num ) {
+            $found_child    = false;
+            $wheel_size_map = self::extract_wheel_size_map( $mapping );
+            $candidates     = [
                 $wheel_size_num . '"',
                 $wheel_size_num . "\xE2\x80\xB3",
                 $wheel_size_num,
             ];
             foreach ( $candidates as $cand ) {
                 $key = self::normalize_text( $cand );
-                if ( isset( $mapping[ $key ] ) ) {
-                    foreach ( $mapping[ $key ] as $cat ) {
+                if ( isset( $wheel_size_map[ $key ] ) ) {
+                    foreach ( $wheel_size_map[ $key ] as $cat ) {
                         if ( ! in_array( $cat, $cats, true ) ) {
                             $cats[] = $cat;
                         }
@@ -552,6 +613,16 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 foreach ( $mset as $model => $terms ) {
                     fputcsv( $fh, [ $brand, $model, implode( ' | ', array_unique( $terms ) ) ] );
                 }
+            }
+            fclose( $fh );
+        }
+
+        $sizes = self::build_wheel_sizes_from_tree( $tree_file );
+        $size_file = rtrim( $dir, '/' ) . '/wheel-sizes.csv';
+        if ( $fh = fopen( $size_file, 'w' ) ) {
+            fputcsv( $fh, [ 'Size', 'Terms' ] );
+            foreach ( $sizes as $size => $terms ) {
+                fputcsv( $fh, [ $size, implode( ' | ', array_unique( $terms ) ) ] );
             }
             fclose( $fh );
         }
