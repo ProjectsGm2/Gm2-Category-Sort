@@ -19,6 +19,12 @@ class Gm2_Category_Sort_Product_Category_Generator {
         'rimliner'        => 'rim liner',
         'rim-liner'       => 'rim liner',
         'rim liners'      => 'rim liner',
+        "\xE2\x80\xB2"       => "'", // prime
+        "\xE2\x80\xB3"       => '"', // double prime
+        "\xE2\x80\x98"       => "'", // left single quote
+        "\xE2\x80\x99"       => "'", // right single quote
+        "\xE2\x80\x9C"       => '"', // left double quote
+        "\xE2\x80\x9D"       => '"', // right double quote
     ];
 
     /** @var string[] */
