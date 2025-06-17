@@ -260,6 +260,9 @@ class Gm2_Category_Sort_Auto_Assign {
         $log    = (array) $progress['log'];
 
         $mapping = self::build_mapping();
+        $upload = function_exists( 'wp_upload_dir' ) ? wp_upload_dir() : [ 'basedir' => dirname( __DIR__ ) ];
+        $export_dir = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/mapping-logs';
+        Gm2_Category_Sort_Product_Category_Generator::export_brand_model_csv( $mapping, $export_dir );
 
         $query = new WP_Query( [
             'post_type'      => 'product',
@@ -278,15 +281,7 @@ class Gm2_Category_Sort_Auto_Assign {
                 continue;
             }
 
-            $text  = $product->get_name() . ' ' . $product->get_description() . ' ' . $product->get_short_description();
-            foreach ( $product->get_attributes() as $attr ) {
-                if ( $attr->is_taxonomy() ) {
-                    $names = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'names' ] );
-                    $text .= ' ' . implode( ' ', $names );
-                } else {
-                    $text .= ' ' . implode( ' ', array_map( 'sanitize_text_field', $attr->get_options() ) );
-                }
-            }
+            $text  = $product->get_name();
 
             $cats      = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy );
             $term_ids  = [];
@@ -445,6 +440,7 @@ class Gm2_Category_Sort_Auto_Assign {
         $progress = get_option( 'gm2_reset_progress', [ 'offset' => 0 ] );
         if ( $reset ) {
             $progress = [ 'offset' => 0 ];
+            delete_option( 'gm2_auto_assign_progress' );
             wp_defer_term_counting( true );
         }
 
@@ -469,6 +465,9 @@ class Gm2_Category_Sort_Auto_Assign {
                     "DELETE FROM {$wpdb->term_relationships} WHERE object_id IN (" . implode( ',', array_map( 'absint', $ids ) ) . ") AND term_taxonomy_id IN (" . implode( ',', array_map( 'absint', $tax_ids ) ) . ")"
                 );
             }
+            if ( function_exists( "clean_object_term_cache" ) ) {
+                clean_object_term_cache( $ids, "product" );
+            }
         }
 
         $new_offset = $offset + count( $ids );
@@ -476,6 +475,7 @@ class Gm2_Category_Sort_Auto_Assign {
 
         if ( $done ) {
             delete_option( 'gm2_reset_progress' );
+            delete_option( 'gm2_auto_assign_progress' );
             wp_defer_term_counting( false );
         } else {
             update_option( 'gm2_reset_progress', [ 'offset' => $new_offset ] );
@@ -501,6 +501,9 @@ class Gm2_Category_Sort_Auto_Assign {
         $overwrite = ! empty( $assoc_args['overwrite'] );
         $fuzzy     = ! empty( $assoc_args['fuzzy'] );
         $mapping   = self::build_mapping();
+        $upload    = function_exists( 'wp_upload_dir' ) ? wp_upload_dir() : [ 'basedir' => dirname( __DIR__ ) ];
+        $export_dir = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/mapping-logs';
+        Gm2_Category_Sort_Product_Category_Generator::export_brand_model_csv( $mapping, $export_dir );
 
         $total    = wp_count_posts( 'product' )->publish;
         $progress = null;
@@ -537,15 +540,7 @@ class Gm2_Category_Sort_Auto_Assign {
                     continue;
                 }
 
-                $text = $product->get_name() . ' ' . $product->get_description() . ' ' . $product->get_short_description();
-                foreach ( $product->get_attributes() as $attr ) {
-                    if ( $attr->is_taxonomy() ) {
-                        $names = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'names' ] );
-                        $text .= ' ' . implode( ' ', $names );
-                    } else {
-                        $text .= ' ' . implode( ' ', array_map( 'sanitize_text_field', $attr->get_options() ) );
-                    }
-                }
+                $text = $product->get_name();
 
                 $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy );
                 $term_ids = [];
