@@ -94,7 +94,10 @@ class Gm2_Category_Sort_One_Click_Assign {
     }
 
     /**
-     * Split category-tree.csv into separate branch files.
+     * Split category-tree.csv into separate branch files for every level.
+     *
+     * Each category path prefix gets its own CSV containing all rows under
+     * that branch, ensuring child categories receive branch files too.
      *
      * @param string $dir Directory containing category-tree.csv.
      * @return void
@@ -111,20 +114,28 @@ class Gm2_Category_Sort_One_Click_Assign {
             if ( empty( $row ) ) {
                 continue;
             }
-            $root = trim( $row[0] );
-            if ( $root === '' ) {
-                continue;
-            }
-            $slug = sanitize_title( $root );
-            $file = rtrim( $dir, '/' ) . '/' . $slug . '.csv';
-            if ( ! isset( $handles[ $slug ] ) ) {
-                $handles[ $slug ] = fopen( $file, 'w' );
-                if ( ! $handles[ $slug ] ) {
-                    unset( $handles[ $slug ] );
+
+            $path_slugs = [];
+            foreach ( $row as $segment ) {
+                $segment = trim( $segment );
+                if ( $segment === '' ) {
                     continue;
                 }
+
+                $path_slugs[] = sanitize_title( $segment );
+                $slug         = implode( '-', $path_slugs );
+                $file         = rtrim( $dir, '/' ) . '/' . $slug . '.csv';
+
+                if ( ! isset( $handles[ $slug ] ) ) {
+                    $handles[ $slug ] = fopen( $file, 'w' );
+                    if ( ! $handles[ $slug ] ) {
+                        unset( $handles[ $slug ] );
+                        continue;
+                    }
+                }
+
+                fputcsv( $handles[ $slug ], $row );
             }
-            fputcsv( $handles[ $slug ], $row );
         }
 
         foreach ( $handles as $fh ) {
