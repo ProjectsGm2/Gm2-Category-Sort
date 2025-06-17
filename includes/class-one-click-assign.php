@@ -53,6 +53,7 @@ class Gm2_Category_Sort_One_Click_Assign {
                 'running'   => __( 'Processing...', 'gm2-category-sort' ),
                 'completed' => __( 'Category CSV files generated.', 'gm2-category-sort' ),
                 'error'     => __( 'Error generating files.', 'gm2-category-sort' ),
+                'branchesTitle' => __( 'Identified Branches', 'gm2-category-sort' ),
             ]
         );
     }
@@ -71,6 +72,7 @@ class Gm2_Category_Sort_One_Click_Assign {
             </p>
             <p><progress id="gm2-one-click-progress" value="0" max="100" style="display:none;width:100%;"></progress></p>
             <div id="gm2-one-click-message"></div>
+            <div id="gm2-one-click-branches"></div>
         </div>
         <?php
     }
@@ -97,6 +99,10 @@ class Gm2_Category_Sort_One_Click_Assign {
 
         $batch    = 100;
         $progress = self::export_branch_csvs_step( $dir, $offset, $batch, $reset );
+
+        if ( $progress['done'] ) {
+            $progress['branches'] = self::get_branch_paths( $dir );
+        }
 
         wp_send_json_success( $progress );
     }
@@ -189,5 +195,42 @@ class Gm2_Category_Sort_One_Click_Assign {
             'total'  => $total,
             'done'   => $done,
         ];
+    }
+
+    /**
+     * Retrieve readable branch paths from the category-tree.csv file.
+     *
+     * @param string $dir Directory containing category-tree.csv.
+     * @return string[] List of branch paths.
+     */
+    protected static function get_branch_paths( $dir ) {
+        $tree_file = rtrim( $dir, '/' ) . '/category-tree.csv';
+        if ( ! file_exists( $tree_file ) ) {
+            return [];
+        }
+
+        $rows  = array_map( 'str_getcsv', file( $tree_file ) );
+        $paths = [];
+        foreach ( $rows as $row ) {
+            if ( empty( $row ) ) {
+                continue;
+            }
+            $slugs = [];
+            $names = [];
+            $last  = count( $row ) - 1;
+            foreach ( $row as $i => $segment ) {
+                $segment = trim( $segment );
+                if ( $segment === '' ) {
+                    continue;
+                }
+                $slugs[] = sanitize_title( $segment );
+                $names[] = $segment;
+                if ( $i < $last ) {
+                    $paths[ implode( '-', $slugs ) ] = implode( ' > ', $names );
+                }
+            }
+        }
+
+        return array_values( $paths );
     }
 }

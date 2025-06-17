@@ -2,6 +2,7 @@ jQuery(function($){
     var btn = $('#gm2-one-click-btn');
     var msg = $('#gm2-one-click-message');
     var progress = $('#gm2-one-click-progress');
+    var branches = $('#gm2-one-click-branches');
     if(!btn.length) return;
 
     function step(offset, reset){
@@ -25,6 +26,15 @@ jQuery(function($){
             }else{
                 progress.hide();
                 msg.text(gm2OneClickAssign.completed);
+                branches.empty();
+                if(resp.data.branches && resp.data.branches.length){
+                    branches.append('<h2>'+gm2OneClickAssign.branchesTitle+'</h2>');
+                    var ul = $('<ul></ul>');
+                    resp.data.branches.forEach(function(path){
+                        ul.append($('<li></li>').text(path));
+                    });
+                    branches.append(ul);
+                }
             }
         }).fail(function(){
             progress.hide();
@@ -36,6 +46,7 @@ jQuery(function($){
         e.preventDefault();
         msg.text(gm2OneClickAssign.running);
         progress.attr('value',0).show();
+        branches.empty();
         step(0, true);
     });
 });

@@ -179,6 +179,8 @@ A progress bar shows the export status as the plugin saves `category-tree.csv` a
 separate branch files for every category that has child terms under
 `wp-content/uploads/gm2-category-sort/categories-structure`.
 Use these files to review or modify the structure of specific sections.
+When processing completes the page also lists each branch path that was
+identified so you can quickly browse them.
 
 ### Manual Search and Assign
 
