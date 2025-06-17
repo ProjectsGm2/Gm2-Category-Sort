@@ -74,10 +74,9 @@ class Gm2_Category_Sort_Auto_Assign {
      * Render the admin page.
      */
     public static function admin_page() {
-        $progress = get_option( 'gm2_auto_assign_progress' );
-        $log      = [];
-        if ( $progress && ! empty( $progress['log'] ) ) {
-            $log = (array) $progress['log'];
+        $log = get_option( 'gm2_auto_assign_log', [] );
+        if ( ! is_array( $log ) ) {
+            $log = [];
         }
         ?>
         <div class="wrap">
@@ -252,12 +251,14 @@ class Gm2_Category_Sort_Auto_Assign {
         $reset     = ! empty( $_POST['reset'] );
         $overwrite = ! empty( $_POST['overwrite'] );
         $fuzzy     = ! empty( $_POST['fuzzy'] );
-        $progress = get_option( 'gm2_auto_assign_progress', [ 'offset' => 0, 'log' => [] ] );
+        $progress  = get_option( 'gm2_auto_assign_progress', [ 'offset' => 0 ] );
+        $log       = get_option( 'gm2_auto_assign_log', [] );
         if ( $reset ) {
-            $progress = [ 'offset' => 0, 'log' => [] ];
+            $progress = [ 'offset' => 0 ];
+            $log      = [];
         }
-        $offset = (int) $progress['offset'];
-        $log    = (array) $progress['log'];
+        $offset = (int) ( $progress['offset'] ?? 0 );
+        $log    = (array) $log;
 
         $mapping = self::build_mapping();
         $upload = function_exists( 'wp_upload_dir' ) ? wp_upload_dir() : [ 'basedir' => dirname( __DIR__ ) ];
@@ -307,16 +308,12 @@ class Gm2_Category_Sort_Auto_Assign {
         $new_offset = $offset + count( $query->posts );
         $done       = $new_offset >= $query->found_posts || empty( $query->posts );
 
+        update_option( 'gm2_auto_assign_log', $log );
+
         if ( $done ) {
             delete_option( 'gm2_auto_assign_progress' );
         } else {
-            update_option(
-                'gm2_auto_assign_progress',
-                [
-                    'offset' => $new_offset,
-                    'log'    => $log,
-                ]
-            );
+            update_option( 'gm2_auto_assign_progress', [ 'offset' => $new_offset ] );
         }
 
         wp_send_json_success( [
@@ -442,6 +439,7 @@ class Gm2_Category_Sort_Auto_Assign {
         if ( $reset ) {
             $progress = [ 'offset' => 0 ];
             delete_option( 'gm2_auto_assign_progress' );
+            delete_option( 'gm2_auto_assign_log' );
             wp_defer_term_counting( true );
         }
 
@@ -477,6 +475,7 @@ class Gm2_Category_Sort_Auto_Assign {
         if ( $done ) {
             delete_option( 'gm2_reset_progress' );
             delete_option( 'gm2_auto_assign_progress' );
+            delete_option( 'gm2_auto_assign_log' );
             wp_defer_term_counting( false );
         } else {
             update_option( 'gm2_reset_progress', [ 'offset' => $new_offset ] );
