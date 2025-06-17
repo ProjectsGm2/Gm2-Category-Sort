@@ -66,7 +66,7 @@ class Gm2_Category_Sort_One_Click_Assign {
             <h1><?php esc_html_e( 'One Click Categories Assignment', 'gm2-category-sort' ); ?></h1>
             <p>
                 <button id="gm2-one-click-btn" class="button button-primary">
-                    <?php esc_html_e( 'Assign Categories', 'gm2-category-sort' ); ?>
+                    <?php esc_html_e( 'Study Category Tree Structure', 'gm2-category-sort' ); ?>
                 </button>
             </p>
             <div id="gm2-one-click-message"></div>
