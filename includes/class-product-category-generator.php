@@ -294,7 +294,13 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $word_count = count( $words );
         foreach ( $mapping as $term => $path ) {
             $matched = false;
-            if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
+            $end_boundary = '/(?<!\\w)' . preg_quote( $term, '/' );
+            if ( substr( $term, -1 ) === '"' || substr( $term, -1 ) === "'" ) {
+                $end_boundary .= '(?=$|[^\\w]|[xX])';
+            } else {
+                $end_boundary .= '(?!\\w)';
+            }
+            if ( preg_match( $end_boundary . '/', $lower ) ) {
                 $matched = true;
             } elseif ( $fuzzy ) {
                 $term_words = preg_split( '/\\s+/', $term );
@@ -526,13 +532,15 @@ class Gm2_Category_Sort_Product_Category_Generator {
 
     /** Wheel size branch logic. */
     protected static function check_wheel_size( $lower, array $mapping, $wheel_size_num, $wheel_size, $brand_found ) {
-        if ( ! $brand_found || ! $wheel_size_num ) {
+        if ( ! $wheel_size_num ) {
             return [];
         }
         $cats           = [];
         $wheel_size_map = self::extract_wheel_size_map( $mapping );
         $candidates     = [
+            $wheel_size,
             $wheel_size_num . '"',
+            $wheel_size_num . "'",
             $wheel_size_num . "\xE2\x80\xB3",
             $wheel_size_num,
         ];
@@ -737,12 +745,13 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $wheel_size_num = null;
         $wheel_size     = null;
         if ( preg_match(
-            '/^\s*(\d{1,2}(?:\.\d+)?)(?=[\s"\'\x{201C}\x{201D}\x{2019}\x{2032}\x{2033}xX]|$)/u',
+            '/(?<![\d.])(\d{1,2}(?:\.\d+)?)(["\'\x{201C}\x{201D}\x{2019}\x{2032}\x{2033}])(?:[xX])?/u',
             $text,
             $m
         ) ) {
             $wheel_size_num = $m[1];
-            $wheel_size     = $wheel_size_num . '"';
+            $quote          = strtr( $m[2], [ "\xE2\x80\xB3" => '"', "\xE2\x80\xB2" => "'", '“' => '"', '”' => '"', '‘' => "'", '’' => "'" ] );
+            $wheel_size     = $wheel_size_num . $quote;
         }
         $brand_found = false;
 
@@ -798,6 +807,11 @@ class Gm2_Category_Sort_Product_Category_Generator {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
             }
+        }
+
+        if ( ! $wheel_size_num && $brand_found && preg_match('/(?<![\\d.])(\\d{1,2}(?:\\.\\d+)?)(?=\\s)/u', $text, $m) ) {
+            $wheel_size_num = $m[1];
+            $wheel_size     = $wheel_size_num . '"';
         }
 
         $ws = self::check_wheel_size( $lower, $mapping, $wheel_size_num, $wheel_size, $brand_found );
