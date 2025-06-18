@@ -39,11 +39,43 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @return string Normalized text.
      */
     public static function normalize_text( $text ) {
+        $text = strtr( $text, [
+            '′' => "'",
+            '″' => '"',
+            '‘' => "'",
+            '’' => "'",
+            '“' => '"',
+            '”' => '"',
+        ] );
         $text = strtolower( $text );
         foreach ( self::$replacements as $key => $val ) {
             $text = preg_replace( '/\b' . preg_quote( $key, '/' ) . '\b/', $val, $text );
         }
         return preg_replace( '/\s+/', ' ', $text );
+    }
+
+    /**
+     * Sanitize a category segment for use in branch slugs while keeping quotes distinct.
+     *
+     * Quotes and prime characters are converted to "d" (double) or "s" (single)
+     * before WordPress sanitization so slugs differ for segments like `19"` and
+     * `19'`.
+     *
+     * @param string $segment Raw category segment.
+     * @return string Sanitized slug portion.
+     */
+    public static function slugify_segment( $segment ) {
+        $segment = strtr( $segment, [
+            '″' => 'd',
+            '“' => 'd',
+            '”' => 'd',
+            '"' => 'd',
+            '′' => 's',
+            '‘' => 's',
+            '’' => 's',
+            "'" => 's',
+        ] );
+        return sanitize_title( $segment );
     }
 
     /**
@@ -922,7 +954,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
             return true;
         }
         for ( $i = 0; $i < count( $path ) - 1; $i++ ) {
-            $slug = sanitize_title( $path[ $i ] ) . '-' . sanitize_title( $path[ $i + 1 ] );
+            $slug = self::slugify_segment( $path[ $i ] ) . '-' . self::slugify_segment( $path[ $i + 1 ] );
             if ( ! isset( $rules[ $slug ] ) ) {
                 continue;
             }
@@ -979,7 +1011,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
             $clean  = preg_replace( '/\s*\([^\)]*\)/', '', $segment );
             $path[] = $clean;
-            $parts[] = sanitize_title( $clean );
+            $parts[] = self::slugify_segment( $clean );
             if ( implode( '-', $parts ) === $slug ) {
                 break;
             }

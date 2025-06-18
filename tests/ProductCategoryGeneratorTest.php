@@ -620,5 +620,15 @@ class ProductCategoryGeneratorTest extends TestCase {
             $cats
         );
     }
+
+    public function test_normalize_text_converts_primes() {
+        $norm = Gm2_Category_Sort_Product_Category_Generator::normalize_text( "Size 19\xE2\x80\xB3 x 8\xE2\x80\xB2" );
+        $this->assertSame( 'size 19" x 8\'', $norm );
+    }
+
+    public function test_slugify_segment_encodes_quotes() {
+        $this->assertSame( '19d', Gm2_Category_Sort_Product_Category_Generator::slugify_segment( '19"' ) );
+        $this->assertSame( '19s', Gm2_Category_Sort_Product_Category_Generator::slugify_segment( "19'" ) );
+    }
 }
 }

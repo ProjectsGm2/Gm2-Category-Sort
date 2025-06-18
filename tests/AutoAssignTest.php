@@ -83,6 +83,7 @@ if ( ! function_exists( 'sanitize_text_field' ) ) {
 if ( ! function_exists( 'sanitize_textarea_field' ) ) {
     function sanitize_textarea_field( $str ) { return $str; }
 }
+
 if ( ! function_exists( 'wp_kses_post' ) ) {
     function wp_kses_post( $str ) { return $str; }
 }

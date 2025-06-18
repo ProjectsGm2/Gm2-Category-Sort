@@ -72,7 +72,7 @@ class Gm2_Category_Sort_Branch_Rules {
         echo '<tbody>';
         foreach ( $branches as $parent => $children ) {
             foreach ( $children as $child ) {
-                $slug = sanitize_title( $parent ) . '-' . sanitize_title( $child );
+                $slug = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $parent ) . '-' . Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $child );
                 $inc  = $rules[ $slug ][ 'include' ] ?? '';
                 $exc  = $rules[ $slug ][ 'exclude' ] ?? '';
                 echo '<tr data-slug="' . esc_attr( $slug ) . '">';
@@ -109,8 +109,8 @@ class Gm2_Category_Sort_Branch_Rules {
         foreach ( $data as $slug => $rule ) {
             $slug          = sanitize_key( $slug );
             $rules[ $slug ] = [
-                'include' => wp_kses_post( $rule['include'] ?? '' ),
-                'exclude' => wp_kses_post( $rule['exclude'] ?? '' ),
+                'include' => sanitize_textarea_field( $rule['include'] ?? '' ),
+                'exclude' => sanitize_textarea_field( $rule['exclude'] ?? '' ),
             ];
         }
         update_option( 'gm2_branch_rules', $rules );
