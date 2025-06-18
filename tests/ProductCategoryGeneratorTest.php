@@ -301,6 +301,19 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertContains( '19.5"', $cats );
     }
 
+    public function test_wheel_size_prefix_html_entity() {
+        $root = wp_insert_term( 'By Wheel Size', 'product_cat' );
+        wp_insert_term( '19.5"', 'product_cat', [ 'parent' => $root['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = '19.5&quot; wheel simulator';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertContains( 'By Wheel Size', $cats );
+        $this->assertContains( '19.5"', $cats );
+    }
+
     public function test_wheel_size_without_brand_word() {
         $root = wp_insert_term( 'By Wheel Size', 'product_cat' );
         wp_insert_term( "19'", 'product_cat', [ 'parent' => $root['term_id'] ] );
