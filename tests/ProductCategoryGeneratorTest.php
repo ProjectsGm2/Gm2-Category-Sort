@@ -323,6 +323,7 @@ class ProductCategoryGeneratorTest extends TestCase {
             $this->assertContains( $cat, $cats );
         }
     }
+
     public function test_eagle_flight_brand_rule() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
         $brands = wp_insert_term( 'Brands', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
