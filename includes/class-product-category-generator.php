@@ -39,6 +39,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @return string Normalized text.
      */
     public static function normalize_text( $text ) {
+        $text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5 );
         $text = strtr( $text, [
             '′' => "'",
             '″' => '"',
@@ -739,14 +740,15 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @return array List of category names.
      */
     public static function assign_categories( $text, array $mapping, $fuzzy = false, $threshold = 85, $csv_dir = null ) {
-        $lower = self::normalize_text( $text );
+        $decoded = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5 );
+        $lower   = self::normalize_text( $decoded );
         $cats  = [];
         $words          = preg_split( '/\s+/', $lower );
         $wheel_size_num = null;
         $wheel_size     = null;
         if ( preg_match(
             '/(?<![\d.])(\d{1,2}(?:\.\d+)?)(["\'\x{201C}\x{201D}\x{2019}\x{2032}\x{2033}])(?:[xX])?/u',
-            $text,
+            $decoded,
             $m
         ) ) {
             $wheel_size_num = $m[1];
@@ -809,7 +811,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
         }
 
-        if ( ! $wheel_size_num && $brand_found && preg_match('/(?<![\\d.])(\\d{1,2}(?:\\.\\d+)?)(?=\\s)/u', $text, $m) ) {
+        if ( ! $wheel_size_num && $brand_found && preg_match('/(?<![\\d.])(\\d{1,2}(?:\\.\\d+)?)(?=\\s)/u', $decoded, $m) ) {
             $wheel_size_num = $m[1];
             $wheel_size     = $wheel_size_num . '"';
         }
