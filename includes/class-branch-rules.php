@@ -104,7 +104,7 @@ class Gm2_Category_Sort_Branch_Rules {
             wp_send_json_error( 'unauthorized' );
         }
         check_ajax_referer( 'gm2_branch_rules', 'nonce' );
-        $data = isset( $_POST['rules'] ) && is_array( $_POST['rules'] ) ? $_POST['rules'] : [];
+        $data = isset( $_POST['rules'] ) && is_array( $_POST['rules'] ) ? wp_unslash( $_POST['rules'] ) : [];
         $rules = [];
         foreach ( $data as $slug => $rule ) {
             $slug          = sanitize_key( $slug );
