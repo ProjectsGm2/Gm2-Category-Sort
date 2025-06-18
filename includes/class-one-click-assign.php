@@ -12,6 +12,7 @@ class Gm2_Category_Sort_One_Click_Assign {
         add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin_assets' ] );
         add_action( 'wp_ajax_gm2_one_click_assign', [ __CLASS__, 'ajax_assign' ] );
         add_action( 'wp_ajax_gm2_one_click_branches', [ __CLASS__, 'ajax_branches' ] );
+        add_action( 'wp_ajax_gm2_one_click_assign_categories', [ __CLASS__, 'ajax_assign_categories' ] );
     }
 
     /**
@@ -54,6 +55,8 @@ class Gm2_Category_Sort_One_Click_Assign {
                 'running'         => __( 'Processing...', 'gm2-category-sort' ),
                 'completed'       => __( 'Category CSV files generated.', 'gm2-category-sort' ),
                 'loadingBranches' => __( 'Loading categories...', 'gm2-category-sort' ),
+                'assigning'       => __( 'Assigning categories...', 'gm2-category-sort' ),
+                'assignDone'      => __( 'Category assignment complete.', 'gm2-category-sort' ),
                 'error'           => __( 'Error generating files.', 'gm2-category-sort' ),
             ]
         );
@@ -69,6 +72,16 @@ class Gm2_Category_Sort_One_Click_Assign {
             <p>
                 <button id="gm2-one-click-btn" class="button button-primary">
                     <?php esc_html_e( 'Study Category Tree', 'gm2-category-sort' ); ?>
+                </button>
+            </p>
+            <p>
+                <select id="gm2-oca-fields" multiple style="min-width:220px;">
+                    <option value="title"><?php esc_html_e( 'Product Title', 'gm2-category-sort' ); ?></option>
+                    <option value="description"><?php esc_html_e( 'Product Description', 'gm2-category-sort' ); ?></option>
+                    <option value="attributes"><?php esc_html_e( 'Product Attributes', 'gm2-category-sort' ); ?></option>
+                </select>
+                <button id="gm2-oca-assign" class="button button-secondary" style="margin-left:6px;">
+                    <?php esc_html_e( 'Assign Categories', 'gm2-category-sort' ); ?>
                 </button>
             </p>
             <div id="gm2-one-click-message"></div>
@@ -161,6 +174,135 @@ class Gm2_Category_Sort_One_Click_Assign {
             }
         }
         return $branches;
+    }
+
+    /**
+     * Assign categories to products using selected fields.
+     */
+    public static function ajax_assign_categories() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( 'unauthorized' );
+        }
+
+        check_ajax_referer( 'gm2_one_click_assign', 'nonce' );
+
+        $fields = array_map( 'sanitize_key', (array) ( $_POST['fields'] ?? [] ) );
+        if ( empty( $fields ) ) {
+            $fields = [ 'title' ];
+        }
+
+        $mapping = self::build_mapping();
+
+        $query = new WP_Query(
+            [
+                'post_type'      => 'product',
+                'post_status'    => 'publish',
+                'fields'         => 'ids',
+                'posts_per_page' => -1,
+            ]
+        );
+
+        foreach ( $query->posts as $product_id ) {
+            $product = wc_get_product( $product_id );
+            if ( ! $product ) {
+                continue;
+            }
+
+            $text = '';
+            if ( in_array( 'title', $fields, true ) ) {
+                $text .= ' ' . $product->get_name();
+            }
+            if ( in_array( 'description', $fields, true ) ) {
+                $text .= ' ' . $product->get_description() . ' ' . $product->get_short_description();
+            }
+            if ( in_array( 'attributes', $fields, true ) ) {
+                foreach ( $product->get_attributes() as $attr ) {
+                    if ( $attr->is_taxonomy() ) {
+                        $names = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'names' ] );
+                        $text .= ' ' . implode( ' ', $names );
+                    } else {
+                        $text .= ' ' . implode( ' ', array_map( 'sanitize_text_field', $attr->get_options() ) );
+                    }
+                }
+            }
+
+            $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+            $term_ids = [];
+            foreach ( $cats as $name ) {
+                $term = get_term_by( 'name', $name, 'product_cat' );
+                if ( $term && ! is_wp_error( $term ) ) {
+                    $term_ids[] = (int) $term->term_id;
+                }
+            }
+            if ( $term_ids ) {
+                wp_set_object_terms( $product_id, $term_ids, 'product_cat', true );
+            }
+        }
+
+        wp_send_json_success();
+    }
+
+    /**
+     * Build a mapping of category terms to their hierarchy.
+     *
+     * @return array<string,array>
+     */
+    protected static function build_mapping() {
+        $terms = get_terms(
+            [
+                'taxonomy'   => 'product_cat',
+                'hide_empty' => false,
+            ]
+        );
+
+        if ( is_wp_error( $terms ) ) {
+            return [];
+        }
+
+        $id_to_parent = [];
+        $id_to_name   = [];
+        $synonyms     = [];
+        foreach ( $terms as $term ) {
+            $id_to_parent[ $term->term_id ] = (int) $term->parent;
+            $id_to_name[ $term->term_id ]   = $term->name;
+            $syn = get_term_meta( $term->term_id, 'gm2_synonyms', true );
+            if ( $syn ) {
+                $synonyms[ $term->term_id ] = $syn;
+            }
+        }
+
+        $mapping = [];
+        foreach ( $id_to_name as $id => $name ) {
+            $path = [];
+            $curr = $id;
+            while ( $curr && isset( $id_to_name[ $curr ] ) ) {
+                array_unshift( $path, $id_to_name[ $curr ] );
+                $curr = $id_to_parent[ $curr ] ?? 0;
+            }
+            $terms_list = array_merge( [ $name ], array_filter( array_map( 'trim', explode( ',', $synonyms[ $id ] ?? '' ) ) ) );
+            foreach ( $terms_list as $term ) {
+                $variants = [ $term ];
+                if ( substr( $term, -1 ) !== 's' ) {
+                    $variants[] = $term . 's';
+                } else {
+                    $variants[] = substr( $term, 0, -1 );
+                }
+                if ( $term === 'hole' ) {
+                    $variants[] = 'hh';
+                    $variants[] = 'holes';
+                }
+                if ( $term === 'lug' ) {
+                    $variants[] = 'lugs';
+                }
+                foreach ( $variants as $v ) {
+                    $key = Gm2_Category_Sort_Product_Category_Generator::normalize_text( $v );
+                    if ( ! isset( $mapping[ $key ] ) ) {
+                        $mapping[ $key ] = $path;
+                    }
+                }
+            }
+        }
+        return $mapping;
     }
 
     /**
