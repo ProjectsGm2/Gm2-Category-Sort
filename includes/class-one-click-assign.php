@@ -67,6 +67,10 @@ class Gm2_Category_Sort_One_Click_Assign {
      * Render the admin page.
      */
     public static function admin_page() {
+        $log = get_option( 'gm2_one_click_log', [] );
+        if ( ! is_array( $log ) ) {
+            $log = [];
+        }
         ?>
         <div class="wrap">
             <h1><?php esc_html_e( 'One Click Categories Assignment', 'gm2-category-sort' ); ?></h1>
@@ -105,7 +109,11 @@ class Gm2_Category_Sort_One_Click_Assign {
             <p><progress id="gm2-oca-reset-progress" value="0" max="100" style="display:none;width:100%;"></progress></p>
             <div id="gm2-one-click-message"></div>
             <div id="gm2-branch-results" style="margin-top:15px;"></div>
-            <ul id="gm2-oca-list" style="background:#fff;border:1px solid #ccc;padding:5px;max-height:300px;overflow:auto;"></ul>
+            <ul id="gm2-oca-list" style="background:#fff;border:1px solid #ccc;padding:5px;max-height:300px;overflow:auto;">
+                <?php foreach ( $log as $line ) : ?>
+                    <li><?php echo esc_html( $line ); ?></li>
+                <?php endforeach; ?>
+            </ul>
         </div>
         <?php
     }
@@ -232,6 +240,11 @@ class Gm2_Category_Sort_One_Click_Assign {
         );
 
         $items = [];
+        $log   = get_option( 'gm2_one_click_log', [] );
+        if ( $offset === 0 ) {
+            $log = [];
+        }
+        $log = (array) $log;
         foreach ( $query->posts as $product_id ) {
             $product = wc_get_product( $product_id );
             if ( ! $product ) {
@@ -273,10 +286,13 @@ class Gm2_Category_Sort_One_Click_Assign {
                 'title' => $product->get_name(),
                 'cats'  => array_values( $cats ),
             ];
+            $log[] = $product->get_sku() . ' - ' . $product->get_name() . ' => ' . implode( ', ', $cats );
         }
 
         $new_offset = $offset + count( $query->posts );
         $done       = $new_offset >= $total_query || empty( $query->posts );
+
+        update_option( 'gm2_one_click_log', $log );
 
         wp_send_json_success(
             [
