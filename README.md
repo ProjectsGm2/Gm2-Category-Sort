@@ -199,6 +199,8 @@ During analysis common negative phrases such as `not for`, `does not fit` or
 basic stemming so minor wording differences like `lugs` vs `lug`,
 `holes`/`hh` vs `hole` still map to the correct terms.
 
+HTML entities are automatically decoded so a phrase like `19.5"` can be written as `19.5&amp;quot;` and still match wheel size categories.
+
 ### Branch Rules
 
 Use **Tools → Branch Rules** to set include and exclude keywords for each
