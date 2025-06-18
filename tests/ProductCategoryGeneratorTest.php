@@ -471,6 +471,32 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertSame( [], $cats );
     }
 
+    public function test_branch_rules_apply_to_direct_match() {
+        $parent = wp_insert_term( 'Branch', 'product_cat' );
+        $child  = wp_insert_term( 'Leaf', 'product_cat', [ 'parent' => $parent['term_id'] ] );
+        update_term_meta( $child['term_id'], 'gm2_synonyms', 'LeafSyn' );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        $upload = wp_upload_dir();
+        $dir    = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        if ( ! is_dir( $dir ) ) { mkdir( $dir, 0777, true ); }
+        file_put_contents( $dir . '/branch-leaf.csv', "Branch,Leaf\n" );
+
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = [
+            'branch-leaf' => [ 'include' => 'foo', 'exclude' => 'bar' ],
+        ];
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'LeafSyn foo item', $mapping );
+        $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'LeafSyn item', $mapping );
+        $this->assertSame( [], $cats );
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'LeafSyn foo bar', $mapping );
+        $this->assertSame( [], $cats );
+    }
+
     public function test_exports_category_tree_csv() {
         $parent = wp_insert_term( 'Top', 'product_cat' );
         update_term_meta( $parent['term_id'], 'gm2_synonyms', 'T' );
@@ -534,6 +560,34 @@ class ProductCategoryGeneratorTest extends TestCase {
         $words = preg_split( '/\s+/', $lower );
         $cats  = $method->invoke( null, $lower, $words, $mapping, false, 85 );
         $this->assertSame( [ 'By Lug/Hole Configuration', '10 Lug 4 Hole' ], $cats );
+    }
+
+    public function test_wheel_size_respects_branch_rules() {
+        $root = wp_insert_term( 'By Wheel Size', 'product_cat' );
+        wp_insert_term( '19.5"', 'product_cat', [ 'parent' => $root['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        $upload = wp_upload_dir();
+        $dir    = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        if ( ! is_dir( $dir ) ) { mkdir( $dir, 0777, true ); }
+        file_put_contents( $dir . '/by-wheel-size-19-5.csv', "By Wheel Size,19.5\"\n" );
+
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = [
+            'by-wheel-size-19-5' => [ 'include' => 'truck', 'exclude' => '' ],
+        ];
+
+        $ref    = new ReflectionClass( Gm2_Category_Sort_Product_Category_Generator::class );
+        $method = $ref->getMethod( 'check_wheel_size' );
+        $method->setAccessible( true );
+
+        $lower = Gm2_Category_Sort_Product_Category_Generator::normalize_text( '19.5" wheel simulator' );
+        $cats  = $method->invoke( null, $lower, $mapping, '19.5', '19.5"', true );
+        $this->assertSame( [], $cats );
+
+        $lower = Gm2_Category_Sort_Product_Category_Generator::normalize_text( '19.5" truck wheel simulator' );
+        $cats  = $method->invoke( null, $lower, $mapping, '19.5', '19.5"', true );
+        $this->assertSame( [ 'By Wheel Size', '19.5"' ], $cats );
     }
 
     public function test_helper_priority_order() {

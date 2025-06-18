@@ -4,6 +4,7 @@
 
 ### Added
 - Reset search button on the Auto Assign Categories page to clear previous results.
+- Branch-rule keywords are evaluated for each matched category path.
 
 ## [1.0.15] - 2025-06-15
 ### Added
