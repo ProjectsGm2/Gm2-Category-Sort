@@ -83,6 +83,12 @@ if ( ! function_exists( 'sanitize_text_field' ) ) {
 if ( ! function_exists( 'sanitize_textarea_field' ) ) {
     function sanitize_textarea_field( $str ) { return $str; }
 }
+if ( ! function_exists( 'wp_unslash' ) ) {
+    function wp_unslash( $value ) {
+        if ( is_array( $value ) ) { return array_map( 'wp_unslash', $value ); }
+        return stripslashes( $value );
+    }
+}
 if ( ! function_exists( 'sanitize_key' ) ) {
     function sanitize_key( $str ) { return $str; }
 }
