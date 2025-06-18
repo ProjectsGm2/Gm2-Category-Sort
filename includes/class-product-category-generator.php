@@ -294,7 +294,13 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $word_count = count( $words );
         foreach ( $mapping as $term => $path ) {
             $matched = false;
-            if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
+            $end_boundary = '/(?<!\\w)' . preg_quote( $term, '/' );
+            if ( substr( $term, -1 ) === '"' || substr( $term, -1 ) === "'" ) {
+                $end_boundary .= '(?=$|[^\\w]|[xX])';
+            } else {
+                $end_boundary .= '(?!\\w)';
+            }
+            if ( preg_match( $end_boundary . '/', $lower ) ) {
                 $matched = true;
             } elseif ( $fuzzy ) {
                 $term_words = preg_split( '/\\s+/', $term );
@@ -737,7 +743,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $wheel_size_num = null;
         $wheel_size     = null;
         if ( preg_match(
-            '/^\s*(\d{1,2}(?:\.\d+)?)(?=[\s"\'\x{201C}\x{201D}\x{2019}\x{2032}\x{2033}xX]|$)/u',
+            '/(\d{1,2}(?:\.\d+)?)(?=[\s"\'\x{201C}\x{201D}\x{2019}\x{2032}\x{2033}]|[xX])/u',
             $text,
             $m
         ) ) {

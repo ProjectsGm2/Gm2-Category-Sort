@@ -288,6 +288,18 @@ class ProductCategoryGeneratorTest extends TestCase {
         );
     }
   
+    public function test_wheel_size_with_x_after_quote() {
+        $root = wp_insert_term( 'By Wheel Size', 'product_cat' );
+        wp_insert_term( '19.5"', 'product_cat', [ 'parent' => $root['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = 'Premium 19.5"x8 wheel simulator';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertContains( 'By Wheel Size', $cats );
+        $this->assertContains( '19.5"', $cats );
+    }
     public function test_eagle_flight_brand_rule() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
         $brands = wp_insert_term( 'Brands', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
@@ -510,6 +522,25 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertSame( [], $cats );
     }
 
+    public function test_branch_rules_include_with_quote() {
+        $parent = wp_insert_term( 'Branch', 'product_cat' );
+        wp_insert_term( 'Leaf', 'product_cat', [ 'parent' => $parent['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        $upload = wp_upload_dir();
+        $dir = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        if ( ! is_dir( $dir ) ) { mkdir( $dir, 0777, true ); }
+        file_put_contents( $dir . '/branch-leaf.csv', "Branch,Leaf\n" );
+
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = [
+            'branch-leaf' => [ 'include' => '19"', 'exclude' => '' ],
+        ];
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'Nice 19" accessory', $mapping );
+
+        $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
+    }
     public function test_exports_category_tree_csv() {
         $parent = wp_insert_term( 'Top', 'product_cat' );
         update_term_meta( $parent['term_id'], 'gm2_synonyms', 'T' );
