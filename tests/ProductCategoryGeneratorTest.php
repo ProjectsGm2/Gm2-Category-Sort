@@ -9,6 +9,15 @@ if ( ! function_exists( 'update_option' ) ) {
 if ( ! function_exists( 'sanitize_text_field' ) ) {
     function sanitize_text_field( $str ) { return $str; }
 }
+if ( ! function_exists( 'sanitize_textarea_field' ) ) {
+    function sanitize_textarea_field( $str ) { return $str; }
+}
+if ( ! function_exists( 'wp_unslash' ) ) {
+    function wp_unslash( $value ) {
+        if ( is_array( $value ) ) { return array_map( 'wp_unslash', $value ); }
+        return stripslashes( $value );
+    }
+}
 if ( ! function_exists( 'sanitize_key' ) ) {
     function sanitize_key( $str ) { return $str; }
 }
@@ -607,6 +616,11 @@ class ProductCategoryGeneratorTest extends TestCase {
             [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators', 'By Brand & Model', 'Dodge', 'Ram 4500', 'By Wheel Size', '19.5"' ],
             $cats
         );
+    }
+
+    public function test_normalize_text_converts_primes() {
+        $norm = Gm2_Category_Sort_Product_Category_Generator::normalize_text( "Size 19\xE2\x80\xB3 x 8\xE2\x80\xB2" );
+        $this->assertSame( 'size 19" x 8\'', $norm );
     }
 }
 }

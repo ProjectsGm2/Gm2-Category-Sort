@@ -39,6 +39,14 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @return string Normalized text.
      */
     public static function normalize_text( $text ) {
+        $text = strtr( $text, [
+            '′' => "'",
+            '″' => '"',
+            '‘' => "'",
+            '’' => "'",
+            '“' => '"',
+            '”' => '"',
+        ] );
         $text = strtolower( $text );
         foreach ( self::$replacements as $key => $val ) {
             $text = preg_replace( '/\b' . preg_quote( $key, '/' ) . '\b/', $val, $text );
