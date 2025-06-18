@@ -337,7 +337,7 @@ class Gm2_Category_Sort_One_Click_Assign {
                     continue;
                 }
 
-                $path_slugs[] = sanitize_title( $segment );
+                $path_slugs[] = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $segment );
                 $slug         = implode( '-', $path_slugs );
 
                 // Only mark a slug if this row has a deeper level underneath it.
@@ -360,7 +360,7 @@ class Gm2_Category_Sort_One_Click_Assign {
                     continue;
                 }
 
-                $path_slugs[] = sanitize_title( $segment );
+                $path_slugs[] = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $segment );
                 $slug         = implode( '-', $path_slugs );
 
                 // Skip if this slug has no children in the overall tree.
