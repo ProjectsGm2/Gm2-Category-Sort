@@ -1,10 +1,37 @@
 <?php
+namespace {
+if ( ! function_exists( 'get_option' ) ) {
+    function get_option( $name, $default = false ) { return $GLOBALS['gm2_options'][ $name ] ?? $default; }
+}
+if ( ! function_exists( 'update_option' ) ) {
+    function update_option( $name, $value ) { $GLOBALS['gm2_options'][ $name ] = $value; return true; }
+}
+if ( ! function_exists( 'sanitize_text_field' ) ) {
+    function sanitize_text_field( $str ) { return $str; }
+}
+if ( ! function_exists( 'sanitize_key' ) ) {
+    function sanitize_key( $str ) { return $str; }
+}
+if ( ! function_exists( 'sanitize_title' ) ) {
+    function sanitize_title( $str ) { $s = strtolower( $str ); $s = preg_replace( '/[^a-z0-9]+/', '-', $s ); return trim( $s, '-' ); }
+}
+if ( ! function_exists( 'wp_unslash' ) ) {
+    function wp_unslash( $value ) { return $value; }
+}
+}
+
 use PHPUnit\Framework\TestCase;
 
 class ProductCategoryGeneratorTest extends TestCase {
 
     protected function setUp(): void {
         gm2_test_reset_terms();
+        $GLOBALS['gm2_options'] = [];
+        $upload = wp_upload_dir();
+        $dir = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        if ( is_dir( $dir ) ) {
+            foreach ( glob( "$dir/*" ) as $f ) { unlink( $f ); }
+        }
     }
 
     private function create_categories() {
@@ -364,7 +391,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertTrue( $found );
     }
 
-  public function test_exports_brand_model_csv_with_alternate_root() {
+    public function test_exports_brand_model_csv_with_alternate_root() {
         $wheel  = wp_insert_term( 'Wheel Simulators', 'product_cat' );
         $branch = wp_insert_term( 'Brands', 'product_cat', [ 'parent' => $wheel['term_id'] ] );
         $dodge  = wp_insert_term( 'Dodge', 'product_cat', [ 'parent' => $branch['term_id'] ] );
@@ -405,6 +432,86 @@ class ProductCategoryGeneratorTest extends TestCase {
         $sizes = array_map( 'str_getcsv', file( $dir . '/wheel-sizes.csv' ) );
         $header = array_shift( $sizes );
         $this->assertSame( [ 'Size', 'Terms' ], $header );
+    }
+
+    public function test_branch_rules_include_assigns_categories() {
+        $parent = wp_insert_term( 'Branch', 'product_cat' );
+        wp_insert_term( 'Leaf', 'product_cat', [ 'parent' => $parent['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        $upload = wp_upload_dir();
+        $dir = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        if ( ! is_dir( $dir ) ) { mkdir( $dir, 0777, true ); }
+        file_put_contents( $dir . '/branch-leaf.csv', "Branch,Leaf\n" );
+
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = [
+            'branch-leaf' => [ 'include' => 'foo', 'exclude' => '' ],
+        ];
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'Great foo product', $mapping );
+
+        $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
+    }
+
+    public function test_branch_rules_exclude_prevents_assignment() {
+        $parent = wp_insert_term( 'Branch', 'product_cat' );
+        wp_insert_term( 'Leaf', 'product_cat', [ 'parent' => $parent['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        $upload = wp_upload_dir();
+        $dir = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        if ( ! is_dir( $dir ) ) { mkdir( $dir, 0777, true ); }
+        file_put_contents( $dir . '/branch-leaf.csv', "Branch,Leaf\n" );
+
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = [
+            'branch-leaf' => [ 'include' => 'foo', 'exclude' => 'bar' ],
+        ];
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'foo bar thing', $mapping );
+
+        $this->assertSame( [], $cats );
+    }
+
+    public function test_branch_rules_double_quote_keyword() {
+        $parent = wp_insert_term( 'Branch', 'product_cat' );
+        wp_insert_term( 'Leaf', 'product_cat', [ 'parent' => $parent['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        $upload = wp_upload_dir();
+        $dir = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        if ( ! is_dir( $dir ) ) { mkdir( $dir, 0777, true ); }
+        file_put_contents( $dir . '/branch-leaf.csv', "Branch,Leaf\n" );
+
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = [
+            'branch-leaf' => [ 'include' => '19"', 'exclude' => '' ],
+        ];
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'Size 19" adapter', $mapping );
+
+        $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
+    }
+
+    public function test_branch_rules_single_quote_keyword() {
+        $parent = wp_insert_term( 'Branch', 'product_cat' );
+        wp_insert_term( 'Leaf', 'product_cat', [ 'parent' => $parent['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        $upload = wp_upload_dir();
+        $dir = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        if ( ! is_dir( $dir ) ) { mkdir( $dir, 0777, true ); }
+        file_put_contents( $dir . '/branch-leaf.csv', "Branch,Leaf\n" );
+
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = [
+            'branch-leaf' => [ 'include' => "19'", 'exclude' => '' ],
+        ];
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( "Fits 19' rims", $mapping );
+
+        $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
     }
 
     public function test_exports_category_tree_csv() {
