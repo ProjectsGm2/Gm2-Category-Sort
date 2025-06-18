@@ -80,6 +80,9 @@ if ( ! function_exists( 'update_option' ) ) {
 if ( ! function_exists( 'sanitize_text_field' ) ) {
     function sanitize_text_field( $str ) { return $str; }
 }
+if ( ! function_exists( 'sanitize_textarea_field' ) ) {
+    function sanitize_textarea_field( $str ) { return $str; }
+}
 if ( ! function_exists( 'sanitize_key' ) ) {
     function sanitize_key( $str ) { return $str; }
 }
