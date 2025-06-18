@@ -954,11 +954,15 @@ class Gm2_Category_Sort_Product_Category_Generator {
             return true;
         }
         for ( $i = 0; $i < count( $path ) - 1; $i++ ) {
-            $slug = self::slugify_segment( $path[ $i ] ) . '-' . self::slugify_segment( $path[ $i + 1 ] );
-            if ( ! isset( $rules[ $slug ] ) ) {
+            $slug        = self::slugify_segment( $path[ $i ] ) . '-' . self::slugify_segment( $path[ $i + 1 ] );
+            $legacy_slug = sanitize_title( $path[ $i ] ) . '-' . sanitize_title( $path[ $i + 1 ] );
+            if ( isset( $rules[ $slug ] ) ) {
+                $rule = $rules[ $slug ];
+            } elseif ( isset( $rules[ $legacy_slug ] ) ) {
+                $rule = $rules[ $legacy_slug ];
+            } else {
                 continue;
             }
-            $rule     = $rules[ $slug ];
             $includes = array_filter( array_map( 'trim', explode( ',', $rule['include'] ?? '' ) ) );
             $excludes = array_filter( array_map( 'trim', explode( ',', $rule['exclude'] ?? '' ) ) );
             if ( $includes ) {
@@ -995,7 +999,12 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $dir    = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
         $file   = rtrim( $dir, '/' ) . '/' . sanitize_key( $slug ) . '.csv';
         if ( ! file_exists( $file ) ) {
-            return [];
+            $legacy = rtrim( $dir, '/' ) . '/' . sanitize_key( sanitize_title( $slug ) ) . '.csv';
+            if ( file_exists( $legacy ) ) {
+                $file = $legacy;
+            } else {
+                return [];
+            }
         }
         $rows = array_map( 'str_getcsv', file( $file ) );
         if ( empty( $rows ) ) {

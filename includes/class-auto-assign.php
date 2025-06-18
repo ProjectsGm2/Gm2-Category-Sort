@@ -440,6 +440,7 @@ class Gm2_Category_Sort_Auto_Assign {
             $progress = [ 'offset' => 0 ];
             delete_option( 'gm2_auto_assign_progress' );
             delete_option( 'gm2_auto_assign_log' );
+            delete_option( 'gm2_one_click_log' );
             wp_defer_term_counting( true );
         }
 
@@ -476,6 +477,7 @@ class Gm2_Category_Sort_Auto_Assign {
             delete_option( 'gm2_reset_progress' );
             delete_option( 'gm2_auto_assign_progress' );
             delete_option( 'gm2_auto_assign_log' );
+            delete_option( 'gm2_one_click_log' );
             wp_defer_term_counting( false );
         } else {
             update_option( 'gm2_reset_progress', [ 'offset' => $new_offset ] );

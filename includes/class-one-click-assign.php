@@ -57,6 +57,7 @@ class Gm2_Category_Sort_One_Click_Assign {
                 'loadingBranches' => __( 'Loading categories...', 'gm2-category-sort' ),
                 'assigning'       => __( 'Assigning categories...', 'gm2-category-sort' ),
                 'assignDone'      => __( 'Category assignment complete.', 'gm2-category-sort' ),
+                'resetDone'       => __( 'All categories reset.', 'gm2-category-sort' ),
                 'error'           => __( 'Error generating files.', 'gm2-category-sort' ),
             ]
         );
@@ -66,6 +67,10 @@ class Gm2_Category_Sort_One_Click_Assign {
      * Render the admin page.
      */
     public static function admin_page() {
+        $log = get_option( 'gm2_one_click_log', [] );
+        if ( ! is_array( $log ) ) {
+            $log = [];
+        }
         ?>
         <div class="wrap">
             <h1><?php esc_html_e( 'One Click Categories Assignment', 'gm2-category-sort' ); ?></h1>
@@ -84,8 +89,31 @@ class Gm2_Category_Sort_One_Click_Assign {
                     <?php esc_html_e( 'Assign Categories', 'gm2-category-sort' ); ?>
                 </button>
             </p>
+            <p>
+                <label>
+                    <input type="radio" name="gm2_oca_overwrite" value="0" checked>
+                    <?php esc_html_e( 'Add to existing categories', 'gm2-category-sort' ); ?>
+                </label>
+                &nbsp;
+                <label>
+                    <input type="radio" name="gm2_oca_overwrite" value="1">
+                    <?php esc_html_e( 'Overwrite existing categories', 'gm2-category-sort' ); ?>
+                </label>
+            </p>
+            <p>
+                <button id="gm2-oca-reset" class="button">
+                    <?php esc_html_e( 'Reset All Categories', 'gm2-category-sort' ); ?>
+                </button>
+            </p>
+            <p><progress id="gm2-oca-progress" value="0" max="100" style="display:none;width:100%;"></progress></p>
+            <p><progress id="gm2-oca-reset-progress" value="0" max="100" style="display:none;width:100%;"></progress></p>
             <div id="gm2-one-click-message"></div>
             <div id="gm2-branch-results" style="margin-top:15px;"></div>
+            <ul id="gm2-oca-list" style="background:#fff;border:1px solid #ccc;padding:5px;max-height:300px;overflow:auto;">
+                <?php foreach ( $log as $line ) : ?>
+                    <li><?php echo esc_html( $line ); ?></li>
+                <?php endforeach; ?>
+            </ul>
         </div>
         <?php
     }
@@ -191,17 +219,32 @@ class Gm2_Category_Sort_One_Click_Assign {
             $fields = [ 'title' ];
         }
 
+        $overwrite = ! empty( $_POST['overwrite'] );
+        $offset    = isset( $_POST['offset'] ) ? max( 0, (int) $_POST['offset'] ) : 0;
+        $limit     = 50;
+
         $mapping = self::build_mapping();
+
+        $total_query = wp_count_posts( 'product' )->publish;
 
         $query = new WP_Query(
             [
                 'post_type'      => 'product',
                 'post_status'    => 'publish',
                 'fields'         => 'ids',
-                'posts_per_page' => -1,
+                'posts_per_page' => $limit,
+                'offset'         => $offset,
+                'orderby'        => 'ID',
+                'order'          => 'ASC',
             ]
         );
 
+        $items = [];
+        $log   = get_option( 'gm2_one_click_log', [] );
+        if ( $offset === 0 ) {
+            $log = [];
+        }
+        $log = (array) $log;
         foreach ( $query->posts as $product_id ) {
             $product = wc_get_product( $product_id );
             if ( ! $product ) {
@@ -226,7 +269,7 @@ class Gm2_Category_Sort_One_Click_Assign {
                 }
             }
 
-            $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+            $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
             $term_ids = [];
             foreach ( $cats as $name ) {
                 $term = get_term_by( 'name', $name, 'product_cat' );
@@ -235,11 +278,30 @@ class Gm2_Category_Sort_One_Click_Assign {
                 }
             }
             if ( $term_ids ) {
-                wp_set_object_terms( $product_id, $term_ids, 'product_cat', true );
+                wp_set_object_terms( $product_id, $term_ids, 'product_cat', ! $overwrite );
             }
+
+            $items[] = [
+                'sku'   => $product->get_sku(),
+                'title' => $product->get_name(),
+                'cats'  => array_values( $cats ),
+            ];
+            $log[] = $product->get_sku() . ' - ' . $product->get_name() . ' => ' . implode( ', ', $cats );
         }
 
-        wp_send_json_success();
+        $new_offset = $offset + count( $query->posts );
+        $done       = $new_offset >= $total_query || empty( $query->posts );
+
+        update_option( 'gm2_one_click_log', $log );
+
+        wp_send_json_success(
+            [
+                'offset' => $new_offset,
+                'total'  => (int) $total_query,
+                'done'   => $done,
+                'items'  => $items,
+            ]
+        );
     }
 
     /**
