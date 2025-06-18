@@ -17,6 +17,7 @@ if ( ! function_exists( 'sanitize_title' ) ) {
 }
 }
 
+namespace {
 use PHPUnit\Framework\TestCase;
 
 class ProductCategoryGeneratorTest extends TestCase {
@@ -607,4 +608,5 @@ class ProductCategoryGeneratorTest extends TestCase {
             $cats
         );
     }
+}
 }

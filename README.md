@@ -179,6 +179,11 @@ The plugin saves `category-tree.csv` plus separate CSVs for each category that
 has child terms under `wp-content/uploads/gm2-category-sort/categories-structure`.
 Use these files to review or modify the structure of specific sections.
 
+After generating the tree you can automatically assign categories to all
+products. Choose which product fields to analyze—title, description or
+attributes—using the multiselect next to the **Assign Categories** button and
+click the button to run the assignment.
+
 ### Manual Search and Assign
 
 Below the log the page provides a search form to manually select products.
