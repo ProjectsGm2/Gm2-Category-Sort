@@ -290,6 +290,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
             if ( $neg ) {
                 continue;
             }
+            if ( ! self::passes_branch_rules_for_path( $path, $lower ) ) {
+                continue;
+            }
             foreach ( $path as $cat ) {
                 if ( ! in_array( $cat, $cats, true ) ) {
                     $cats[] = $cat;
@@ -322,6 +325,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
                     break;
                 }
             }
+        }
+        if ( $cats && ! self::passes_branch_rules_for_path( $cats, $lower ) ) {
+            return [];
         }
         return $cats;
     }
@@ -437,6 +443,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 if ( $neg ) {
                     continue;
                 }
+                if ( ! self::passes_branch_rules_for_path( $entry['path'], $lower ) ) {
+                    continue;
+                }
                 $brand_matches[ $brand ] = $term;
                 foreach ( $entry['path'] as $cat ) {
                     if ( ! in_array( $cat, $cats, true ) ) {
@@ -467,6 +476,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 $close_pattern   = '/\\b' . preg_quote( $brand_norm, '/' ) . '\\b.{0,40}\\b' . preg_quote( $first_word, '/' ) . '/';
                 $reverse_pattern = '/\\b' . preg_quote( $first_word, '/' ) . '\\b.{0,40}\\b' . preg_quote( $brand_norm, '/' ) . '/';
                 if ( ! preg_match( $close_pattern, $lower ) && ! preg_match( $reverse_pattern, $lower ) ) {
+                    continue;
+                }
+                if ( ! self::passes_branch_rules_for_path( $model['path'], $lower ) ) {
                     continue;
                 }
                 foreach ( $model['path'] as $cat ) {
@@ -511,6 +523,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
                     $cats[] = $cat;
                 }
             }
+        }
+        if ( ! self::passes_branch_rules_for_path( $cats, $lower ) ) {
+            return [];
         }
         return $cats;
     }
@@ -561,6 +576,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
             return strlen( $b ) <=> strlen( $a );
         } );
         $path = reset( $candidates );
+        if ( ! self::passes_branch_rules_for_path( $path, $lower ) ) {
+            return [];
+        }
         return array_values( array_unique( $path ) );
     }
 
@@ -889,6 +907,49 @@ class Gm2_Category_Sort_Product_Category_Generator {
         }
 
         return $cats;
+    }
+
+    /**
+     * Check branch rules for a specific category path.
+     *
+     * @param array  $path  Category names from root to leaf.
+     * @param string $lower Normalized text being analyzed.
+     * @return bool True when the path should be allowed.
+     */
+    protected static function passes_branch_rules_for_path( array $path, $lower ) {
+        $rules = get_option( 'gm2_branch_rules', [] );
+        if ( ! is_array( $rules ) || ! $rules ) {
+            return true;
+        }
+        for ( $i = 0; $i < count( $path ) - 1; $i++ ) {
+            $slug = sanitize_title( $path[ $i ] ) . '-' . sanitize_title( $path[ $i + 1 ] );
+            if ( ! isset( $rules[ $slug ] ) ) {
+                continue;
+            }
+            $rule     = $rules[ $slug ];
+            $includes = array_filter( array_map( 'trim', explode( ',', $rule['include'] ?? '' ) ) );
+            $excludes = array_filter( array_map( 'trim', explode( ',', $rule['exclude'] ?? '' ) ) );
+            if ( $includes ) {
+                $found = false;
+                foreach ( $includes as $term ) {
+                    $term = self::normalize_text( $term );
+                    if ( $term !== '' && strpos( $lower, $term ) !== false ) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if ( ! $found ) {
+                    return false;
+                }
+            }
+            foreach ( $excludes as $term ) {
+                $term = self::normalize_text( $term );
+                if ( $term !== '' && strpos( $lower, $term ) !== false ) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
