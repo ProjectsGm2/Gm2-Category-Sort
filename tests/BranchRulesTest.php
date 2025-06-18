@@ -17,6 +17,9 @@ if ( ! function_exists( 'wp_unslash' ) ) {
 if ( ! function_exists( 'sanitize_textarea_field' ) ) {
     function sanitize_textarea_field( $str ) { return $str; }
 }
+if ( ! function_exists( 'wp_kses_post' ) ) {
+    function wp_kses_post( $str ) { return $str; }
+}
 if ( ! function_exists( 'sanitize_key' ) ) {
     function sanitize_key( $str ) { return $str; }
 }
