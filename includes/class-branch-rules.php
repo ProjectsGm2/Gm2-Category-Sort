@@ -109,8 +109,8 @@ class Gm2_Category_Sort_Branch_Rules {
         foreach ( $data as $slug => $rule ) {
             $slug          = sanitize_key( $slug );
             $rules[ $slug ] = [
-                'include' => sanitize_text_field( $rule['include'] ?? '' ),
-                'exclude' => sanitize_text_field( $rule['exclude'] ?? '' ),
+                'include' => sanitize_textarea_field( $rule['include'] ?? '' ),
+                'exclude' => sanitize_textarea_field( $rule['exclude'] ?? '' ),
             ];
         }
         update_option( 'gm2_branch_rules', $rules );

@@ -34,6 +34,9 @@ if ( ! function_exists( 'sanitize_key' ) ) {
 if ( ! function_exists( 'sanitize_text_field' ) ) {
     function sanitize_text_field( $str ) { return $str; }
 }
+if ( ! function_exists( 'sanitize_textarea_field' ) ) {
+    function sanitize_textarea_field( $str ) { return $str; }
+}
 if ( ! function_exists( 'wc_get_product' ) ) {
     function wc_get_product( $id ) { return $GLOBALS['gm2_product_objects'][$id] ?? null; }
 }
