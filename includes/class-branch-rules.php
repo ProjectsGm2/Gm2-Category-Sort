@@ -45,7 +45,7 @@ class Gm2_Category_Sort_Branch_Rules {
                 foreach ( $terms as $term ) {
                     $term_map[ $term->slug ] = $term->name;
                 }
-                $attr_data[ $attr->attribute_name ] = [
+                $attr_data[ $taxonomy ] = [
                     'label' => $attr->attribute_label,
                     'terms' => $term_map,
                 ];
@@ -92,7 +92,8 @@ class Gm2_Category_Sort_Branch_Rules {
         $options = '';
         if ( $attrs ) {
             foreach ( $attrs as $attr ) {
-                $options .= '<option value="' . esc_attr( $attr->attribute_name ) . '">' . esc_html( $attr->attribute_label ) . '</option>';
+                $taxonomy = wc_attribute_taxonomy_name( $attr->attribute_name );
+                $options .= '<option value="' . esc_attr( $taxonomy ) . '">' . esc_html( $attr->attribute_label ) . '</option>';
             }
         }
 
