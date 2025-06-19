@@ -6,6 +6,7 @@
 - Reset search button on the Auto Assign Categories page to clear previous results.
 - Branch-rule keywords are evaluated for each matched category path.
 - Branch CSV files are now generated for leaf categories so branch rules work for every category.
+- Branch rule slugs now include the full category path so rules apply to deep branches.
 
 ## [1.0.15] - 2025-06-15
 ### Added

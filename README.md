@@ -205,6 +205,8 @@ Use **Tools → Branch Rules** to set include and exclude keywords for each
 category branch. When a product text contains any include term and none of the
 exclude terms, that branch is added to the detected categories. These settings
 are stored in the `gm2_branch_rules` option.
+Each rule is saved using a slug that represents the full category path so even
+nested branches can be targeted.
 
 ## SEO Improvements
 
