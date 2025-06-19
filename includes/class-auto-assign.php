@@ -230,7 +230,17 @@ class Gm2_Category_Sort_Auto_Assign {
                 foreach ( $variants as $v ) {
                     $key = Gm2_Category_Sort_Product_Category_Generator::normalize_text( $v );
                     if ( ! isset( $mapping[ $key ] ) ) {
-                        $mapping[ $key ] = $path;
+                        $mapping[ $key ] = [];
+                    }
+                    $exists = false;
+                    foreach ( $mapping[ $key ] as $existing ) {
+                        if ( $existing === $path ) {
+                            $exists = true;
+                            break;
+                        }
+                    }
+                    if ( ! $exists ) {
+                        $mapping[ $key ][] = $path;
                     }
                 }
             }

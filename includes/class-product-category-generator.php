@@ -254,13 +254,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @return array<string,array> Filtered mapping for wheel size terms.
      */
     protected static function extract_wheel_size_map( array $mapping ) {
-        $result = [];
-        foreach ( $mapping as $term => $path ) {
-            if ( in_array( 'By Wheel Size', $path, true ) ) {
-                $result[ $term ] = $path;
-            }
-        }
-        return $result;
+        return self::filter_by_segment( $mapping, 'By Wheel Size' );
     }
 
     /**
@@ -272,9 +266,16 @@ class Gm2_Category_Sort_Product_Category_Generator {
      */
     protected static function filter_by_segment( array $mapping, $segment ) {
         $result = [];
-        foreach ( $mapping as $term => $path ) {
-            if ( in_array( $segment, $path, true ) ) {
-                $result[ $term ] = $path;
+        foreach ( $mapping as $term => $paths ) {
+            foreach ( $paths as $path ) {
+                if ( in_array( $segment, $path, true ) ) {
+                    if ( ! isset( $result[ $term ] ) ) {
+                        $result[ $term ] = [];
+                    }
+                    if ( ! in_array( $path, $result[ $term ], true ) ) {
+                        $result[ $term ][] = $path;
+                    }
+                }
             }
         }
         return $result;
@@ -293,7 +294,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
     protected static function match_terms( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
         $cats       = [];
         $word_count = count( $words );
-        foreach ( $mapping as $term => $path ) {
+        foreach ( $mapping as $term => $paths ) {
             $matched = false;
             $end_boundary = '/(?<!\\w)' . preg_quote( $term, '/' );
             if ( substr( $term, -1 ) === '"' || substr( $term, -1 ) === "'" ) {
@@ -329,12 +330,14 @@ class Gm2_Category_Sort_Product_Category_Generator {
             if ( $neg ) {
                 continue;
             }
-            if ( ! self::passes_branch_rules_for_path( $path, $lower ) ) {
-                continue;
-            }
-            foreach ( $path as $cat ) {
-                if ( ! in_array( $cat, $cats, true ) ) {
-                    $cats[] = $cat;
+            foreach ( $paths as $path ) {
+                if ( ! self::passes_branch_rules_for_path( $path, $lower ) ) {
+                    continue;
+                }
+                foreach ( $path as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
+                    }
                 }
             }
         }
@@ -376,9 +379,18 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $brands       = [];
         $brand_models = [];
 
+        $flat_mapping = [];
+        foreach ( $mapping as $t => $paths ) {
+            foreach ( $paths as $p ) {
+                $flat_mapping[] = [ 'term' => $t, 'path' => $p ];
+            }
+        }
+
         if ( $csv_dir ) {
             list( $csv_brands, $csv_models ) = self::load_brand_model_csv( $csv_dir );
-            foreach ( $mapping as $term => $path ) {
+            foreach ( $flat_mapping as $entry ) {
+                $term = $entry['term'];
+                $path = $entry['path'];
                 $brand_idx = self::find_brand_index( $path );
                 if ( $brand_idx === false ) {
                     continue;
@@ -410,7 +422,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 }
             }
         } else {
-            foreach ( $mapping as $term => $path ) {
+            foreach ( $flat_mapping as $entry ) {
+                $term = $entry['term'];
+                $path = $entry['path'];
                 $brand_idx = self::find_brand_index( $path );
                 if ( $brand_idx === false ) {
                     continue;
@@ -549,9 +563,11 @@ class Gm2_Category_Sort_Product_Category_Generator {
         foreach ( $candidates as $cand ) {
             $key = self::normalize_text( $cand );
             if ( isset( $wheel_size_map[ $key ] ) ) {
-                foreach ( $wheel_size_map[ $key ] as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
+                foreach ( $wheel_size_map[ $key ] as $path ) {
+                    foreach ( $path as $cat ) {
+                        if ( ! in_array( $cat, $cats, true ) ) {
+                            $cats[] = $cat;
+                        }
                     }
                 }
                 $found_child = true;
@@ -576,7 +592,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $subset      = self::filter_by_segment( $mapping, 'By Lug/Hole Configuration' );
         $candidates  = [];
         $word_count  = count( $words );
-        foreach ( $subset as $term => $path ) {
+        foreach ( $subset as $term => $paths ) {
             $matched = false;
             if ( preg_match( '/(?<!\\w)' . preg_quote( $term, '/' ) . '(?!\\w)/', $lower ) ) {
                 $matched = true;
@@ -606,8 +622,8 @@ class Gm2_Category_Sort_Product_Category_Generator {
             if ( $neg ) {
                 continue;
             }
-            if ( ! isset( $candidates[ $term ] ) ) {
-                $candidates[ $term ] = $path;
+            foreach ( $paths as $path ) {
+                $candidates[] = [ 'term' => $term, 'path' => $path ];
             }
         }
         if ( ! $candidates ) {
@@ -617,10 +633,12 @@ class Gm2_Category_Sort_Product_Category_Generator {
         if ( preg_match( '/\b(\d+)\s*lugs?\b/', $lower, $m ) ) {
             $lug_num = $m[1];
         }
-        uksort( $candidates, static function ( $a, $b ) use ( $lug_num ) {
+        usort( $candidates, static function ( $a, $b ) use ( $lug_num ) {
+            $ta = $a['term'];
+            $tb = $b['term'];
             if ( $lug_num !== null ) {
-                $a_has = strpos( $a, $lug_num ) !== false;
-                $b_has = strpos( $b, $lug_num ) !== false;
+                $a_has = strpos( $ta, $lug_num ) !== false;
+                $b_has = strpos( $tb, $lug_num ) !== false;
                 if ( $a_has && ! $b_has ) {
                     return -1;
                 }
@@ -628,13 +646,15 @@ class Gm2_Category_Sort_Product_Category_Generator {
                     return 1;
                 }
             }
-            return strlen( $b ) <=> strlen( $a );
+            return strlen( $tb ) <=> strlen( $ta );
         } );
-        $path = reset( $candidates );
-        if ( ! self::passes_branch_rules_for_path( $path, $lower ) ) {
-            return [];
+        foreach ( $candidates as $cand ) {
+            $path = $cand['path'];
+            if ( self::passes_branch_rules_for_path( $path, $lower ) ) {
+                return array_values( array_unique( $path ) );
+            }
         }
-        return array_values( array_unique( $path ) );
+        return [];
     }
 
     /** Generic helpers for additional branches. */
@@ -738,7 +758,17 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 foreach ( $variants as $v ) {
                     $key = self::normalize_text( $v );
                     if ( ! isset( $mapping[ $key ] ) ) {
-                        $mapping[ $key ] = $path;
+                        $mapping[ $key ] = [];
+                    }
+                    $exists = false;
+                    foreach ( $mapping[ $key ] as $existing ) {
+                        if ( $existing === $path ) {
+                            $exists = true;
+                            break;
+                        }
+                    }
+                    if ( ! $exists ) {
+                        $mapping[ $key ][] = $path;
                     }
                 }
             }
@@ -789,21 +819,28 @@ class Gm2_Category_Sort_Product_Category_Generator {
         ];
 
         $other_map = [];
-        foreach ( $mapping as $term => $path ) {
-            if ( self::find_brand_index( $path ) !== false ) {
-                continue;
-            }
-            $skip = false;
-            foreach ( $exclude_segments as $seg ) {
-                if ( in_array( $seg, $path, true ) ) {
-                    $skip = true;
-                    break;
+        foreach ( $mapping as $term => $paths ) {
+            foreach ( $paths as $path ) {
+                if ( self::find_brand_index( $path ) !== false ) {
+                    continue;
+                }
+                $skip = false;
+                foreach ( $exclude_segments as $seg ) {
+                    if ( in_array( $seg, $path, true ) ) {
+                        $skip = true;
+                        break;
+                    }
+                }
+                if ( $skip ) {
+                    continue;
+                }
+                if ( ! isset( $other_map[ $term ] ) ) {
+                    $other_map[ $term ] = [];
+                }
+                if ( ! in_array( $path, $other_map[ $term ], true ) ) {
+                    $other_map[ $term ][] = $path;
                 }
             }
-            if ( $skip ) {
-                continue;
-            }
-            $other_map[ $term ] = $path;
         }
 
         $cats = array_merge( $cats, self::match_terms( $lower, $words, $other_map, $fuzzy, $threshold ) );

@@ -76,6 +76,24 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertSame( [ 'Parent' ], $cats );
     }
 
+    public function test_overlapping_synonyms_assign_all_categories() {
+        $a = wp_insert_term( 'CatA', 'product_cat' );
+        $b = wp_insert_term( 'CatB', 'product_cat' );
+        update_term_meta( $a['term_id'], 'gm2_synonyms', 'Common' );
+        update_term_meta( $b['term_id'], 'gm2_synonyms', 'Common' );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $key     = Gm2_Category_Sort_Product_Category_Generator::normalize_text( 'Common' );
+
+        $this->assertArrayHasKey( $key, $mapping );
+        $this->assertCount( 2, $mapping[ $key ] );
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'Great common item', $mapping );
+
+        $this->assertContains( 'CatA', $cats );
+        $this->assertContains( 'CatB', $cats );
+    }
+
     public function test_ignores_negative_phrases() {
         $this->create_categories();
 
