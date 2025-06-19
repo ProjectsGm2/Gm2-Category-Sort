@@ -28,8 +28,17 @@ if ( ! function_exists( 'wp_send_json_success' ) ) {
 if ( ! function_exists( 'wp_send_json_error' ) ) {
     function wp_send_json_error( $data = null ) { $GLOBALS['gm2_json_result'] = ['success'=>false,'data'=>$data]; return $GLOBALS['gm2_json_result']; }
 }
+if ( ! function_exists( 'get_option' ) ) {
+    function get_option( $name, $default = false ) { return $GLOBALS['gm2_options'][$name] ?? $default; }
+}
+if ( ! function_exists( 'update_option' ) ) {
+    function update_option( $name, $value ) { $GLOBALS['gm2_options'][$name] = $value; return true; }
+}
 if ( ! function_exists( 'sanitize_key' ) ) {
     function sanitize_key( $str ) { return $str; }
+}
+if ( ! function_exists( 'sanitize_title' ) ) {
+    function sanitize_title( $str ) { $s = strtolower( $str ); $s = preg_replace('/[^a-z0-9]+/', '-', $s); return trim($s, '-'); }
 }
 if ( ! function_exists( 'sanitize_text_field' ) ) {
     function sanitize_text_field( $str ) { return $str; }
@@ -91,6 +100,27 @@ class OneClickAssignTest extends TestCase {
         $this->assertCount(1, $calls);
         $this->assertContains($pid, $calls[0]['terms']);
         $this->assertContains($cid, $calls[0]['terms']);
+    }
+
+    public function test_overwrite_clears_categories_when_no_match(){
+        list($pid,$cid) = $this->create_categories();
+        $GLOBALS['gm2_product_objects'][1] = new DummyProduct(1,'Prod','great alt thing');
+        $_POST['nonce']='t';
+        $_POST['fields']=['description'];
+        $_POST['overwrite']='1';
+        Gm2_Category_Sort_One_Click_Assign::ajax_assign_categories();
+
+        $GLOBALS['gm2_set_terms_calls'] = [];
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = [
+            'parent-child' => [ 'include' => 'nomatch', 'exclude' => '' ],
+        ];
+
+        Gm2_Category_Sort_One_Click_Assign::ajax_assign_categories();
+
+        $calls = $GLOBALS['gm2_set_terms_calls'];
+        $this->assertCount(1, $calls);
+        $this->assertSame([], $calls[0]['terms']);
+        $this->assertFalse($calls[0]['append']);
     }
 }
 }
