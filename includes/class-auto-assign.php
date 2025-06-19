@@ -256,7 +256,9 @@ class Gm2_Category_Sort_Auto_Assign {
             wp_send_json_error( 'unauthorized' );
         }
 
-        check_ajax_referer( 'gm2_auto_assign', 'nonce' );
+        if ( ! check_ajax_referer( 'gm2_auto_assign', 'nonce', false ) ) {
+            check_ajax_referer( 'gm2_one_click_assign', 'nonce' );
+        }
 
         $reset     = ! empty( $_POST['reset'] );
         $overwrite = ! empty( $_POST['overwrite'] );
@@ -341,7 +343,9 @@ class Gm2_Category_Sort_Auto_Assign {
             wp_send_json_error( 'unauthorized' );
         }
 
-        check_ajax_referer( 'gm2_auto_assign', 'nonce' );
+        if ( ! check_ajax_referer( 'gm2_auto_assign', 'nonce', false ) ) {
+            check_ajax_referer( 'gm2_one_click_assign', 'nonce' );
+        }
 
         $fields = array_map( 'sanitize_key', (array) ( $_POST['fields'] ?? [] ) );
         $search = sanitize_text_field( $_POST['search'] ?? '' );
@@ -417,7 +421,9 @@ class Gm2_Category_Sort_Auto_Assign {
             wp_send_json_error( 'unauthorized' );
         }
 
-        check_ajax_referer( 'gm2_auto_assign', 'nonce' );
+        if ( ! check_ajax_referer( 'gm2_auto_assign', 'nonce', false ) ) {
+            check_ajax_referer( 'gm2_one_click_assign', 'nonce' );
+        }
 
         $products  = array_map( 'intval', (array) ( $_POST['products'] ?? [] ) );
         $categories = array_map( 'intval', (array) ( $_POST['categories'] ?? [] ) );
@@ -442,7 +448,9 @@ class Gm2_Category_Sort_Auto_Assign {
             wp_send_json_error( 'unauthorized' );
         }
 
-        check_ajax_referer( 'gm2_auto_assign', 'nonce' );
+        if ( ! check_ajax_referer( 'gm2_auto_assign', 'nonce', false ) ) {
+            check_ajax_referer( 'gm2_one_click_assign', 'nonce' );
+        }
 
         $reset    = ! empty( $_POST['reset'] );
         $progress = get_option( 'gm2_reset_progress', [ 'offset' => 0 ] );
