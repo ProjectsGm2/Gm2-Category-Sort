@@ -254,7 +254,8 @@ class Gm2_Category_Sort_One_Click_Assign {
                 continue;
             }
 
-            $text = '';
+            $text       = '';
+            $attr_slugs = [];
             if ( in_array( 'title', $fields, true ) ) {
                 $text .= ' ' . $product->get_name();
             }
@@ -265,14 +266,26 @@ class Gm2_Category_Sort_One_Click_Assign {
                 foreach ( $product->get_attributes() as $attr ) {
                     if ( $attr->is_taxonomy() ) {
                         $names = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'names' ] );
-                        $text .= ' ' . implode( ' ', $names );
+                        $slugs = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'slugs' ] );
+                        $text  .= ' ' . implode( ' ', $names );
+                        $key    = sanitize_key( $attr->get_name() );
+                        if ( ! isset( $attr_slugs[ $key ] ) ) {
+                            $attr_slugs[ $key ] = [];
+                        }
+                        $attr_slugs[ $key ] = array_merge( $attr_slugs[ $key ], $slugs );
                     } else {
-                        $text .= ' ' . implode( ' ', array_map( 'sanitize_text_field', $attr->get_options() ) );
+                        $opts = array_map( 'sanitize_text_field', $attr->get_options() );
+                        $text .= ' ' . implode( ' ', $opts );
+                        $key  = sanitize_key( $attr->get_name() );
+                        if ( ! isset( $attr_slugs[ $key ] ) ) {
+                            $attr_slugs[ $key ] = [];
+                        }
+                        $attr_slugs[ $key ] = array_merge( $attr_slugs[ $key ], array_map( 'sanitize_title', $opts ) );
                     }
                 }
             }
 
-            $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+            $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, false, 85, null, $attr_slugs );
             $term_ids = [];
             foreach ( $cats as $name ) {
                 $term = get_term_by( 'name', $name, 'product_cat' );

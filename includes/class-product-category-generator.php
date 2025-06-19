@@ -291,7 +291,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @param int    $threshold Fuzzy matching threshold.
      * @return array List of category names to assign.
      */
-    protected static function match_terms( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+    protected static function match_terms( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
         $cats       = [];
         $word_count = count( $words );
         foreach ( $mapping as $term => $paths ) {
@@ -331,7 +331,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 continue;
             }
             foreach ( $paths as $path ) {
-                if ( ! self::passes_branch_rules_for_path( $path, $lower ) ) {
+                if ( ! self::passes_branch_rules_for_path( $path, $lower, $attributes ) ) {
                     continue;
                 }
                 foreach ( $path as $cat ) {
@@ -345,7 +345,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /** Helper for root wheel simulator keywords. */
-    protected static function check_wheel_simulators( $lower ) {
+    protected static function check_wheel_simulators( $lower, array $attributes = [] ) {
         $cats        = [];
         $brand_terms = [ 'wheel simulator', 'rim liner', 'hubcap', 'wheel cover' ];
         foreach ( $brand_terms as $term ) {
@@ -368,14 +368,14 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 }
             }
         }
-        if ( $cats && ! self::passes_branch_rules_for_path( $cats, $lower ) ) {
+        if ( $cats && ! self::passes_branch_rules_for_path( $cats, $lower, $attributes ) ) {
             return [];
         }
         return $cats;
     }
 
     /** Brand and model branch logic. */
-    protected static function check_brand_model( $lower, array $words, array $mapping, $fuzzy, $threshold, $csv_dir ) {
+    protected static function check_brand_model( $lower, array $words, array $mapping, $fuzzy, $threshold, $csv_dir, array $attributes = [] ) {
         $brands       = [];
         $brand_models = [];
 
@@ -496,7 +496,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 if ( $neg ) {
                     continue;
                 }
-                if ( ! self::passes_branch_rules_for_path( $entry['path'], $lower ) ) {
+                    if ( ! self::passes_branch_rules_for_path( $entry['path'], $lower, $attributes ) ) {
                     continue;
                 }
                 $brand_matches[ $brand ] = $term;
@@ -531,7 +531,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 if ( ! preg_match( $close_pattern, $lower ) && ! preg_match( $reverse_pattern, $lower ) ) {
                     continue;
                 }
-                if ( ! self::passes_branch_rules_for_path( $model['path'], $lower ) ) {
+                if ( ! self::passes_branch_rules_for_path( $model['path'], $lower, $attributes ) ) {
                     continue;
                 }
                 foreach ( $model['path'] as $cat ) {
@@ -546,7 +546,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /** Wheel size branch logic. */
-    protected static function check_wheel_size( $lower, array $mapping, $wheel_size_num, $wheel_size, $brand_found ) {
+    protected static function check_wheel_size( $lower, array $mapping, $wheel_size_num, $wheel_size, $brand_found, array $attributes = [] ) {
         if ( ! $wheel_size_num ) {
             return [];
         }
@@ -581,14 +581,14 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 }
             }
         }
-        if ( ! self::passes_branch_rules_for_path( $cats, $lower ) ) {
+        if ( ! self::passes_branch_rules_for_path( $cats, $lower, $attributes ) ) {
             return [];
         }
         return $cats;
     }
 
     /** Lug/Hole configuration branch logic. */
-    protected static function check_lug_hole( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
+    protected static function check_lug_hole( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
         $subset      = self::filter_by_segment( $mapping, 'By Lug/Hole Configuration' );
         $candidates  = [];
         $word_count  = count( $words );
@@ -650,7 +650,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
         } );
         foreach ( $candidates as $cand ) {
             $path = $cand['path'];
-            if ( self::passes_branch_rules_for_path( $path, $lower ) ) {
+            if ( self::passes_branch_rules_for_path( $path, $lower, $attributes ) ) {
                 return array_values( array_unique( $path ) );
             }
         }
@@ -658,52 +658,52 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /** Generic helpers for additional branches. */
-    protected static function check_wheel_type( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
-        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Wheel Type' ), $fuzzy, $threshold );
+    protected static function check_wheel_type( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Wheel Type' ), $fuzzy, $threshold, $attributes );
     }
 
-    protected static function check_set_sizes( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
-        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Wheel Set Sizes' ), $fuzzy, $threshold );
+    protected static function check_set_sizes( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Wheel Set Sizes' ), $fuzzy, $threshold, $attributes );
     }
 
-    protected static function check_fit_type( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
-        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Fit Type' ), $fuzzy, $threshold );
+    protected static function check_fit_type( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Fit Type' ), $fuzzy, $threshold, $attributes );
     }
 
-    protected static function check_vehicle_type( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
-        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Vehicle Type' ), $fuzzy, $threshold );
+    protected static function check_vehicle_type( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Vehicle Type' ), $fuzzy, $threshold, $attributes );
     }
 
-    protected static function check_ring_mount( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
-        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Ring Mount' ), $fuzzy, $threshold );
+    protected static function check_ring_mount( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Ring Mount' ), $fuzzy, $threshold, $attributes );
     }
 
-    protected static function check_dayton_spoke( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
-        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Dayton Spoke' ), $fuzzy, $threshold );
+    protected static function check_dayton_spoke( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Dayton Spoke' ), $fuzzy, $threshold, $attributes );
     }
 
-    protected static function check_wheel_center_caps( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
-        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Wheel Center Caps' ), $fuzzy, $threshold );
+    protected static function check_wheel_center_caps( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Wheel Center Caps' ), $fuzzy, $threshold, $attributes );
     }
 
-    protected static function check_wheel_cover_parts( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
-        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Wheel Cover Parts' ), $fuzzy, $threshold );
+    protected static function check_wheel_cover_parts( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Wheel Cover Parts' ), $fuzzy, $threshold, $attributes );
     }
 
-    protected static function check_seat_covers( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
-        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Seat Covers' ), $fuzzy, $threshold );
+    protected static function check_seat_covers( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Seat Covers' ), $fuzzy, $threshold, $attributes );
     }
 
-    protected static function check_coverking_accessories( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
-        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Coverking Accessories' ), $fuzzy, $threshold );
+    protected static function check_coverking_accessories( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Coverking Accessories' ), $fuzzy, $threshold, $attributes );
     }
 
-    protected static function check_accessories_hardware( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
-        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Accessories & Hardware' ), $fuzzy, $threshold );
+    protected static function check_accessories_hardware( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Accessories & Hardware' ), $fuzzy, $threshold, $attributes );
     }
 
-    protected static function check_brands( $lower, array $words, array $mapping, $fuzzy, $threshold ) {
-        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Brands' ), $fuzzy, $threshold );
+    protected static function check_brands( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
+        return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Brands' ), $fuzzy, $threshold, $attributes );
     }
 
     /**
@@ -783,7 +783,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @param array  $mapping Term mapping from build_mapping_from_globals().
      * @return array List of category names.
      */
-    public static function assign_categories( $text, array $mapping, $fuzzy = false, $threshold = 85, $csv_dir = null ) {
+    public static function assign_categories( $text, array $mapping, $fuzzy = false, $threshold = 85, $csv_dir = null, array $attributes = [] ) {
         $decoded = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5 );
         $lower   = self::normalize_text( $decoded );
         $cats  = [];
@@ -843,9 +843,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
         }
 
-        $cats = array_merge( $cats, self::match_terms( $lower, $words, $other_map, $fuzzy, $threshold ) );
+        $cats = array_merge( $cats, self::match_terms( $lower, $words, $other_map, $fuzzy, $threshold, $attributes ) );
 
-        $sim = self::check_wheel_simulators( $lower );
+        $sim = self::check_wheel_simulators( $lower, $attributes );
         if ( $sim ) {
             foreach ( $sim as $c ) {
                 if ( ! in_array( $c, $cats, true ) ) {
@@ -855,7 +855,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
             $brand_found = true;
         }
 
-        $bm = self::check_brand_model( $lower, $words, $mapping, $fuzzy, $threshold, $csv_dir );
+        $bm = self::check_brand_model( $lower, $words, $mapping, $fuzzy, $threshold, $csv_dir, $attributes );
         foreach ( $bm as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
@@ -867,98 +867,98 @@ class Gm2_Category_Sort_Product_Category_Generator {
             $wheel_size     = $wheel_size_num . '"';
         }
 
-        $ws = self::check_wheel_size( $lower, $mapping, $wheel_size_num, $wheel_size, $brand_found );
+        $ws = self::check_wheel_size( $lower, $mapping, $wheel_size_num, $wheel_size, $brand_found, $attributes );
         foreach ( $ws as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
             }
         }
 
-        $lh = self::check_lug_hole( $lower, $words, $mapping, $fuzzy, $threshold );
+        $lh = self::check_lug_hole( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
         foreach ( $lh as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
             }
         }
 
-        $wt = self::check_wheel_type( $lower, $words, $mapping, $fuzzy, $threshold );
+        $wt = self::check_wheel_type( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
         foreach ( $wt as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
             }
         }
 
-        $ss = self::check_set_sizes( $lower, $words, $mapping, $fuzzy, $threshold );
+        $ss = self::check_set_sizes( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
         foreach ( $ss as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
             }
         }
 
-        $ft = self::check_fit_type( $lower, $words, $mapping, $fuzzy, $threshold );
+        $ft = self::check_fit_type( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
         foreach ( $ft as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
             }
         }
 
-        $vt = self::check_vehicle_type( $lower, $words, $mapping, $fuzzy, $threshold );
+        $vt = self::check_vehicle_type( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
         foreach ( $vt as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
             }
         }
 
-        $rm = self::check_ring_mount( $lower, $words, $mapping, $fuzzy, $threshold );
+        $rm = self::check_ring_mount( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
         foreach ( $rm as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
             }
         }
 
-        $ds = self::check_dayton_spoke( $lower, $words, $mapping, $fuzzy, $threshold );
+        $ds = self::check_dayton_spoke( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
         foreach ( $ds as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
             }
         }
 
-        $cap = self::check_wheel_center_caps( $lower, $words, $mapping, $fuzzy, $threshold );
+        $cap = self::check_wheel_center_caps( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
         foreach ( $cap as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
             }
         }
 
-        $wcp = self::check_wheel_cover_parts( $lower, $words, $mapping, $fuzzy, $threshold );
+        $wcp = self::check_wheel_cover_parts( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
         foreach ( $wcp as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
             }
         }
 
-        $sc = self::check_seat_covers( $lower, $words, $mapping, $fuzzy, $threshold );
+        $sc = self::check_seat_covers( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
         foreach ( $sc as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
             }
         }
 
-        $cka = self::check_coverking_accessories( $lower, $words, $mapping, $fuzzy, $threshold );
+        $cka = self::check_coverking_accessories( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
         foreach ( $cka as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
             }
         }
 
-        $ah = self::check_accessories_hardware( $lower, $words, $mapping, $fuzzy, $threshold );
+        $ah = self::check_accessories_hardware( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
         foreach ( $ah as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
             }
         }
 
-        $br = self::check_brands( $lower, $words, $mapping, $fuzzy, $threshold );
+        $br = self::check_brands( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
         foreach ( $br as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
@@ -1015,7 +1015,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @param string $lower Normalized text being analyzed.
      * @return bool True when the path should be allowed.
      */
-    protected static function passes_branch_rules_for_path( array $path, $lower ) {
+    protected static function passes_branch_rules_for_path( array $path, $lower, array $attributes = [] ) {
         $rules = get_option( 'gm2_branch_rules', [] );
         if ( ! is_array( $rules ) || ! $rules ) {
             return true;
@@ -1055,7 +1055,13 @@ class Gm2_Category_Sort_Product_Category_Generator {
             $include_attrs = $rule['include_attrs'] ?? [];
             foreach ( $include_attrs as $attr => $terms ) {
                 $found = false;
+                $attr  = sanitize_key( $attr );
                 foreach ( (array) $terms as $t ) {
+                    $slug = sanitize_title( $t );
+                    if ( isset( $attributes[ $attr ] ) && in_array( $slug, $attributes[ $attr ], true ) ) {
+                        $found = true;
+                        break;
+                    }
                     $t = str_replace( '-', ' ', $t );
                     $t = self::normalize_text( $t );
                     if ( $t !== '' && strpos( $lower, $t ) !== false ) {
@@ -1070,7 +1076,12 @@ class Gm2_Category_Sort_Product_Category_Generator {
 
             $exclude_attrs = $rule['exclude_attrs'] ?? [];
             foreach ( $exclude_attrs as $attr => $terms ) {
+                $attr = sanitize_key( $attr );
                 foreach ( (array) $terms as $t ) {
+                    $slug = sanitize_title( $t );
+                    if ( isset( $attributes[ $attr ] ) && in_array( $slug, $attributes[ $attr ], true ) ) {
+                        return false;
+                    }
                     $t = str_replace( '-', ' ', $t );
                     $t = self::normalize_text( $t );
                     if ( $t !== '' && strpos( $lower, $t ) !== false ) {

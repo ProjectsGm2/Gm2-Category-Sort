@@ -295,9 +295,27 @@ class Gm2_Category_Sort_Auto_Assign {
                 continue;
             }
 
-            $text  = $product->get_name();
+            $text       = $product->get_name();
+            $attr_slugs = [];
+            foreach ( $product->get_attributes() as $attr ) {
+                if ( $attr->is_taxonomy() ) {
+                    $slugs = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'slugs' ] );
+                    $key   = sanitize_key( $attr->get_name() );
+                    if ( ! isset( $attr_slugs[ $key ] ) ) {
+                        $attr_slugs[ $key ] = [];
+                    }
+                    $attr_slugs[ $key ] = array_merge( $attr_slugs[ $key ], $slugs );
+                } else {
+                    $opts = array_map( 'sanitize_text_field', $attr->get_options() );
+                    $key  = sanitize_key( $attr->get_name() );
+                    if ( ! isset( $attr_slugs[ $key ] ) ) {
+                        $attr_slugs[ $key ] = [];
+                    }
+                    $attr_slugs[ $key ] = array_merge( $attr_slugs[ $key ], array_map( 'sanitize_title', $opts ) );
+                }
+            }
 
-            $cats      = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy, 85, $export_dir );
+            $cats      = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy, 85, $export_dir, $attr_slugs );
             $term_ids  = [];
             foreach ( $cats as $name ) {
                 $term = get_term_by( 'name', $name, 'product_cat' );
@@ -561,9 +579,27 @@ class Gm2_Category_Sort_Auto_Assign {
                     continue;
                 }
 
-                $text = $product->get_name();
+                $text       = $product->get_name();
+                $attr_slugs = [];
+                foreach ( $product->get_attributes() as $attr ) {
+                    if ( $attr->is_taxonomy() ) {
+                        $slugs = wc_get_product_terms( $product_id, $attr->get_name(), [ 'fields' => 'slugs' ] );
+                        $key   = sanitize_key( $attr->get_name() );
+                        if ( ! isset( $attr_slugs[ $key ] ) ) {
+                            $attr_slugs[ $key ] = [];
+                        }
+                        $attr_slugs[ $key ] = array_merge( $attr_slugs[ $key ], $slugs );
+                    } else {
+                        $opts = array_map( 'sanitize_text_field', $attr->get_options() );
+                        $key  = sanitize_key( $attr->get_name() );
+                        if ( ! isset( $attr_slugs[ $key ] ) ) {
+                            $attr_slugs[ $key ] = [];
+                        }
+                        $attr_slugs[ $key ] = array_merge( $attr_slugs[ $key ], array_map( 'sanitize_title', $opts ) );
+                    }
+                }
 
-                $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy, 85, $export_dir );
+                $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy, 85, $export_dir, $attr_slugs );
                 $term_ids = [];
                 foreach ( $cats as $name ) {
                     $term = get_term_by( 'name', $name, 'product_cat' );
