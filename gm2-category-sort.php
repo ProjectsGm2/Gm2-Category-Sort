@@ -58,6 +58,7 @@ function gm2_category_sort_init() {
     require_once GM2_CAT_SORT_PATH . 'includes/class-category-importer.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-product-category-generator.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-product-category-importer.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-product-csv.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-attribute-fixer.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-auto-assign.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-one-click-assign.php';
@@ -76,6 +77,7 @@ function gm2_category_sort_init() {
     Gm2_Category_Sort_Auto_Assign::init();
     Gm2_Category_Sort_One_Click_Assign::init();
     Gm2_Category_Sort_Branch_Rules::init();
+    Gm2_Category_Sort_Product_CSV::init();
     
     add_filter('pre_get_document_title', 'gm2_category_sort_modify_title');
     add_action('wp_head', 'gm2_category_sort_meta_description');
