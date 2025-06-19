@@ -149,11 +149,12 @@ class Gm2_Category_Sort_Product_CSV {
      * @return true|WP_Error
      */
     public static function export_to_csv( $file ) {
-        if ( ! class_exists( 'WC_Product_CSV_Exporter' ) ) {
+        if ( ! function_exists( 'WC' ) ) {
             return new WP_Error( 'gm2_missing_wc', __( 'WooCommerce not installed.', 'gm2-category-sort' ) );
         }
 
-        include_once WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php';
+        $wc_path = defined( 'WC_ABSPATH' ) ? WC_ABSPATH : trailingslashit( WC()->plugin_path() );
+        include_once $wc_path . 'includes/export/class-wc-product-csv-exporter.php';
 
         $exporter = new WC_Product_CSV_Exporter();
         $exporter->set_columns_to_export( array_keys( $exporter->get_default_column_names() ) );
@@ -174,11 +175,12 @@ class Gm2_Category_Sort_Product_CSV {
      * @return true|WP_Error
      */
     public static function import_from_csv( $file ) {
-        if ( ! class_exists( 'WC_Product_CSV_Importer' ) ) {
+        if ( ! function_exists( 'WC' ) ) {
             return new WP_Error( 'gm2_missing_wc', __( 'WooCommerce not installed.', 'gm2-category-sort' ) );
         }
 
-        include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
+        $wc_path = defined( 'WC_ABSPATH' ) ? WC_ABSPATH : trailingslashit( WC()->plugin_path() );
+        include_once $wc_path . 'includes/import/class-wc-product-csv-importer.php';
 
         $importer = new WC_Product_CSV_Importer( $file, [ 'update_existing' => true ] );
         $importer->import();

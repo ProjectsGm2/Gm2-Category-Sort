@@ -8,6 +8,8 @@
 - Branch CSV files are now generated for leaf categories so branch rules work for every category.
 - Branch rule slugs now include the full category path so rules apply to deep branches.
 - Export and import WooCommerce products via CSV including assigned categories.
+### Fixed
+- Product CSV export no longer reports WooCommerce missing when the WC_ABSPATH constant is undefined.
 
 ## [1.0.15] - 2025-06-15
 ### Added
