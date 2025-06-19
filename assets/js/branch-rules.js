@@ -27,6 +27,28 @@ jQuery(function($){
         });
     }
 
+    function summarize(selected){
+        var parts=[];
+        $.each(selected,function(attr,terms){
+            if(!terms.length) return;
+            var info=attrs[attr]||{};
+            var label=info.label||attr;
+            var names=[];
+            $.each(terms,function(i,slug){
+                names.push(info.terms && info.terms[slug] ? info.terms[slug] : slug);
+            });
+            parts.push(label+': '+names.join(', '));
+        });
+        return parts.join('; ');
+    }
+
+    function updateSummary(row){
+        var inc=gatherSelected(row.find('.gm2-include-terms'));
+        var exc=gatherSelected(row.find('.gm2-exclude-terms'));
+        row.find('.gm2-include-summary').text(summarize(inc));
+        row.find('.gm2-exclude-summary').text(summarize(exc));
+    }
+
     form.find('.gm2-attr-select').each(function(){
         populate($(this));
     });
@@ -46,6 +68,7 @@ jQuery(function($){
                     row.find('.gm2-exclude-attr').val(excAttrs);
                     renderTerms(row.find('.gm2-include-terms'),incAttrs,r.include_attrs);
                     renderTerms(row.find('.gm2-exclude-terms'),excAttrs,r.exclude_attrs);
+                    updateSummary(row);
                 }
             }
         });
@@ -67,6 +90,7 @@ jQuery(function($){
         var attrsSel=$(this).val()||[];
         var current=gatherSelected(row.find('.gm2-include-terms'));
         renderTerms(row.find('.gm2-include-terms'),attrsSel,current);
+        updateSummary(row);
     });
 
     form.on('change','.gm2-exclude-attr',function(){
@@ -74,6 +98,11 @@ jQuery(function($){
         var attrsSel=$(this).val()||[];
         var current=gatherSelected(row.find('.gm2-exclude-terms'));
         renderTerms(row.find('.gm2-exclude-terms'),attrsSel,current);
+        updateSummary(row);
+    });
+
+    form.on('change','.gm2-include-terms select,.gm2-exclude-terms select',function(){
+        updateSummary($(this).closest('tr'));
     });
 
     form.on('submit',function(e){
