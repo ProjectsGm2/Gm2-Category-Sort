@@ -54,4 +54,22 @@ class BranchRulesTest extends TestCase {
         $this->assertSame( '19"', $saved['branch-leaf']['include'] );
         $this->assertSame( "19'", $saved['branch-leaf']['exclude'] );
     }
+
+    public function test_ajax_save_rules_stores_attr_arrays() {
+        $_POST['nonce'] = 't';
+        $_POST['rules'] = [
+            'branch-leaf' => [
+                'include'       => '',
+                'exclude'       => '',
+                'include_attrs' => [ 'pa_Color' => [ 'Red', 'Blue' ] ],
+                'exclude_attrs' => [ 'pa_Size' => [ 'Large' ] ],
+            ],
+        ];
+
+        Gm2_Category_Sort_Branch_Rules::ajax_save_rules();
+        $saved = get_option( 'gm2_branch_rules' );
+
+        $this->assertSame( [ 'pa_Color' => [ 'Red', 'Blue' ] ], $saved['branch-leaf']['include_attrs'] );
+        $this->assertSame( [ 'pa_Size' => [ 'Large' ] ], $saved['branch-leaf']['exclude_attrs'] );
+    }
 }
