@@ -173,6 +173,8 @@ class Gm2_Category_Sort_Product_CSV {
         if ( ! @copy( $source, $file ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
             return new WP_Error( 'gm2_copy_failed', __( 'Unable to copy export file.', 'gm2-category-sort' ) );
         }
+
+        @unlink( $source ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
         return true;
     }
 
