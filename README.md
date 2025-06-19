@@ -213,12 +213,15 @@ basic stemming so minor wording differences like `lugs` vs `lug`,
 
 ### Branch Rules
 
-Use **Tools → Branch Rules** to set include and exclude keywords for each
-category branch. When a product text contains any include term and none of the
-exclude terms, that branch is added to the detected categories. These settings
-are stored in the `gm2_branch_rules` option.
-Each rule is saved using a slug that represents the full category path so even
-nested branches can be targeted.
+Use **Tools → Branch Rules** (requires the `manage_options` capability) to set
+include and exclude keywords for each category branch. Each rule also provides
+**Include Attributes** and **Exclude Attributes** selectors. When you run **One
+Click Categories Assignment** with the **Product Attributes** option enabled,
+these attribute selections are checked in addition to the regular include and
+exclude keywords. A branch is applied when any include term or attribute is
+found and no exclude term or attribute matches. The rules are stored in the
+`gm2_branch_rules` option. Each rule is saved using a slug that represents the
+full category path so even nested branches can be targeted.
 
 ## SEO Improvements
 
