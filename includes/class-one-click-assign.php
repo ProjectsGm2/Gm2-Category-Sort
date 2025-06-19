@@ -382,6 +382,18 @@ class Gm2_Category_Sort_One_Click_Assign {
             return;
         }
 
+        // Remove any existing CSV files from previous runs to avoid stale data.
+        foreach ( glob( rtrim( $dir, '/' ) . '/*.csv' ) as $csv ) {
+            $base = basename( $csv );
+            if ( $base === 'category-tree.csv' ) {
+                continue;
+            }
+            if ( strtolower( substr( $base, -4 ) ) !== '.csv' ) {
+                continue;
+            }
+            unlink( $csv );
+        }
+
         $rows    = array_map( 'str_getcsv', file( $tree_file ) );
 
 

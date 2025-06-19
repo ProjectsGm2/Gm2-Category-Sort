@@ -37,4 +37,30 @@ class BranchCsvExportTest extends TestCase {
         $this->assertSame( [ [ 'Root', 'Branch', 'Leaf' ] ], $leaf_rows );
         $this->assertSame( [ [ 'Solo' ] ], $solo_rows );
     }
+
+    public function test_old_branch_csvs_are_removed() {
+        $root = wp_insert_term( 'Top', 'product_cat' );
+        wp_insert_term( 'Child', 'product_cat', [ 'parent' => $root['term_id'] ] );
+
+        $dir = sys_get_temp_dir() . '/gm2_branch_cleanup';
+        if ( file_exists( $dir ) ) {
+            foreach ( glob( "$dir/*" ) as $f ) { unlink( $f ); }
+            rmdir( $dir );
+        }
+
+        Gm2_Category_Sort_Product_Category_Generator::export_category_tree_csv( $dir );
+
+        file_put_contents( "$dir/old.csv", 'old' );
+        file_put_contents( "$dir/keep.txt", 'keep' );
+
+        $ref    = new ReflectionClass( Gm2_Category_Sort_One_Click_Assign::class );
+        $method = $ref->getMethod( 'export_branch_csvs' );
+        $method->setAccessible( true );
+        $method->invoke( null, $dir );
+
+        $this->assertFileDoesNotExist( "$dir/old.csv" );
+        $this->assertFileExists( "$dir/keep.txt" );
+        $this->assertFileExists( "$dir/top-child.csv" );
+        $this->assertFileExists( "$dir/category-tree.csv" );
+    }
 }
