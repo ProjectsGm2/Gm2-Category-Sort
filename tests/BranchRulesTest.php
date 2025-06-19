@@ -72,4 +72,17 @@ class BranchRulesTest extends TestCase {
         $this->assertSame( [ 'pa_Color' => [ 'Red', 'Blue' ] ], $saved['branch-leaf']['include_attrs'] );
         $this->assertSame( [ 'pa_Size' => [ 'Large' ] ], $saved['branch-leaf']['exclude_attrs'] );
     }
+
+    public function test_stub_attribute_creation() {
+        wc_create_attribute( [ 'slug' => 'color', 'name' => 'Color' ] );
+        $tax = wc_attribute_taxonomy_name( 'color' );
+        wp_insert_term( 'Red', $tax );
+
+        $attrs = wc_get_attribute_taxonomies();
+        $this->assertCount( 1, $attrs );
+        $this->assertSame( 'color', $attrs[0]->attribute_name );
+
+        $terms = get_terms( [ 'taxonomy' => $tax, 'hide_empty' => false ] );
+        $this->assertCount( 1, $terms );
+    }
 }

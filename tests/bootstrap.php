@@ -36,6 +36,7 @@ $GLOBALS['gm2_insert_calls'] = [];
 $GLOBALS['gm2_meta_updates'] = [];
 $GLOBALS['gm2_products'] = [];
 $GLOBALS['gm2_set_terms_calls'] = [];
+$GLOBALS['gm2_attributes'] = [];
 
 function gm2_test_reset_terms() {
     $GLOBALS['gm2_test_terms'] = [];
@@ -44,6 +45,7 @@ function gm2_test_reset_terms() {
     $GLOBALS['gm2_meta_updates'] = [];
     $GLOBALS['gm2_products'] = [];
     $GLOBALS['gm2_set_terms_calls'] = [];
+    $GLOBALS['gm2_attributes'] = [];
 }
 
 gm2_test_reset_terms();
@@ -100,6 +102,45 @@ function wp_set_object_terms( $object_id, $terms, $taxonomy, $append = false ) {
         'append'    => $append,
     ];
     return $terms;
+}
+
+function wc_create_attribute( $args ) {
+    $slug = sanitize_key( $args['slug'] ?? $args['name'] );
+    $id   = count( $GLOBALS['gm2_attributes'] ) + 1;
+    $GLOBALS['gm2_attributes'][ $slug ] = [
+        'id'             => $id,
+        'attribute_id'   => $id,
+        'attribute_name' => $slug,
+        'attribute_label'=> $args['name'] ?? $slug,
+    ];
+    return $id;
+}
+
+function wc_get_attribute_taxonomies() {
+    $list = [];
+    foreach ( $GLOBALS['gm2_attributes'] as $slug => $attr ) {
+        $list[] = (object) $attr;
+    }
+    return $list;
+}
+
+function wc_attribute_taxonomy_name( $name ) {
+    $name = sanitize_title( $name );
+    return strpos( $name, 'pa_' ) === 0 ? $name : 'pa_' . $name;
+}
+
+function wc_sanitize_taxonomy_name( $name ) {
+    return sanitize_title( $name );
+}
+
+function wc_delete_attribute( $id ) {
+    foreach ( $GLOBALS['gm2_attributes'] as $slug => $attr ) {
+        if ( $attr['id'] === $id ) {
+            unset( $GLOBALS['gm2_attributes'][ $slug ] );
+            return true;
+        }
+    }
+    return false;
 }
 
 if ( ! function_exists( 'delete_option' ) ) {
