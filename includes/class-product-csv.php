@@ -161,7 +161,8 @@ class Gm2_Category_Sort_Product_CSV {
         $exporter->set_filename( basename( $file ) );
         $exporter->generate_file();
 
-        $source = $exporter->get_file_path();
+        $upload_dir = wp_upload_dir();
+        $source     = trailingslashit( $upload_dir['basedir'] ) . $exporter->get_filename();
         if ( ! @copy( $source, $file ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
             return new WP_Error( 'gm2_copy_failed', __( 'Unable to copy export file.', 'gm2-category-sort' ) );
         }
