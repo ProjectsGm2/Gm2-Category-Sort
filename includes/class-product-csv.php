@@ -10,6 +10,7 @@ class Gm2_Category_Sort_Product_CSV {
     public static function init() {
         self::register_cli();
         add_action( 'admin_menu', [ __CLASS__, 'register_admin_pages' ] );
+        add_action( 'admin_post_gm2_export_products', [ __CLASS__, 'handle_export_request' ] );
     }
 
     /**
@@ -46,29 +47,35 @@ class Gm2_Category_Sort_Product_CSV {
      * Render export page.
      */
     public static function export_page() {
-        if ( isset( $_POST['gm2_export_nonce'] ) ) {
-            check_admin_referer( 'gm2_export_products', 'gm2_export_nonce' );
-            $file   = wp_tempnam( 'products.csv' );
-            $result = self::export_to_csv( $file );
-            if ( is_wp_error( $result ) ) {
-                echo '<div class="notice notice-error"><p>' . esc_html( $result->get_error_message() ) . '</p></div>';
-            } else {
-                header( 'Content-Type: text/csv' );
-                header( 'Content-Disposition: attachment; filename="products.csv"' );
-                readfile( $file );
-                unlink( $file );
-                exit;
-            }
-        }
         ?>
         <div class="wrap">
             <h1><?php esc_html_e( 'Export Products', 'gm2-category-sort' ); ?></h1>
-            <form method="post">
+            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
                 <?php wp_nonce_field( 'gm2_export_products', 'gm2_export_nonce' ); ?>
+                <input type="hidden" name="action" value="gm2_export_products">
                 <?php submit_button( __( 'Download CSV', 'gm2-category-sort' ) ); ?>
             </form>
         </div>
         <?php
+    }
+
+    /**
+     * Handle product export form submission.
+     */
+    public static function handle_export_request() {
+        check_admin_referer( 'gm2_export_products', 'gm2_export_nonce' );
+
+        $file   = wp_tempnam( 'products.csv' );
+        $result = self::export_to_csv( $file );
+        if ( is_wp_error( $result ) ) {
+            wp_die( esc_html( $result->get_error_message() ) );
+        }
+
+        header( 'Content-Type: text/csv' );
+        header( 'Content-Disposition: attachment; filename="products.csv"' );
+        readfile( $file );
+        unlink( $file );
+        exit;
     }
 
     /**
