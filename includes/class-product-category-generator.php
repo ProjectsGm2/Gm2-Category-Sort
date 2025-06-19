@@ -1062,12 +1062,6 @@ class Gm2_Category_Sort_Product_Category_Generator {
                         $found = true;
                         break;
                     }
-                    $t = str_replace( '-', ' ', $t );
-                    $t = self::normalize_text( $t );
-                    if ( $t !== '' && strpos( $lower, $t ) !== false ) {
-                        $found = true;
-                        break;
-                    }
                 }
                 if ( ! $found ) {
                     return false;
@@ -1080,11 +1074,6 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 foreach ( (array) $terms as $t ) {
                     $slug = sanitize_title( $t );
                     if ( isset( $attributes[ $attr ] ) && in_array( $slug, $attributes[ $attr ], true ) ) {
-                        return false;
-                    }
-                    $t = str_replace( '-', ' ', $t );
-                    $t = self::normalize_text( $t );
-                    if ( $t !== '' && strpos( $lower, $t ) !== false ) {
                         return false;
                     }
                 }
