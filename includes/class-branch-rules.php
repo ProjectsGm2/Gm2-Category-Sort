@@ -103,13 +103,34 @@ class Gm2_Category_Sort_Branch_Rules {
             wp_send_json_error( 'unauthorized' );
         }
         check_ajax_referer( 'gm2_branch_rules', 'nonce' );
-        $data = isset( $_POST['rules'] ) && is_array( $_POST['rules'] ) ? wp_unslash( $_POST['rules'] ) : [];
+        $data  = isset( $_POST['rules'] ) && is_array( $_POST['rules'] ) ? wp_unslash( $_POST['rules'] ) : [];
         $rules = [];
         foreach ( $data as $slug => $rule ) {
-            $slug          = sanitize_key( $slug );
+            $slug    = sanitize_key( $slug );
+            $include = sanitize_textarea_field( $rule['include'] ?? '' );
+            $exclude = sanitize_textarea_field( $rule['exclude'] ?? '' );
+
+            $include_attrs = [];
+            if ( isset( $rule['include_attrs'] ) && is_array( $rule['include_attrs'] ) ) {
+                foreach ( $rule['include_attrs'] as $attr => $terms ) {
+                    $attr               = sanitize_key( $attr );
+                    $include_attrs[$attr] = array_map( 'sanitize_key', (array) $terms );
+                }
+            }
+
+            $exclude_attrs = [];
+            if ( isset( $rule['exclude_attrs'] ) && is_array( $rule['exclude_attrs'] ) ) {
+                foreach ( $rule['exclude_attrs'] as $attr => $terms ) {
+                    $attr               = sanitize_key( $attr );
+                    $exclude_attrs[$attr] = array_map( 'sanitize_key', (array) $terms );
+                }
+            }
+
             $rules[ $slug ] = [
-                'include' => sanitize_textarea_field( $rule['include'] ?? '' ),
-                'exclude' => sanitize_textarea_field( $rule['exclude'] ?? '' ),
+                'include'       => $include,
+                'exclude'       => $exclude,
+                'include_attrs' => $include_attrs,
+                'exclude_attrs' => $exclude_attrs,
             ];
         }
         update_option( 'gm2_branch_rules', $rules );
