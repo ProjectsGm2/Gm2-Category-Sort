@@ -41,6 +41,7 @@ class BranchRulesTest extends TestCase {
         $GLOBALS['gm2_options'] = [];
         $_POST = [];
         $GLOBALS['gm2_json_result'] = null;
+        gm2_test_reset_terms();
     }
 
     public function test_ajax_save_rules_preserves_quotes() {

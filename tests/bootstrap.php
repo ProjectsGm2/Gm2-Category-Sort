@@ -37,9 +37,11 @@ $GLOBALS['gm2_meta_updates'] = [];
 $GLOBALS['gm2_products'] = [];
 $GLOBALS['gm2_set_terms_calls'] = [];
 $GLOBALS['gm2_attributes'] = [];
+$GLOBALS['gm2_attr_terms'] = [];
 
 function gm2_test_reset_terms() {
     $GLOBALS['gm2_test_terms'] = [];
+    $GLOBALS['gm2_attr_terms'] = [];
     $GLOBALS['gm2_next_id'] = 1;
     $GLOBALS['gm2_insert_calls'] = [];
     $GLOBALS['gm2_meta_updates'] = [];
@@ -51,6 +53,13 @@ function gm2_test_reset_terms() {
 gm2_test_reset_terms();
 
 function term_exists( $name, $taxonomy = null, $parent = 0 ) {
+    if ( $taxonomy && $taxonomy !== 'product_cat' ) {
+        $terms = $GLOBALS['gm2_attr_terms'][ $taxonomy ] ?? [];
+        if ( isset( $terms[ $name ] ) ) {
+            return [ 'term_id' => $terms[ $name ] ];
+        }
+        return false;
+    }
     $terms = $GLOBALS['gm2_test_terms'];
     if ( isset( $terms[ $parent ][ $name ] ) ) {
         return [ 'term_id' => $terms[ $parent ][ $name ] ];
@@ -61,10 +70,17 @@ function term_exists( $name, $taxonomy = null, $parent = 0 ) {
 function wp_insert_term( $name, $taxonomy, $args = [] ) {
     $parent = $args['parent'] ?? 0;
     $id = $GLOBALS['gm2_next_id']++;
-    if ( ! isset( $GLOBALS['gm2_test_terms'][ $parent ] ) ) {
-        $GLOBALS['gm2_test_terms'][ $parent ] = [];
+    if ( $taxonomy === 'product_cat' ) {
+        if ( ! isset( $GLOBALS['gm2_test_terms'][ $parent ] ) ) {
+            $GLOBALS['gm2_test_terms'][ $parent ] = [];
+        }
+        $GLOBALS['gm2_test_terms'][ $parent ][ $name ] = $id;
+    } else {
+        if ( ! isset( $GLOBALS['gm2_attr_terms'][ $taxonomy ] ) ) {
+            $GLOBALS['gm2_attr_terms'][ $taxonomy ] = [];
+        }
+        $GLOBALS['gm2_attr_terms'][ $taxonomy ][ $name ] = $id;
     }
-    $GLOBALS['gm2_test_terms'][ $parent ][ $name ] = $id;
     $GLOBALS['gm2_insert_calls'][] = [ 'name' => $name, 'parent' => $parent, 'id' => $id ];
     return [ 'term_id' => $id ];
 }
@@ -176,9 +192,16 @@ if ( ! isset( $GLOBALS['wpdb'] ) ) {
 // Basic stubs for renderer tests and others.
 if ( ! function_exists( 'get_terms' ) ) {
     function get_terms( $args ) {
-        $parent  = isset( $args['parent'] ) ? (int) $args['parent'] : null;
-        $include = isset( $args['include'] ) ? (array) $args['include'] : null;
-        $terms   = [];
+        $taxonomy = $args['taxonomy'] ?? 'product_cat';
+        $parent   = isset( $args['parent'] ) ? (int) $args['parent'] : null;
+        $include  = isset( $args['include'] ) ? (array) $args['include'] : null;
+        $terms    = [];
+        if ( $taxonomy !== 'product_cat' ) {
+            foreach ( $GLOBALS['gm2_attr_terms'][ $taxonomy ] ?? [] as $name => $id ) {
+                $terms[] = (object) [ 'term_id' => $id, 'parent' => 0, 'name' => $name ];
+            }
+            return $terms;
+        }
         foreach ( $GLOBALS['gm2_test_terms'] as $p => $cats ) {
             foreach ( $cats as $name => $id ) {
                 if ( $parent !== null && (int) $p !== $parent ) {
