@@ -53,16 +53,27 @@ jQuery(function($){
 
     load();
 
+    function gatherSelected(container){
+        var selected={};
+        container.find('select').each(function(){
+            var attr=$(this).data('attr');
+            selected[attr]=$(this).val()||[];
+        });
+        return selected;
+    }
+
     form.on('change','.gm2-include-attr',function(){
         var row=$(this).closest('tr');
         var attrsSel=$(this).val()||[];
-        renderTerms(row.find('.gm2-include-terms'),attrsSel);
+        var current=gatherSelected(row.find('.gm2-include-terms'));
+        renderTerms(row.find('.gm2-include-terms'),attrsSel,current);
     });
 
     form.on('change','.gm2-exclude-attr',function(){
         var row=$(this).closest('tr');
         var attrsSel=$(this).val()||[];
-        renderTerms(row.find('.gm2-exclude-terms'),attrsSel);
+        var current=gatherSelected(row.find('.gm2-exclude-terms'));
+        renderTerms(row.find('.gm2-exclude-terms'),attrsSel,current);
     });
 
     form.on('submit',function(e){
