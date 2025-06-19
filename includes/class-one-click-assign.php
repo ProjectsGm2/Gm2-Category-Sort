@@ -384,30 +384,6 @@ class Gm2_Category_Sort_One_Click_Assign {
 
         $rows    = array_map( 'str_getcsv', file( $tree_file ) );
 
-        // Determine which category path prefixes have children.
-        $has_children = [];
-        foreach ( $rows as $row ) {
-            if ( empty( $row ) ) {
-                continue;
-            }
-
-            $path_slugs = [];
-            $last_index = count( $row ) - 1;
-            foreach ( $row as $index => $segment ) {
-                $segment = trim( $segment );
-                if ( $segment === '' ) {
-                    continue;
-                }
-
-                $path_slugs[] = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $segment );
-                $slug         = implode( '-', $path_slugs );
-
-                // Only mark a slug if this row has a deeper level underneath it.
-                if ( $index < $last_index ) {
-                    $has_children[ $slug ] = true;
-                }
-            }
-        }
 
         $handles = [];
         foreach ( $rows as $row ) {
