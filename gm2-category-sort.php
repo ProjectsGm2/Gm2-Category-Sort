@@ -34,7 +34,8 @@ function gm2_category_sort_deactivate() {
 }
 
 // Initialize plugin
-add_action('plugins_loaded', 'gm2_category_sort_init');
+// Load after WooCommerce so product CSV tools can access WC classes.
+add_action('plugins_loaded', 'gm2_category_sort_init', 20);
 function gm2_category_sort_init() {
     // Check for required plugins
     if (!did_action('elementor/loaded') || !function_exists('WC')) {
