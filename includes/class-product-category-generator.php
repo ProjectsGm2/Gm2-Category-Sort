@@ -613,7 +613,21 @@ class Gm2_Category_Sort_Product_Category_Generator {
         if ( ! $candidates ) {
             return [];
         }
-        uksort( $candidates, static function ( $a, $b ) {
+        $lug_num = null;
+        if ( preg_match( '/\b(\d+)\s*lugs?\b/', $lower, $m ) ) {
+            $lug_num = $m[1];
+        }
+        uksort( $candidates, static function ( $a, $b ) use ( $lug_num ) {
+            if ( $lug_num !== null ) {
+                $a_has = strpos( $a, $lug_num ) !== false;
+                $b_has = strpos( $b, $lug_num ) !== false;
+                if ( $a_has && ! $b_has ) {
+                    return -1;
+                }
+                if ( $b_has && ! $a_has ) {
+                    return 1;
+                }
+            }
             return strlen( $b ) <=> strlen( $a );
         } );
         $path = reset( $candidates );

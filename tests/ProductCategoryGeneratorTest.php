@@ -663,6 +663,21 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertSame( [ 'By Lug/Hole Configuration', '10 Lug 4 Hole' ], $cats );
     }
 
+    public function test_lug_number_preferred_over_synonyms() {
+        $root = wp_insert_term( 'By Lug/Hole Configuration', 'product_cat' );
+        $six  = wp_insert_term( '6 Lug', 'product_cat', [ 'parent' => $root['term_id'] ] );
+        $five = wp_insert_term( '5 Lug', 'product_cat', [ 'parent' => $root['term_id'] ] );
+        update_term_meta( $six['term_id'], 'gm2_synonyms', 'Trailer' );
+        update_term_meta( $five['term_id'], 'gm2_synonyms', 'Trailer' );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $text    = 'Heavy duty trailer for 5 lug wheels';
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        $this->assertSame( [ 'By Lug/Hole Configuration', '5 Lug' ], $cats );
+    }
+
     public function test_wheel_size_respects_branch_rules() {
         $root = wp_insert_term( 'By Wheel Size', 'product_cat' );
         wp_insert_term( '19.5"', 'product_cat', [ 'parent' => $root['term_id'] ] );
