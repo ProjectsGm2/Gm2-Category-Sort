@@ -104,6 +104,18 @@ When uploading through the admin screen a progress bar shows the import status
 so large files can be processed incrementally. Each request handles about 50
 rows. For huge imports consider WP‑CLI which displays a terminal progress bar.
 
+## Product CSV Export & Import
+
+All WooCommerce product data can be exported to a CSV file along with any
+assigned categories. Visit **Tools → Export Products** to download the file or
+run `wp gm2-category-sort export-products <path>` from WP‑CLI. The CSV matches
+WooCommerce's built‑in format so it can be re‑imported later.
+
+To import product information, open **Tools → Import Products** and upload a
+CSV created by the exporter (or run `wp gm2-category-sort import-products <file>`
+from WP‑CLI). Existing products are updated when their IDs or SKUs match.
+An example export is provided at `assets/example-products.csv`.
+
 ### Generate Category Assignments from Research CSV
 
 The `scripts/generate_product_categories.py` helper reads
