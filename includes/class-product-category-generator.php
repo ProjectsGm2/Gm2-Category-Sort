@@ -1051,6 +1051,33 @@ class Gm2_Category_Sort_Product_Category_Generator {
                     return false;
                 }
             }
+
+            $include_attrs = $rule['include_attrs'] ?? [];
+            foreach ( $include_attrs as $attr => $terms ) {
+                $found = false;
+                foreach ( (array) $terms as $t ) {
+                    $t = str_replace( '-', ' ', $t );
+                    $t = self::normalize_text( $t );
+                    if ( $t !== '' && strpos( $lower, $t ) !== false ) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if ( ! $found ) {
+                    return false;
+                }
+            }
+
+            $exclude_attrs = $rule['exclude_attrs'] ?? [];
+            foreach ( $exclude_attrs as $attr => $terms ) {
+                foreach ( (array) $terms as $t ) {
+                    $t = str_replace( '-', ' ', $t );
+                    $t = self::normalize_text( $t );
+                    if ( $t !== '' && strpos( $lower, $t ) !== false ) {
+                        return false;
+                    }
+                }
+            }
         }
         return true;
     }
