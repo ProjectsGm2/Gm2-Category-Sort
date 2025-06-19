@@ -149,7 +149,7 @@ class Gm2_Category_Sort_Product_CSV {
      * @return true|WP_Error
      */
     public static function export_to_csv( $file ) {
-        if ( ! class_exists( 'WC_Product_CSV_Exporter' ) ) {
+        if ( ! defined( 'WC_ABSPATH' ) ) {
             return new WP_Error( 'gm2_missing_wc', __( 'WooCommerce not installed.', 'gm2-category-sort' ) );
         }
 
@@ -174,7 +174,7 @@ class Gm2_Category_Sort_Product_CSV {
      * @return true|WP_Error
      */
     public static function import_from_csv( $file ) {
-        if ( ! class_exists( 'WC_Product_CSV_Importer' ) ) {
+        if ( ! defined( 'WC_ABSPATH' ) ) {
             return new WP_Error( 'gm2_missing_wc', __( 'WooCommerce not installed.', 'gm2-category-sort' ) );
         }
 
