@@ -164,7 +164,7 @@ class Gm2_Category_Sort_One_Click_Assign {
                 function( $child ) {
                     return preg_replace( '/\s*\([^\)]*\)/', '', $child );
                 },
-                $children
+                array_keys( $children )
             );
             echo '<li><strong>' . esc_html( $clean_parent ) . '</strong>: ' . esc_html( implode( ', ', $clean_children ) ) . '</li>';
         }
@@ -184,18 +184,21 @@ class Gm2_Category_Sort_One_Click_Assign {
         $rows     = array_map( 'str_getcsv', file( $file ) );
         $branches = [];
         foreach ( $rows as $row ) {
-            $prev = null;
+            $prev       = null;
+            $path_slugs = [];
             foreach ( $row as $segment ) {
                 $segment = trim( $segment );
                 if ( $segment === '' ) {
                     continue;
                 }
+                $path_slugs[] = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $segment );
                 if ( $prev !== null ) {
                     if ( ! isset( $branches[ $prev ] ) ) {
                         $branches[ $prev ] = [];
                     }
-                    if ( ! in_array( $segment, $branches[ $prev ], true ) ) {
-                        $branches[ $prev ][] = $segment;
+                    $slug = implode( '-', $path_slugs );
+                    if ( ! isset( $branches[ $prev ][ $segment ] ) ) {
+                        $branches[ $prev ][ $segment ] = $slug;
                     }
                 }
                 $prev = $segment;
@@ -425,10 +428,10 @@ class Gm2_Category_Sort_One_Click_Assign {
                 $path_slugs[] = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $segment );
                 $slug         = implode( '-', $path_slugs );
 
-                // Skip if this slug has no children in the overall tree.
-                if ( ! isset( $has_children[ $slug ] ) ) {
-                    continue;
-                }
+                // Previously branch CSVs were only written for categories that
+                // have children.  This meant branch rules could not target
+                // leaf categories.  Write a file for every slug so branch rules
+                // work consistently regardless of depth.
 
                 $file = rtrim( $dir, '/' ) . '/' . $slug . '.csv';
 

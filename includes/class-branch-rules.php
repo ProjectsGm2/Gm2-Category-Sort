@@ -71,10 +71,9 @@ class Gm2_Category_Sort_Branch_Rules {
         echo '<thead><tr><th>' . esc_html__( 'Branch', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Include Keywords', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Exclude Keywords', 'gm2-category-sort' ) . '</th></tr></thead>';
         echo '<tbody>';
         foreach ( $branches as $parent => $children ) {
-            foreach ( $children as $child ) {
-                $slug = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $parent ) . '-' . Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $child );
-                $inc  = $rules[ $slug ][ 'include' ] ?? '';
-                $exc  = $rules[ $slug ][ 'exclude' ] ?? '';
+            foreach ( $children as $child => $slug ) {
+                $inc = $rules[ $slug ][ 'include' ] ?? '';
+                $exc = $rules[ $slug ][ 'exclude' ] ?? '';
                 echo '<tr data-slug="' . esc_attr( $slug ) . '">';
                 echo '<td><strong>' . esc_html( $parent . ' > ' . $child ) . '</strong></td>';
                 echo '<td><textarea data-slug="' . esc_attr( $slug ) . '" data-type="include" rows="2" style="width:100%;">' . esc_textarea( $inc ) . '</textarea></td>';
