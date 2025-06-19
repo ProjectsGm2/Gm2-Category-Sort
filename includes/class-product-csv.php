@@ -11,6 +11,7 @@ class Gm2_Category_Sort_Product_CSV {
         self::register_cli();
         add_action( 'admin_menu', [ __CLASS__, 'register_admin_pages' ] );
         add_action( 'admin_post_gm2_export_products', [ __CLASS__, 'handle_export_request' ] );
+        add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin_assets' ] );
     }
 
     /**
@@ -44,6 +45,26 @@ class Gm2_Category_Sort_Product_CSV {
     }
 
     /**
+     * Enqueue admin assets for the export page.
+     *
+     * @param string $hook Current admin page hook.
+     */
+    public static function enqueue_admin_assets( $hook ) {
+        if ( $hook !== 'tools_page_gm2-product-export' ) {
+            return;
+        }
+
+        $ver = file_exists( GM2_CAT_SORT_PATH . 'assets/js/product-export.js' ) ? filemtime( GM2_CAT_SORT_PATH . 'assets/js/product-export.js' ) : GM2_CAT_SORT_VERSION;
+        wp_enqueue_script(
+            'gm2-product-export',
+            GM2_CAT_SORT_URL . 'assets/js/product-export.js',
+            [ 'jquery' ],
+            $ver,
+            true
+        );
+    }
+
+    /**
      * Render export page.
      */
     public static function export_page() {
@@ -54,10 +75,11 @@ class Gm2_Category_Sort_Product_CSV {
             <?php if ( $error ) : ?>
                 <div class="notice notice-error"><p><?php echo esc_html( $error ); ?></p></div>
             <?php endif; ?>
-            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+            <form id="gm2-product-export-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
                 <?php wp_nonce_field( 'gm2_export_products', 'gm2_export_nonce' ); ?>
                 <input type="hidden" name="action" value="gm2_export_products">
                 <?php submit_button( __( 'Download CSV', 'gm2-category-sort' ) ); ?>
+                <span id="gm2-export-spinner" class="spinner" style="float:none;margin-top:4px;display:none;"></span>
             </form>
         </div>
         <?php
