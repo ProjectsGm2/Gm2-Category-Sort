@@ -47,9 +47,13 @@ class Gm2_Category_Sort_Product_CSV {
      * Render export page.
      */
     public static function export_page() {
+        $error = isset( $_GET['gm2_export_error'] ) ? sanitize_text_field( wp_unslash( $_GET['gm2_export_error'] ) ) : '';
         ?>
         <div class="wrap">
             <h1><?php esc_html_e( 'Export Products', 'gm2-category-sort' ); ?></h1>
+            <?php if ( $error ) : ?>
+                <div class="notice notice-error"><p><?php echo esc_html( $error ); ?></p></div>
+            <?php endif; ?>
             <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
                 <?php wp_nonce_field( 'gm2_export_products', 'gm2_export_nonce' ); ?>
                 <input type="hidden" name="action" value="gm2_export_products">
@@ -65,7 +69,17 @@ class Gm2_Category_Sort_Product_CSV {
     public static function handle_export_request() {
         check_admin_referer( 'gm2_export_products', 'gm2_export_nonce' );
 
-        $file   = wp_tempnam( 'products.csv' );
+        $file = wp_tempnam( 'products.csv' );
+        if ( ! $file ) {
+            $redirect = add_query_arg(
+                'gm2_export_error',
+                rawurlencode( __( 'Unable to create temporary file.', 'gm2-category-sort' ) ),
+                admin_url( 'tools.php?page=gm2-product-export' )
+            );
+            wp_safe_redirect( $redirect );
+            exit;
+        }
+
         $result = self::export_to_csv( $file );
         if ( is_wp_error( $result ) ) {
             wp_die( esc_html( $result->get_error_message() ) );
