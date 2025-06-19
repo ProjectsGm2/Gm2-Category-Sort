@@ -32,13 +32,34 @@ class Gm2_Category_Sort_Branch_Rules {
             true
         );
 
+        $attrs = wc_get_attribute_taxonomies();
+        $attr_data = [];
+        if ( $attrs ) {
+            foreach ( $attrs as $attr ) {
+                $taxonomy = wc_attribute_taxonomy_name( $attr->attribute_name );
+                $terms    = get_terms( [
+                    'taxonomy'   => $taxonomy,
+                    'hide_empty' => false,
+                ] );
+                $term_map = [];
+                foreach ( $terms as $term ) {
+                    $term_map[ $term->slug ] = $term->name;
+                }
+                $attr_data[ $attr->attribute_name ] = [
+                    'label' => $attr->attribute_label,
+                    'terms' => $term_map,
+                ];
+            }
+        }
+
         wp_localize_script(
             'gm2-branch-rules',
             'gm2BranchRules',
             [
-                'nonce' => wp_create_nonce( 'gm2_branch_rules' ),
-                'saved' => __( 'Rules saved.', 'gm2-category-sort' ),
-                'error' => __( 'Error saving rules.', 'gm2-category-sort' ),
+                'nonce'      => wp_create_nonce( 'gm2_branch_rules' ),
+                'saved'      => __( 'Rules saved.', 'gm2-category-sort' ),
+                'error'      => __( 'Error saving rules.', 'gm2-category-sort' ),
+                'attributes' => $attr_data,
             ]
         );
     }
@@ -67,8 +88,16 @@ class Gm2_Category_Sort_Branch_Rules {
         echo '<h1>' . esc_html__( 'Branch Rules', 'gm2-category-sort' ) . '</h1>';
         echo '<form id="gm2-branch-rules-form">';
         wp_nonce_field( 'gm2_branch_rules', 'gm2_branch_rules_nonce' );
+        $attrs = wc_get_attribute_taxonomies();
+        $options = '';
+        if ( $attrs ) {
+            foreach ( $attrs as $attr ) {
+                $options .= '<option value="' . esc_attr( $attr->attribute_name ) . '">' . esc_html( $attr->attribute_label ) . '</option>';
+            }
+        }
+
         echo '<table class="widefat">';
-        echo '<thead><tr><th>' . esc_html__( 'Branch', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Include Keywords', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Exclude Keywords', 'gm2-category-sort' ) . '</th></tr></thead>';
+        echo '<thead><tr><th>' . esc_html__( 'Branch', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Include Keywords', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Exclude Keywords', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Include Attributes', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Exclude Attributes', 'gm2-category-sort' ) . '</th></tr></thead>';
         echo '<tbody>';
         foreach ( $branches as $parent => $children ) {
             foreach ( $children as $child => $slug ) {
@@ -78,6 +107,8 @@ class Gm2_Category_Sort_Branch_Rules {
                 echo '<td><strong>' . esc_html( $parent . ' > ' . $child ) . '</strong></td>';
                 echo '<td><textarea data-slug="' . esc_attr( $slug ) . '" data-type="include" rows="2" style="width:100%;">' . esc_textarea( $inc ) . '</textarea></td>';
                 echo '<td><textarea data-slug="' . esc_attr( $slug ) . '" data-type="exclude" rows="2" style="width:100%;">' . esc_textarea( $exc ) . '</textarea></td>';
+                echo '<td><select multiple class="gm2-attr-select gm2-include-attr" data-type="include_attrs" data-slug="' . esc_attr( $slug ) . '" style="width:100%;">' . $options . '</select><div class="gm2-include-terms"></div></td>';
+                echo '<td><select multiple class="gm2-attr-select gm2-exclude-attr" data-type="exclude_attrs" data-slug="' . esc_attr( $slug ) . '" style="width:100%;">' . $options . '</select><div class="gm2-exclude-terms"></div></td>';
                 echo '</tr>';
             }
         }
