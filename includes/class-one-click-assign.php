@@ -425,10 +425,10 @@ class Gm2_Category_Sort_One_Click_Assign {
                 $path_slugs[] = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $segment );
                 $slug         = implode( '-', $path_slugs );
 
-                // Skip if this slug has no children in the overall tree.
-                if ( ! isset( $has_children[ $slug ] ) ) {
-                    continue;
-                }
+                // Previously branch CSVs were only written for categories that
+                // have children.  This meant branch rules could not target
+                // leaf categories.  Write a file for every slug so branch rules
+                // work consistently regardless of depth.
 
                 $file = rtrim( $dir, '/' ) . '/' . $slug . '.csv';
 
