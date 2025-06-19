@@ -637,10 +637,24 @@ class ProductCategoryGeneratorTest extends TestCase {
             'branch-leaf' => [ 'include' => '', 'exclude' => '', 'include_attrs' => [ 'pa_color' => [ 'red' ] ] ],
         ];
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'LeafSyn red part', $mapping );
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories(
+            'LeafSyn red part',
+            $mapping,
+            false,
+            85,
+            null,
+            [ 'pa_color' => [ 'red' ] ]
+        );
         $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'LeafSyn part', $mapping );
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories(
+            'LeafSyn part',
+            $mapping,
+            false,
+            85,
+            null,
+            []
+        );
         $this->assertSame( [], $cats );
     }
 
@@ -664,10 +678,24 @@ class ProductCategoryGeneratorTest extends TestCase {
             'branch-leaf' => [ 'include' => '', 'exclude' => '', 'exclude_attrs' => [ 'pa_color' => [ 'blue' ] ] ],
         ];
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'LeafSyn blue part', $mapping );
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories(
+            'LeafSyn blue part',
+            $mapping,
+            false,
+            85,
+            null,
+            [ 'pa_color' => [ 'blue' ] ]
+        );
         $this->assertSame( [], $cats );
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'LeafSyn part', $mapping );
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories(
+            'LeafSyn part',
+            $mapping,
+            false,
+            85,
+            null,
+            []
+        );
         $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
     }
     public function test_exports_category_tree_csv() {
