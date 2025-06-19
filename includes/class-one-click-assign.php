@@ -280,9 +280,7 @@ class Gm2_Category_Sort_One_Click_Assign {
                     $term_ids[] = (int) $term->term_id;
                 }
             }
-            if ( $term_ids ) {
-                wp_set_object_terms( $product_id, $term_ids, 'product_cat', ! $overwrite );
-            }
+            wp_set_object_terms( $product_id, $term_ids ?: [], 'product_cat', ! $overwrite );
 
             $items[] = [
                 'sku'   => $product->get_sku(),
