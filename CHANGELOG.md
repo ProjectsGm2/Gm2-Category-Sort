@@ -10,6 +10,7 @@
 - Export and import WooCommerce products via CSV including assigned categories.
 ### Fixed
 - Product CSV export no longer reports WooCommerce missing when the WC_ABSPATH constant is undefined.
+- Product CSV export now sends headers before any admin page output so files download correctly.
 
 ## [1.0.15] - 2025-06-15
 ### Added

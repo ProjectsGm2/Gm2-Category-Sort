@@ -10,6 +10,9 @@ class Gm2_Category_Sort_Product_CSV {
     public static function init() {
         self::register_cli();
         add_action( 'admin_menu', [ __CLASS__, 'register_admin_pages' ] );
+        // Handle exports and imports before admin page output.
+        add_action( 'admin_post_gm2_export_products', [ __CLASS__, 'handle_export' ] );
+        add_action( 'admin_post_gm2_import_products', [ __CLASS__, 'handle_import' ] );
     }
 
     /**
@@ -46,24 +49,11 @@ class Gm2_Category_Sort_Product_CSV {
      * Render export page.
      */
     public static function export_page() {
-        if ( isset( $_POST['gm2_export_nonce'] ) ) {
-            check_admin_referer( 'gm2_export_products', 'gm2_export_nonce' );
-            $file   = wp_tempnam( 'products.csv' );
-            $result = self::export_to_csv( $file );
-            if ( is_wp_error( $result ) ) {
-                echo '<div class="notice notice-error"><p>' . esc_html( $result->get_error_message() ) . '</p></div>';
-            } else {
-                header( 'Content-Type: text/csv' );
-                header( 'Content-Disposition: attachment; filename="products.csv"' );
-                readfile( $file );
-                unlink( $file );
-                exit;
-            }
-        }
         ?>
         <div class="wrap">
             <h1><?php esc_html_e( 'Export Products', 'gm2-category-sort' ); ?></h1>
-            <form method="post">
+            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                <input type="hidden" name="action" value="gm2_export_products">
                 <?php wp_nonce_field( 'gm2_export_products', 'gm2_export_nonce' ); ?>
                 <?php submit_button( __( 'Download CSV', 'gm2-category-sort' ) ); ?>
             </form>
@@ -77,19 +67,14 @@ class Gm2_Category_Sort_Product_CSV {
     public static function import_page() {
         $message = '';
         $error   = '';
-        if ( isset( $_POST['gm2_import_nonce'] ) ) {
-            check_admin_referer( 'gm2_import_products', 'gm2_import_nonce' );
-            if ( ! empty( $_FILES['gm2_import_file']['tmp_name'] ) ) {
-                $file   = $_FILES['gm2_import_file']['tmp_name'];
-                $result = self::import_from_csv( $file );
-                if ( is_wp_error( $result ) ) {
-                    $error = $result->get_error_message();
-                } else {
-                    $message = __( 'Products imported successfully.', 'gm2-category-sort' );
-                }
-            } else {
+        if ( isset( $_GET['gm2_msg'] ) ) {
+            if ( 'success' === $_GET['gm2_msg'] ) {
+                $message = __( 'Products imported successfully.', 'gm2-category-sort' );
+            } elseif ( 'missing_file' === $_GET['gm2_msg'] ) {
                 $error = __( 'Please select a CSV file.', 'gm2-category-sort' );
             }
+        } elseif ( ! empty( $_GET['gm2_err'] ) ) {
+            $error = sanitize_text_field( wp_unslash( $_GET['gm2_err'] ) );
         }
         ?>
         <div class="wrap">
@@ -99,7 +84,8 @@ class Gm2_Category_Sort_Product_CSV {
             <?php elseif ( $error ) : ?>
                 <div class="notice notice-error"><p><?php echo esc_html( $error ); ?></p></div>
             <?php endif; ?>
-            <form method="post" enctype="multipart/form-data">
+            <form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                <input type="hidden" name="action" value="gm2_import_products">
                 <?php wp_nonce_field( 'gm2_import_products', 'gm2_import_nonce' ); ?>
                 <input type="file" name="gm2_import_file" accept=".csv">
                 <?php submit_button( __( 'Import', 'gm2-category-sort' ) ); ?>
@@ -140,6 +126,53 @@ class Gm2_Category_Sort_Product_CSV {
             \WP_CLI::error( $result->get_error_message() );
         }
         \WP_CLI::success( 'Products imported successfully.' );
+    }
+
+    /**
+     * Handle admin export request.
+     */
+    public static function handle_export() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( __( 'Sorry, you are not allowed to export products.', 'gm2-category-sort' ) );
+        }
+        check_admin_referer( 'gm2_export_products', 'gm2_export_nonce' );
+
+        $file   = wp_tempnam( 'products.csv' );
+        $result = self::export_to_csv( $file );
+        if ( is_wp_error( $result ) ) {
+            wp_die( $result->get_error_message() );
+        }
+
+        header( 'Content-Type: text/csv' );
+        header( 'Content-Disposition: attachment; filename="products.csv"' );
+        readfile( $file );
+        unlink( $file );
+        exit;
+    }
+
+    /**
+     * Handle admin import request.
+     */
+    public static function handle_import() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( __( 'Sorry, you are not allowed to import products.', 'gm2-category-sort' ) );
+        }
+        check_admin_referer( 'gm2_import_products', 'gm2_import_nonce' );
+
+        if ( empty( $_FILES['gm2_import_file']['tmp_name'] ) ) {
+            wp_safe_redirect( add_query_arg( 'gm2_msg', 'missing_file', wp_get_referer() ) );
+            exit;
+        }
+
+        $file   = $_FILES['gm2_import_file']['tmp_name'];
+        $result = self::import_from_csv( $file );
+        if ( is_wp_error( $result ) ) {
+            wp_safe_redirect( add_query_arg( 'gm2_err', urlencode( $result->get_error_message() ), wp_get_referer() ) );
+            exit;
+        }
+
+        wp_safe_redirect( add_query_arg( 'gm2_msg', 'success', wp_get_referer() ) );
+        exit;
     }
 
     /**
