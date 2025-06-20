@@ -10,12 +10,13 @@ jQuery(function($){
         });
     }
 
-    function renderTerms(container,attrList,selected){
+    function renderTerms(container,attrList,selected,collapsed){
         container.empty();
         attrList.forEach(function(attr){
             var info=attrs[attr];
             if(!info) return;
             var group=$('<span class="gm2-attr-group">');
+            var toggle=$('<span class="gm2-toggle-attr" data-attr="'+attr+'">&#9660;</span>');
             var remove=$('<span class="gm2-remove-attr" data-attr="'+attr+'">&times;</span>');
             var sel=$('<select multiple>').attr('data-attr',attr);
             $.each(info.terms,function(slug,name){
@@ -25,8 +26,12 @@ jQuery(function($){
                 }
                 sel.append(opt);
             });
+            group.append(toggle);
             group.append(remove);
             group.append(sel);
+            if(collapsed){
+                group.addClass('collapsed');
+            }
             container.append(group);
         });
     }
@@ -97,8 +102,8 @@ jQuery(function($){
                     var excAttrs=Object.keys(r.exclude_attrs||{});
                     row.find('.gm2-include-attr').val(incAttrs);
                     row.find('.gm2-exclude-attr').val(excAttrs);
-                    renderTerms(row.find('.gm2-include-terms'),incAttrs,r.include_attrs);
-                    renderTerms(row.find('.gm2-exclude-terms'),excAttrs,r.exclude_attrs);
+                    renderTerms(row.find('.gm2-include-terms'),incAttrs,r.include_attrs,true);
+                    renderTerms(row.find('.gm2-exclude-terms'),excAttrs,r.exclude_attrs,true);
                     updateSummary(row);
                 }
             }
@@ -120,7 +125,7 @@ jQuery(function($){
         var row=$(this).closest('tr');
         var attrsSel=$(this).val()||[];
         var current=gatherSelected(row.find('.gm2-include-terms'));
-        renderTerms(row.find('.gm2-include-terms'),attrsSel,current);
+        renderTerms(row.find('.gm2-include-terms'),attrsSel,current,false);
         updateSummary(row);
     });
 
@@ -128,12 +133,17 @@ jQuery(function($){
         var row=$(this).closest('tr');
         var attrsSel=$(this).val()||[];
         var current=gatherSelected(row.find('.gm2-exclude-terms'));
-        renderTerms(row.find('.gm2-exclude-terms'),attrsSel,current);
+        renderTerms(row.find('.gm2-exclude-terms'),attrsSel,current,false);
         updateSummary(row);
     });
 
     form.on('change','.gm2-include-terms select,.gm2-exclude-terms select',function(){
         updateSummary($(this).closest('tr'));
+    });
+
+    form.on('click','.gm2-attr-group .gm2-toggle-attr',function(){
+        var group=$(this).closest('.gm2-attr-group');
+        group.toggleClass('collapsed');
     });
 
     form.on('click','.gm2-attr-group .gm2-remove-attr',function(){
