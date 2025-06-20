@@ -16,6 +16,7 @@ jQuery(function($){
             var info=attrs[attr];
             if(!info) return;
             var group=$('<span class="gm2-attr-group">');
+            var toggle=$('<span class="gm2-toggle-attr" data-attr="'+attr+'">&#9660;</span>');
             var remove=$('<span class="gm2-remove-attr" data-attr="'+attr+'">&times;</span>');
             var sel=$('<select multiple>').attr('data-attr',attr);
             $.each(info.terms,function(slug,name){
@@ -25,6 +26,7 @@ jQuery(function($){
                 }
                 sel.append(opt);
             });
+            group.append(toggle);
             group.append(remove);
             group.append(sel);
             container.append(group);
@@ -134,6 +136,11 @@ jQuery(function($){
 
     form.on('change','.gm2-include-terms select,.gm2-exclude-terms select',function(){
         updateSummary($(this).closest('tr'));
+    });
+
+    form.on('click','.gm2-attr-group .gm2-toggle-attr',function(){
+        var group=$(this).closest('.gm2-attr-group');
+        group.toggleClass('collapsed');
     });
 
     form.on('click','.gm2-attr-group .gm2-remove-attr',function(){
