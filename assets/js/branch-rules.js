@@ -68,8 +68,6 @@ jQuery(function($){
     function updateSummary(row){
         var inc=gatherSelected(row.find('.gm2-include-terms'));
         var exc=gatherSelected(row.find('.gm2-exclude-terms'));
-        row.find('.gm2-include-summary').text(summarize(inc));
-        row.find('.gm2-exclude-summary').text(summarize(exc));
         renderTags(row.find('.gm2-include-tags'),inc);
         renderTags(row.find('.gm2-exclude-tags'),exc);
     }
