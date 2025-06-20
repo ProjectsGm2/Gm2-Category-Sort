@@ -39,21 +39,6 @@ jQuery(function($){
         });
     }
 
-    function summarize(selected){
-        var parts=[];
-        $.each(selected,function(attr,terms){
-            if(!terms.length) return;
-            var info=attrs[attr]||{};
-            var label=info.label||attr;
-            var names=[];
-            $.each(terms,function(i,slug){
-                names.push(info.terms && info.terms[slug] ? info.terms[slug] : slug);
-            });
-            parts.push(label+': '+names.join(', '));
-        });
-        return parts.join('; ');
-    }
-
     function renderTags(container, selected){
         container.empty();
         $.each(selected,function(attr,terms){
