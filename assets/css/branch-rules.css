@@ -1,0 +1,16 @@
+.gm2-attr-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+}
+.gm2-remove-attr {
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    margin-right: 4px;
+    padding: 2px;
+}
+.gm2-remove-attr:hover {
+    color: red;
+    transform: scale(1.2);
+}

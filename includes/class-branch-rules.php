@@ -32,6 +32,14 @@ class Gm2_Category_Sort_Branch_Rules {
             true
         );
 
+        $css_ver = file_exists( GM2_CAT_SORT_PATH . 'assets/css/branch-rules.css' ) ? filemtime( GM2_CAT_SORT_PATH . 'assets/css/branch-rules.css' ) : GM2_CAT_SORT_VERSION;
+        wp_enqueue_style(
+            'gm2-branch-rules',
+            GM2_CAT_SORT_URL . 'assets/css/branch-rules.css',
+            [],
+            $css_ver
+        );
+
         $attrs = wc_get_attribute_taxonomies();
         $attr_data = [];
         if ( $attrs ) {
