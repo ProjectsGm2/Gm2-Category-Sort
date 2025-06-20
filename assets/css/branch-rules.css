@@ -14,3 +14,10 @@
     color: red;
     transform: scale(1.2);
 }
+.gm2-include-summary,
+.gm2-exclude-summary {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #666;
+}
+
