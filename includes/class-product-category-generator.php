@@ -80,6 +80,36 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /**
+     * Determine if a normalized rule keyword exists within the normalized text.
+     *
+     * Underscores in the keyword act as wildcards matching any words in
+     * between the segments. For example, the keyword "foo_bar" matches
+     * "foo something bar".
+     *
+     * @param string $keyword Normalized keyword from rules.
+     * @param string $text    Normalized text to search.
+     * @return bool True when the keyword matches.
+     */
+    protected static function match_rule_keyword( $keyword, $text ) {
+        if ( $keyword === '' ) {
+            return false;
+        }
+        if ( strpos( $keyword, '_' ) === false ) {
+            return strpos( $text, $keyword ) !== false;
+        }
+        $parts  = array_filter( explode( '_', $keyword ) );
+        $offset = 0;
+        foreach ( $parts as $part ) {
+            $pos = strpos( $text, $part, $offset );
+            if ( $pos === false ) {
+                return false;
+            }
+            $offset = $pos + strlen( $part );
+        }
+        return true;
+    }
+
+    /**
      * Locate the index of the brand branch within a category path.
      *
      * The tree may use different wording like "Brands" or "By Brand & Model". Any
@@ -977,7 +1007,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 $has_include = false;
                 foreach ( $includes as $t ) {
                     $t = self::normalize_text( $t );
-                    if ( $t !== '' && strpos( $lower, $t ) !== false ) {
+                    if ( self::match_rule_keyword( $t, $lower ) ) {
                         $has_include = true;
                         break;
                     }
@@ -988,7 +1018,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 $skip = false;
                 foreach ( $excludes as $t ) {
                     $t = self::normalize_text( $t );
-                    if ( $t !== '' && strpos( $lower, $t ) !== false ) {
+                    if ( self::match_rule_keyword( $t, $lower ) ) {
                         $skip = true;
                         break;
                     }
@@ -1036,7 +1066,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 $found = false;
                 foreach ( $includes as $term ) {
                     $term = self::normalize_text( $term );
-                    if ( $term !== '' && strpos( $lower, $term ) !== false ) {
+                    if ( self::match_rule_keyword( $term, $lower ) ) {
                         $found = true;
                         break;
                     }
@@ -1047,7 +1077,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
             foreach ( $excludes as $term ) {
                 $term = self::normalize_text( $term );
-                if ( $term !== '' && strpos( $lower, $term ) !== false ) {
+                if ( self::match_rule_keyword( $term, $lower ) ) {
                     return false;
                 }
             }

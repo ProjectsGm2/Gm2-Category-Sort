@@ -619,6 +619,46 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertSame( [ 'By Wheel Size', "19'", 'Branch', 'Leaf' ], $cats );
     }
 
+    public function test_branch_rules_include_underscore_keyword() {
+        $parent = wp_insert_term( 'Branch', 'product_cat' );
+        wp_insert_term( 'Leaf', 'product_cat', [ 'parent' => $parent['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        $upload = wp_upload_dir();
+        $dir = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        if ( ! is_dir( $dir ) ) { mkdir( $dir, 0777, true ); }
+        file_put_contents( $dir . '/branch-leaf.csv', "Branch,Leaf\n" );
+
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = [
+            'branch-leaf' => [ 'include' => 'foo_bar', 'exclude' => '' ],
+        ];
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'Great foo awesome bar product', $mapping );
+
+        $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
+    }
+
+    public function test_branch_rules_exclude_underscore_keyword() {
+        $parent = wp_insert_term( 'Branch', 'product_cat' );
+        wp_insert_term( 'Leaf', 'product_cat', [ 'parent' => $parent['term_id'] ] );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        $upload = wp_upload_dir();
+        $dir = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        if ( ! is_dir( $dir ) ) { mkdir( $dir, 0777, true ); }
+        file_put_contents( $dir . '/branch-leaf.csv', "Branch,Leaf\n" );
+
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = [
+            'branch-leaf' => [ 'include' => 'foo', 'exclude' => 'bar_baz' ],
+        ];
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'foo bar weird baz thing', $mapping );
+
+        $this->assertSame( [], $cats );
+    }
+
     public function test_branch_rules_include_attribute_term() {
         $parent = wp_insert_term( 'Branch', 'product_cat' );
         $child  = wp_insert_term( 'Leaf', 'product_cat', [ 'parent' => $parent['term_id'] ] );
