@@ -285,7 +285,11 @@ class Gm2_Category_Sort_One_Click_Assign {
                 }
             }
 
-            $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, false, 85, null, $attr_slugs );
+            if ( in_array( 'attributes', $fields, true ) && count( $fields ) === 1 ) {
+                $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes( $attr_slugs );
+            } else {
+                $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, false, 85, null, $attr_slugs );
+            }
             $term_ids = [];
             foreach ( $cats as $name ) {
                 $term = get_term_by( 'name', $name, 'product_cat' );
