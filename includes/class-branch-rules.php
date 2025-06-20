@@ -104,8 +104,10 @@ class Gm2_Category_Sort_Branch_Rules {
             foreach ( $children as $child => $slug ) {
                 $inc = $rules[ $slug ][ 'include' ] ?? '';
                 $exc = $rules[ $slug ][ 'exclude' ] ?? '';
+                $clean_parent = preg_replace( '/\s*\([^\)]*\)/', '', $parent );
+                $clean_child  = preg_replace( '/\s*\([^\)]*\)/', '', $child );
                 echo '<tr data-slug="' . esc_attr( $slug ) . '">';
-                echo '<td><strong>' . esc_html( $parent . ' > ' . $child ) . '</strong></td>';
+                echo '<td><strong>' . esc_html( $clean_parent . ' > ' . $clean_child ) . '</strong></td>';
                 echo '<td><textarea data-slug="' . esc_attr( $slug ) . '" data-type="include" rows="2" style="width:100%;">' . esc_textarea( $inc ) . '</textarea></td>';
                 echo '<td><textarea data-slug="' . esc_attr( $slug ) . '" data-type="exclude" rows="2" style="width:100%;">' . esc_textarea( $exc ) . '</textarea></td>';
                 echo '<td><select multiple class="gm2-attr-select gm2-include-attr" data-type="include_attrs" data-slug="' . esc_attr( $slug ) . '" style="width:100%;">' . $options . '</select><div class="gm2-include-terms"></div><div class="gm2-include-summary"></div></td>';
