@@ -861,5 +861,34 @@ class ProductCategoryGeneratorTest extends TestCase {
         $saved = get_option( 'gm2_branch_rules' );
         $this->assertSame( [], $saved['branch-leaf']['include_attrs'] );
     }
+
+    public function test_assign_categories_from_attributes() {
+        $parent = wp_insert_term( 'Branch', 'product_cat' );
+        wp_insert_term( 'Leaf', 'product_cat', [ 'parent' => $parent['term_id'] ] );
+
+        $upload = wp_upload_dir();
+        $dir    = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        if ( ! is_dir( $dir ) ) { mkdir( $dir, 0777, true ); }
+        file_put_contents( $dir . '/branch-leaf.csv', "Branch,Leaf\n" );
+
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = [
+            'branch-leaf' => [
+                'include'       => '',
+                'exclude'       => '',
+                'include_attrs' => [ 'pa_color' => [ 'red' ] ],
+                'exclude_attrs' => [ 'pa_size' => [ 'large' ] ],
+            ],
+        ];
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
+            [ 'pa_color' => [ 'red' ] ]
+        );
+        $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
+            [ 'pa_color' => [ 'red' ], 'pa_size' => [ 'large' ] ]
+        );
+        $this->assertSame( [], $cats );
+    }
 }
 }

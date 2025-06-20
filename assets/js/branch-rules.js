@@ -9,8 +9,8 @@ jQuery(function($){
             select.append($('<option>').val(slug).text(data.label));
         });
     }
-
-    function renderTerms(container,attrList,selected,collapsed){
+    
+  function renderTerms(container,attrList,selected,collapsed){
         container.empty();
         attrList.forEach(function(attr){
             var info=attrs[attr];
@@ -36,21 +36,6 @@ jQuery(function($){
         });
     }
 
-    function summarize(selected){
-        var parts=[];
-        $.each(selected,function(attr,terms){
-            if(!terms.length) return;
-            var info=attrs[attr]||{};
-            var label=info.label||attr;
-            var names=[];
-            $.each(terms,function(i,slug){
-                names.push(info.terms && info.terms[slug] ? info.terms[slug] : slug);
-            });
-            parts.push(label+': '+names.join(', '));
-        });
-        return parts.join('; ');
-    }
-
     function renderTags(container, selected){
         container.empty();
         $.each(selected,function(attr,terms){
@@ -71,8 +56,6 @@ jQuery(function($){
     function updateSummary(row){
         var inc=gatherSelected(row.find('.gm2-include-terms'));
         var exc=gatherSelected(row.find('.gm2-exclude-terms'));
-        row.find('.gm2-include-summary').text(summarize(inc));
-        row.find('.gm2-exclude-summary').text(summarize(exc));
         renderTags(row.find('.gm2-include-tags'),inc);
         renderTags(row.find('.gm2-exclude-tags'),exc);
     }
@@ -148,13 +131,7 @@ jQuery(function($){
 
     form.on('click','.gm2-attr-group .gm2-remove-attr',function(){
         var group=$(this).closest('.gm2-attr-group');
-        var container=group.closest('.gm2-include-terms,.gm2-exclude-terms');
-        var row=group.closest('tr');
-        var attr=$(this).data('attr');
-        var attrSelect=container.siblings('select.gm2-attr-select');
-        attrSelect.find('option[value="'+attr+'"]').prop('selected',false);
-        group.remove();
-        updateSummary(row);
+        group.toggleClass('collapsed');
     });
 
     form.on('click','.gm2-remove-tag',function(){
