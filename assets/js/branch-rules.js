@@ -9,13 +9,8 @@ jQuery(function($){
             select.append($('<option>').val(slug).text(data.label));
         });
     }
-
-    function renderTerms(container,attrList,selected){
-        var collapsed={};
-        container.find('.gm2-attr-group').each(function(){
-            var attr=$(this).find('select').data('attr');
-            if($(this).hasClass('collapsed')) collapsed[attr]=true;
-        });
+    
+  function renderTerms(container,attrList,selected,collapsed){
         container.empty();
         attrList.forEach(function(attr){
             var info=attrs[attr];
@@ -34,7 +29,9 @@ jQuery(function($){
             group.append(toggle);
             group.append(remove);
             group.append(sel);
-            if(collapsed[attr]) group.addClass('collapsed');
+            if(collapsed){
+                group.addClass('collapsed');
+            }
             container.append(group);
         });
     }
@@ -88,8 +85,8 @@ jQuery(function($){
                     var excAttrs=Object.keys(r.exclude_attrs||{});
                     row.find('.gm2-include-attr').val(incAttrs);
                     row.find('.gm2-exclude-attr').val(excAttrs);
-                    renderTerms(row.find('.gm2-include-terms'),incAttrs,r.include_attrs);
-                    renderTerms(row.find('.gm2-exclude-terms'),excAttrs,r.exclude_attrs);
+                    renderTerms(row.find('.gm2-include-terms'),incAttrs,r.include_attrs,true);
+                    renderTerms(row.find('.gm2-exclude-terms'),excAttrs,r.exclude_attrs,true);
                     updateSummary(row);
                 }
             }
@@ -111,7 +108,7 @@ jQuery(function($){
         var row=$(this).closest('tr');
         var attrsSel=$(this).val()||[];
         var current=gatherSelected(row.find('.gm2-include-terms'));
-        renderTerms(row.find('.gm2-include-terms'),attrsSel,current);
+        renderTerms(row.find('.gm2-include-terms'),attrsSel,current,false);
         updateSummary(row);
     });
 
@@ -119,7 +116,7 @@ jQuery(function($){
         var row=$(this).closest('tr');
         var attrsSel=$(this).val()||[];
         var current=gatherSelected(row.find('.gm2-exclude-terms'));
-        renderTerms(row.find('.gm2-exclude-terms'),attrsSel,current);
+        renderTerms(row.find('.gm2-exclude-terms'),attrsSel,current,false);
         updateSummary(row);
     });
 
