@@ -11,6 +11,11 @@ jQuery(function($){
     }
 
     function renderTerms(container,attrList,selected){
+        var collapsed={};
+        container.find('.gm2-attr-group').each(function(){
+            var attr=$(this).find('select').data('attr');
+            collapsed[attr]=$(this).hasClass('collapsed');
+        });
         container.empty();
         attrList.forEach(function(attr){
             var info=attrs[attr];
@@ -29,6 +34,7 @@ jQuery(function($){
             group.append(toggle);
             group.append(remove);
             group.append(sel);
+            if(collapsed[attr]) group.addClass('collapsed');
             container.append(group);
         });
     }
