@@ -27,6 +27,8 @@ if ( ! function_exists( 'sanitize_key' ) ) {
 if ( ! function_exists( 'sanitize_title' ) ) {
     function sanitize_title( $str ) { $s = strtolower( $str ); $s = preg_replace( '/[^a-z0-9]+/', '-', $s ); return trim( $s, '-' ); }
 }
+
+require_once __DIR__ . '/../includes/class-branch-rules.php';
 }
 
 namespace {
@@ -832,6 +834,32 @@ class ProductCategoryGeneratorTest extends TestCase {
     public function test_slugify_segment_encodes_quotes() {
         $this->assertSame( '19d', Gm2_Category_Sort_Product_Category_Generator::slugify_segment( '19"' ) );
         $this->assertSame( '19s', Gm2_Category_Sort_Product_Category_Generator::slugify_segment( "19'" ) );
+    }
+
+    public function test_ajax_remove_attribute_deletes_option() {
+        $_POST['nonce'] = 't';
+        $_POST['rules'] = [
+            'branch-leaf' => [
+                'include'       => '',
+                'exclude'       => '',
+                'include_attrs' => [ 'pa_color' => [ 'red' ] ],
+            ],
+        ];
+        Gm2_Category_Sort_Branch_Rules::ajax_save_rules();
+        $saved = get_option( 'gm2_branch_rules' );
+        $this->assertSame( [ 'pa_color' => [ 'red' ] ], $saved['branch-leaf']['include_attrs'] );
+
+        $_POST['nonce'] = 't';
+        $_POST['rules'] = [
+            'branch-leaf' => [
+                'include'       => '',
+                'exclude'       => '',
+                'include_attrs' => [],
+            ],
+        ];
+        Gm2_Category_Sort_Branch_Rules::ajax_save_rules();
+        $saved = get_option( 'gm2_branch_rules' );
+        $this->assertSame( [], $saved['branch-leaf']['include_attrs'] );
     }
 }
 }

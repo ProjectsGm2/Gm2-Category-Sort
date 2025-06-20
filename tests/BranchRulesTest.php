@@ -74,6 +74,35 @@ class BranchRulesTest extends TestCase {
         $this->assertSame( [ 'pa_Size' => [ 'Large' ] ], $saved['branch-leaf']['exclude_attrs'] );
     }
 
+    public function test_ajax_get_rules_returns_multiple_attributes() {
+        $_POST['nonce'] = 't';
+        $_POST['rules'] = [
+            'branch-leaf' => [
+                'include'       => 'foo',
+                'exclude'       => 'bar',
+                'include_attrs' => [
+                    'pa_Color' => [ 'Red' ],
+                    'pa_Size'  => [ 'Large', 'Small' ],
+                ],
+                'exclude_attrs' => [
+                    'pa_Material' => [ 'Steel' ],
+                    'pa_Type'     => [ 'OEM' ],
+                ],
+            ],
+        ];
+
+        $expected = $_POST['rules'];
+
+        Gm2_Category_Sort_Branch_Rules::ajax_save_rules();
+
+        $_POST = [ 'nonce' => 't' ];
+        Gm2_Category_Sort_Branch_Rules::ajax_get_rules();
+        $result = $GLOBALS['gm2_json_result'];
+
+        $this->assertTrue( $result['success'] );
+        $this->assertSame( $expected, $result['data'] );
+    }
+
     public function test_stub_attribute_creation() {
         wc_create_attribute( [ 'slug' => 'color', 'name' => 'Color' ] );
         $tax = wc_attribute_taxonomy_name( 'color' );
