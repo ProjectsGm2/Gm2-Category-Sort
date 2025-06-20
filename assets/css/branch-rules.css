@@ -10,6 +10,19 @@
     margin-right: 4px;
     padding: 2px;
 }
+.gm2-toggle-attr {
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    margin-right: 4px;
+    padding: 2px;
+}
+.gm2-attr-group.collapsed select {
+    display: none;
+}
+.gm2-attr-group.collapsed .gm2-toggle-attr {
+    transform: rotate(-90deg);
+}
 .gm2-remove-attr:hover {
     color: red;
     transform: scale(1.2);
