@@ -1083,6 +1083,74 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /**
+     * Assign categories based solely on attribute rules.
+     *
+     * @param array $attributes Mapping of attribute slugs to selected term slugs.
+     * @return array List of category names that match the attribute rules.
+     */
+    public static function assign_categories_from_attributes( array $attributes ) {
+        $rules = get_option( 'gm2_branch_rules', [] );
+        if ( ! is_array( $rules ) || ! $rules ) {
+            return [];
+        }
+
+        $cats = [];
+        foreach ( $rules as $slug => $rule ) {
+            $inc = $rule['include_attrs'] ?? [];
+            if ( ! $inc ) {
+                continue;
+            }
+
+            $exc = $rule['exclude_attrs'] ?? [];
+
+            $skip = false;
+            foreach ( $exc as $attr => $terms ) {
+                $attr = sanitize_key( $attr );
+                foreach ( (array) $terms as $t ) {
+                    $t = sanitize_title( $t );
+                    if ( isset( $attributes[ $attr ] ) && in_array( $t, $attributes[ $attr ], true ) ) {
+                        $skip = true;
+                        break 2;
+                    }
+                }
+            }
+            if ( $skip ) {
+                continue;
+            }
+
+            $match = true;
+            foreach ( $inc as $attr => $terms ) {
+                $attr  = sanitize_key( $attr );
+                $found = false;
+                foreach ( (array) $terms as $t ) {
+                    $t = sanitize_title( $t );
+                    if ( isset( $attributes[ $attr ] ) && in_array( $t, $attributes[ $attr ], true ) ) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if ( ! $found ) {
+                    $match = false;
+                    break;
+                }
+            }
+
+            if ( ! $match ) {
+                continue;
+            }
+
+            $path = self::path_from_branch_slug( $slug );
+            foreach ( $path as $cat ) {
+                if ( ! in_array( $cat, $cats, true ) ) {
+                    $cats[] = $cat;
+                }
+            }
+        }
+
+        return $cats;
+    }
+
+    /**
      * Get the category path represented by a branch slug.
      *
      * @param string $slug Branch slug from branch CSV filename.
