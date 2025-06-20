@@ -76,6 +76,14 @@ jQuery(function($){
         populate($(this));
     });
 
+    // Allow selecting multiple attributes without holding Ctrl/Command
+    form.on('mousedown', '.gm2-attr-select option', function(e){
+        e.preventDefault();
+        var opt=$(this);
+        opt.prop('selected', !opt.prop('selected'));
+        opt.parent().trigger('change');
+    });
+
     function load(){
         $.post(ajaxurl,{action:'gm2_branch_rules_get',nonce:gm2BranchRules.nonce})
         .done(function(resp){
