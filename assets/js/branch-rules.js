@@ -15,6 +15,7 @@ jQuery(function($){
         attrList.forEach(function(attr){
             var info=attrs[attr];
             if(!info) return;
+            var group=$('<span class="gm2-attr-group">');
             var sel=$('<select multiple>').attr('data-attr',attr);
             $.each(info.terms,function(slug,name){
                 var opt=$('<option>').val(slug).text(name);
@@ -23,7 +24,9 @@ jQuery(function($){
                 }
                 sel.append(opt);
             });
-            container.append(sel);
+            group.append(sel);
+            group.append($('<button type="button" class="gm2-remove-attr">&times;</button>'));
+            container.append(group);
         });
     }
 
@@ -78,7 +81,7 @@ jQuery(function($){
 
     function gatherSelected(container){
         var selected={};
-        container.find('select').each(function(){
+        container.find('.gm2-attr-group select').each(function(){
             var attr=$(this).data('attr');
             selected[attr]=$(this).val()||[];
         });
@@ -103,6 +106,17 @@ jQuery(function($){
 
     form.on('change','.gm2-include-terms select,.gm2-exclude-terms select',function(){
         updateSummary($(this).closest('tr'));
+    });
+
+    form.on('click','.gm2-attr-group .gm2-remove-attr',function(){
+        var group=$(this).closest('.gm2-attr-group');
+        var container=group.closest('.gm2-include-terms,.gm2-exclude-terms');
+        var row=group.closest('tr');
+        var attr=group.find('select').data('attr');
+        var attrSelect=container.siblings('select.gm2-attr-select');
+        attrSelect.find('option[value="'+attr+'"]').prop('selected',false);
+        group.remove();
+        updateSummary(row);
     });
 
     form.on('submit',function(e){
