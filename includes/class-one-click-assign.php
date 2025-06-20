@@ -285,10 +285,17 @@ class Gm2_Category_Sort_One_Click_Assign {
                 }
             }
 
-            if ( in_array( 'attributes', $fields, true ) && count( $fields ) === 1 ) {
-                $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes( $attr_slugs );
-            } else {
+            $cats = [];
+            if ( in_array( 'title', $fields, true ) || in_array( 'description', $fields, true ) ) {
                 $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, false, 85, null, $attr_slugs );
+            }
+            if ( in_array( 'attributes', $fields, true ) ) {
+                $extra = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes( $attr_slugs );
+                foreach ( $extra as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
+                    }
+                }
             }
             $term_ids = [];
             foreach ( $cats as $name ) {
