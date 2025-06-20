@@ -11,6 +11,11 @@ jQuery(function($){
     }
 
     function renderTerms(container,attrList,selected){
+        var collapsed={};
+        container.find('.gm2-attr-group').each(function(){
+            var attr=$(this).find('select').data('attr');
+            if($(this).hasClass('collapsed')) collapsed[attr]=true;
+        });
         container.empty();
         attrList.forEach(function(attr){
             var info=attrs[attr];
@@ -29,6 +34,7 @@ jQuery(function($){
             group.append(toggle);
             group.append(remove);
             group.append(sel);
+            if(collapsed[attr]) group.addClass('collapsed');
             container.append(group);
         });
     }
@@ -143,13 +149,7 @@ jQuery(function($){
 
     form.on('click','.gm2-attr-group .gm2-remove-attr',function(){
         var group=$(this).closest('.gm2-attr-group');
-        var container=group.closest('.gm2-include-terms,.gm2-exclude-terms');
-        var row=group.closest('tr');
-        var attr=$(this).data('attr');
-        var attrSelect=container.siblings('select.gm2-attr-select');
-        attrSelect.find('option[value="'+attr+'"]').prop('selected',false);
-        group.remove();
-        updateSummary(row);
+        group.toggleClass('collapsed');
     });
 
     form.on('click','.gm2-remove-tag',function(){
