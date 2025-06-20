@@ -46,11 +46,30 @@ jQuery(function($){
         return parts.join('; ');
     }
 
+    function renderTags(container, selected){
+        container.empty();
+        $.each(selected,function(attr,terms){
+            if(!terms.length) return;
+            var info=attrs[attr]||{};
+            var label=info.label||attr;
+            var names=[];
+            $.each(terms,function(i,slug){
+                names.push(info.terms && info.terms[slug] ? info.terms[slug] : slug);
+            });
+            var tag=$('<span class="gm2-tag" data-attr="'+attr+'">');
+            var remove=$('<span class="gm2-remove-tag" data-attr="'+attr+'">&times;</span>');
+            tag.append(remove).append(' '+label+': '+names.join(', '));
+            container.append(tag);
+        });
+    }
+
     function updateSummary(row){
         var inc=gatherSelected(row.find('.gm2-include-terms'));
         var exc=gatherSelected(row.find('.gm2-exclude-terms'));
         row.find('.gm2-include-summary').text(summarize(inc));
         row.find('.gm2-exclude-summary').text(summarize(exc));
+        renderTags(row.find('.gm2-include-tags'),inc);
+        renderTags(row.find('.gm2-exclude-tags'),exc);
     }
 
     form.find('.gm2-attr-select').each(function(){
@@ -117,6 +136,19 @@ jQuery(function($){
         var attrSelect=container.siblings('select.gm2-attr-select');
         attrSelect.find('option[value="'+attr+'"]').prop('selected',false);
         group.remove();
+        updateSummary(row);
+    });
+
+    form.on('click','.gm2-remove-tag',function(){
+        var tag=$(this).closest('.gm2-tag');
+        var attr=$(this).data('attr');
+        var row=tag.closest('tr');
+        var isInc=tag.closest('.gm2-include-tags').length>0;
+        var attrSelect=isInc?row.find('.gm2-include-attr'):row.find('.gm2-exclude-attr');
+        var termsContainer=isInc?row.find('.gm2-include-terms'):row.find('.gm2-exclude-terms');
+        attrSelect.find('option[value="'+attr+'"]').prop('selected',false);
+        termsContainer.find('select[data-attr="'+attr+'"]').closest('.gm2-attr-group').remove();
+        tag.remove();
         updateSummary(row);
     });
 

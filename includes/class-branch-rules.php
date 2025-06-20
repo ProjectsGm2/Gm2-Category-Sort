@@ -118,8 +118,8 @@ class Gm2_Category_Sort_Branch_Rules {
                 echo '<td><strong>' . esc_html( $clean_parent . ' > ' . $clean_child ) . '</strong></td>';
                 echo '<td><textarea data-slug="' . esc_attr( $slug ) . '" data-type="include" rows="2" style="width:100%;">' . esc_textarea( $inc ) . '</textarea></td>';
                 echo '<td><textarea data-slug="' . esc_attr( $slug ) . '" data-type="exclude" rows="2" style="width:100%;">' . esc_textarea( $exc ) . '</textarea></td>';
-                echo '<td><select multiple class="gm2-attr-select gm2-include-attr" data-type="include_attrs" data-slug="' . esc_attr( $slug ) . '" style="width:100%;">' . $options . '</select><div class="gm2-include-terms"></div><div class="gm2-include-summary"></div></td>';
-                echo '<td><select multiple class="gm2-attr-select gm2-exclude-attr" data-type="exclude_attrs" data-slug="' . esc_attr( $slug ) . '" style="width:100%;">' . $options . '</select><div class="gm2-exclude-terms"></div><div class="gm2-exclude-summary"></div></td>';
+                echo '<td><select multiple class="gm2-attr-select gm2-include-attr" data-type="include_attrs" data-slug="' . esc_attr( $slug ) . '" style="width:100%;">' . $options . '</select><div class="gm2-include-terms"></div><div class="gm2-include-tags"></div><div class="gm2-include-summary"></div></td>';
+                echo '<td><select multiple class="gm2-attr-select gm2-exclude-attr" data-type="exclude_attrs" data-slug="' . esc_attr( $slug ) . '" style="width:100%;">' . $options . '</select><div class="gm2-exclude-terms"></div><div class="gm2-exclude-tags"></div><div class="gm2-exclude-summary"></div></td>';
                 echo '</tr>';
             }
         }
