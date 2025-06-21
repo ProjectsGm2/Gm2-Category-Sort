@@ -77,6 +77,45 @@ class Gm2_Category_Sort_Branch_Rules {
         return trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
     }
 
+    /**
+     * Parse category-tree.csv and build a mapping of branch slugs to their full path.
+     *
+     * Mirrors the slug creation logic from One_Click_Assign::export_branch_csvs().
+     * Each slug includes every level so even leaf categories are returned.
+     *
+     * @param string $file Path to category-tree.csv.
+     * @return array Mapping of slug => "Root > Child > ..." path.
+     */
+    public static function build_slug_path_map( $file ) {
+        $rows = array_map( 'str_getcsv', file( $file ) );
+        $map  = [];
+
+        foreach ( $rows as $row ) {
+            if ( empty( $row ) ) {
+                continue;
+            }
+
+            $path_slugs = [];
+            $path_names = [];
+            foreach ( $row as $segment ) {
+                $segment = trim( $segment );
+                if ( $segment === '' ) {
+                    continue;
+                }
+
+                $path_slugs[] = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $segment );
+                $path_names[] = preg_replace( '/\s*\([^\)]*\)/', '', $segment );
+                $slug = implode( '-', $path_slugs );
+
+                if ( ! isset( $map[ $slug ] ) ) {
+                    $map[ $slug ] = implode( ' > ', $path_names );
+                }
+            }
+        }
+
+        return $map;
+    }
+
     public static function admin_page() {
         $dir  = self::get_branch_dir();
         $tree = rtrim( $dir, '/' ) . '/category-tree.csv';
@@ -86,7 +125,7 @@ class Gm2_Category_Sort_Branch_Rules {
             return;
         }
 
-        $branches = Gm2_Category_Sort_One_Click_Assign::build_branch_map( $tree );
+        $branches = self::build_slug_path_map( $tree );
         $rules    = get_option( 'gm2_branch_rules', [] );
         if ( ! is_array( $rules ) ) {
             $rules = [];
@@ -108,22 +147,18 @@ class Gm2_Category_Sort_Branch_Rules {
         echo '<table class="widefat">';
         echo '<thead><tr><th>' . esc_html__( 'Branch', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Include Keywords', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Exclude Keywords', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Include Attributes', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Exclude Attributes', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Allow Multiple Leaves', 'gm2-category-sort' ) . '</th></tr></thead>';
         echo '<tbody>';
-        foreach ( $branches as $parent => $children ) {
-            foreach ( $children as $child => $slug ) {
-                $inc   = $rules[ $slug ][ 'include' ] ?? '';
-                $exc   = $rules[ $slug ][ 'exclude' ] ?? '';
-                $multi = ! empty( $rules[ $slug ]['allow_multi'] );
-                $clean_parent = preg_replace( '/\s*\([^\)]*\)/', '', $parent );
-                $clean_child  = preg_replace( '/\s*\([^\)]*\)/', '', $child );
-                echo '<tr data-slug="' . esc_attr( $slug ) . '">';
-                echo '<td><strong>' . esc_html( $clean_parent . ' > ' . $clean_child ) . '</strong></td>';
-                echo '<td><textarea data-slug="' . esc_attr( $slug ) . '" data-type="include" rows="2" style="width:100%;">' . esc_textarea( $inc ) . '</textarea></td>';
-                echo '<td><textarea data-slug="' . esc_attr( $slug ) . '" data-type="exclude" rows="2" style="width:100%;">' . esc_textarea( $exc ) . '</textarea></td>';
-                echo '<td><select multiple class="gm2-attr-select gm2-include-attr" data-type="include_attrs" data-slug="' . esc_attr( $slug ) . '" style="width:100%;">' . $options . '</select><div class="gm2-include-terms"></div><div class="gm2-include-tags"></div></td>';
-                echo '<td><select multiple class="gm2-attr-select gm2-exclude-attr" data-type="exclude_attrs" data-slug="' . esc_attr( $slug ) . '" style="width:100%;">' . $options . '</select><div class="gm2-exclude-terms"></div><div class="gm2-exclude-tags"></div></td>';
-                echo '<td class="gm2-allow-multi"><input type="checkbox" data-type="allow_multi" data-slug="' . esc_attr( $slug ) . '"' . ( $multi ? ' checked' : '' ) . '></td>';
-                echo '</tr>';
-            }
+        foreach ( $branches as $slug => $path ) {
+            $inc   = $rules[ $slug ][ 'include' ] ?? '';
+            $exc   = $rules[ $slug ][ 'exclude' ] ?? '';
+            $multi = ! empty( $rules[ $slug ]['allow_multi'] );
+            echo '<tr data-slug="' . esc_attr( $slug ) . '">';
+            echo '<td><strong>' . esc_html( $path ) . '</strong></td>';
+            echo '<td><textarea data-slug="' . esc_attr( $slug ) . '" data-type="include" rows="2" style="width:100%;">' . esc_textarea( $inc ) . '</textarea></td>';
+            echo '<td><textarea data-slug="' . esc_attr( $slug ) . '" data-type="exclude" rows="2" style="width:100%;">' . esc_textarea( $exc ) . '</textarea></td>';
+            echo '<td><select multiple class="gm2-attr-select gm2-include-attr" data-type="include_attrs" data-slug="' . esc_attr( $slug ) . '" style="width:100%;">' . $options . '</select><div class="gm2-include-terms"></div><div class="gm2-include-tags"></div></td>';
+            echo '<td><select multiple class="gm2-attr-select gm2-exclude-attr" data-type="exclude_attrs" data-slug="' . esc_attr( $slug ) . '" style="width:100%;">' . $options . '</select><div class="gm2-exclude-terms"></div><div class="gm2-exclude-tags"></div></td>';
+            echo '<td class="gm2-allow-multi"><input type="checkbox" data-type="allow_multi" data-slug="' . esc_attr( $slug ) . '"' . ( $multi ? ' checked' : '' ) . '></td>';
+            echo '</tr>';
         }
         echo '</tbody></table>';
         echo '<p><button class="button button-primary">' . esc_html__( 'Save Rules', 'gm2-category-sort' ) . '</button> <span id="gm2-branch-rules-msg"></span></p>';
