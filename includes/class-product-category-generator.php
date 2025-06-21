@@ -1113,17 +1113,19 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
 
             $include_attrs = $rule['include_attrs'] ?? [];
-            foreach ( $include_attrs as $attr => $terms ) {
-                $found = false;
-                $attr  = sanitize_key( $attr );
-                foreach ( (array) $terms as $t ) {
-                    $slug = sanitize_title( $t );
-                    if ( isset( $attributes[ $attr ] ) && in_array( $slug, $attributes[ $attr ], true ) ) {
-                        $found = true;
-                        break;
+            if ( $include_attrs ) {
+                $found_any = false;
+                foreach ( $include_attrs as $attr => $terms ) {
+                    $attr = sanitize_key( $attr );
+                    foreach ( (array) $terms as $t ) {
+                        $slug = sanitize_title( $t );
+                        if ( isset( $attributes[ $attr ] ) && in_array( $slug, $attributes[ $attr ], true ) ) {
+                            $found_any = true;
+                            break 2;
+                        }
                     }
                 }
-                if ( ! $found ) {
+                if ( ! $found_any ) {
                     return false;
                 }
             }
@@ -1178,20 +1180,15 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 continue;
             }
 
-            $match = true;
+            $match = false;
             foreach ( $inc as $attr => $terms ) {
-                $attr  = sanitize_key( $attr );
-                $found = false;
+                $attr = sanitize_key( $attr );
                 foreach ( (array) $terms as $t ) {
                     $t = sanitize_title( $t );
                     if ( isset( $attributes[ $attr ] ) && in_array( $t, $attributes[ $attr ], true ) ) {
-                        $found = true;
-                        break;
+                        $match = true;
+                        break 2;
                     }
-                }
-                if ( ! $found ) {
-                    $match = false;
-                    break;
                 }
             }
 

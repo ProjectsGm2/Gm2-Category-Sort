@@ -739,6 +739,76 @@ class ProductCategoryGeneratorTest extends TestCase {
         );
         $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
     }
+
+    public function test_multiple_include_attribute_terms_any_match() {
+        $parent = wp_insert_term( 'Branch', 'product_cat' );
+        $child  = wp_insert_term( 'Leaf', 'product_cat', [ 'parent' => $parent['term_id'] ] );
+        update_term_meta( $child['term_id'], 'gm2_synonyms', 'LeafSyn' );
+
+        wc_create_attribute( [ 'slug' => 'color', 'name' => 'Color' ] );
+        $tax1 = wc_attribute_taxonomy_name( 'color' );
+        wp_insert_term( 'Red', $tax1 );
+
+        wc_create_attribute( [ 'slug' => 'size', 'name' => 'Size' ] );
+        $tax2 = wc_attribute_taxonomy_name( 'size' );
+        wp_insert_term( 'Large', $tax2 );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        $upload = wp_upload_dir();
+        $dir    = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        if ( ! is_dir( $dir ) ) { mkdir( $dir, 0777, true ); }
+        file_put_contents( $dir . '/branch-leaf.csv', "Branch,Leaf\n" );
+
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = [
+            'branch-leaf' => [
+                'include_attrs' => [ 'pa_color' => [ 'red' ], 'pa_size' => [ 'large' ] ],
+            ],
+        ];
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories(
+            'LeafSyn red',
+            $mapping,
+            false,
+            85,
+            null,
+            [ 'pa_color' => [ 'red' ] ]
+        );
+        $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories(
+            'LeafSyn large',
+            $mapping,
+            false,
+            85,
+            null,
+            [ 'pa_size' => [ 'large' ] ]
+        );
+        $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories(
+            'LeafSyn',
+            $mapping,
+            false,
+            85,
+            null,
+            []
+        );
+        $this->assertSame( [], $cats );
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
+            [ 'pa_color' => [ 'red' ] ]
+        );
+        $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
+            [ 'pa_size' => [ 'large' ] ]
+        );
+        $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes( [] );
+        $this->assertSame( [], $cats );
+    }
     public function test_exports_category_tree_csv() {
         $parent = wp_insert_term( 'Top', 'product_cat' );
         update_term_meta( $parent['term_id'], 'gm2_synonyms', 'T' );
