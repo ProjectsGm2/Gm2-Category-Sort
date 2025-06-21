@@ -321,7 +321,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @param int    $threshold Fuzzy matching threshold.
      * @return array List of category names to assign.
      */
-    protected static function match_terms( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
+    protected static function match_terms( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
         $cats       = [];
         $word_count = count( $words );
         foreach ( $mapping as $term => $paths ) {
@@ -364,9 +364,13 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 if ( ! self::passes_branch_rules_for_path( $path, $lower, $attributes ) ) {
                     continue;
                 }
-                foreach ( $path as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
+                if ( is_array( $assigned ) ) {
+                    self::add_path_categories( $path, $cats, $assigned, $branch_rules );
+                } else {
+                    foreach ( $path as $cat ) {
+                        if ( ! in_array( $cat, $cats, true ) ) {
+                            $cats[] = $cat;
+                        }
                     }
                 }
             }
@@ -405,7 +409,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /** Brand and model branch logic. */
-    protected static function check_brand_model( $lower, array $words, array $mapping, $fuzzy, $threshold, $csv_dir, array $attributes = [] ) {
+    protected static function check_brand_model( $lower, array $words, array $mapping, $fuzzy, $threshold, $csv_dir, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
         $brands       = [];
         $brand_models = [];
 
@@ -526,13 +530,17 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 if ( $neg ) {
                     continue;
                 }
-                    if ( ! self::passes_branch_rules_for_path( $entry['path'], $lower, $attributes ) ) {
+                if ( ! self::passes_branch_rules_for_path( $entry['path'], $lower, $attributes ) ) {
                     continue;
                 }
                 $brand_matches[ $brand ] = $term;
-                foreach ( $entry['path'] as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
+                if ( is_array( $assigned ) ) {
+                    self::add_path_categories( $entry['path'], $cats, $assigned, $branch_rules );
+                } else {
+                    foreach ( $entry['path'] as $cat ) {
+                        if ( ! in_array( $cat, $cats, true ) ) {
+                            $cats[] = $cat;
+                        }
                     }
                 }
                 break;
@@ -564,9 +572,13 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 if ( ! self::passes_branch_rules_for_path( $model['path'], $lower, $attributes ) ) {
                     continue;
                 }
-                foreach ( $model['path'] as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
+                if ( is_array( $assigned ) ) {
+                    self::add_path_categories( $model['path'], $cats, $assigned, $branch_rules );
+                } else {
+                    foreach ( $model['path'] as $cat ) {
+                        if ( ! in_array( $cat, $cats, true ) ) {
+                            $cats[] = $cat;
+                        }
                     }
                 }
             }
@@ -576,7 +588,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /** Wheel size branch logic. */
-    protected static function check_wheel_size( $lower, array $mapping, $wheel_size_num, $wheel_size, $brand_found, array $attributes = [] ) {
+    protected static function check_wheel_size( $lower, array $mapping, $wheel_size_num, $wheel_size, $brand_found, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
         if ( ! $wheel_size_num ) {
             return [];
         }
@@ -594,9 +606,16 @@ class Gm2_Category_Sort_Product_Category_Generator {
             $key = self::normalize_text( $cand );
             if ( isset( $wheel_size_map[ $key ] ) ) {
                 foreach ( $wheel_size_map[ $key ] as $path ) {
-                    foreach ( $path as $cat ) {
-                        if ( ! in_array( $cat, $cats, true ) ) {
-                            $cats[] = $cat;
+                    if ( ! self::passes_branch_rules_for_path( $path, $lower, $attributes ) ) {
+                        continue;
+                    }
+                    if ( is_array( $assigned ) ) {
+                        self::add_path_categories( $path, $cats, $assigned, $branch_rules );
+                    } else {
+                        foreach ( $path as $cat ) {
+                            if ( ! in_array( $cat, $cats, true ) ) {
+                                $cats[] = $cat;
+                            }
                         }
                     }
                 }
@@ -611,8 +630,15 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 }
             }
         }
-        if ( ! self::passes_branch_rules_for_path( $cats, $lower, $attributes ) ) {
-            return [];
+        if ( ! $found_child ) {
+            $path_for_rules = $cats;
+            if ( ! self::passes_branch_rules_for_path( $path_for_rules, $lower, $attributes ) ) {
+                return [];
+            }
+            if ( is_array( $assigned ) ) {
+                self::add_path_categories( $path_for_rules, $cats, $assigned, $branch_rules );
+                return $cats;
+            }
         }
         return $cats;
     }
@@ -814,9 +840,11 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @return array List of category names.
      */
     public static function assign_categories( $text, array $mapping, $fuzzy = false, $threshold = 85, $csv_dir = null, array $attributes = [] ) {
-        $decoded = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5 );
-        $lower   = self::normalize_text( $decoded );
-        $cats  = [];
+        $decoded       = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5 );
+        $lower         = self::normalize_text( $decoded );
+        $cats          = [];
+        $branch_rules  = get_option( 'gm2_branch_rules', [] );
+        $assigned      = [];
         $words          = preg_split( '/\s+/', $lower );
         $wheel_size_num = null;
         $wheel_size     = null;
@@ -873,7 +901,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
         }
 
-        $cats = array_merge( $cats, self::match_terms( $lower, $words, $other_map, $fuzzy, $threshold, $attributes ) );
+        $cats = array_merge( $cats, self::match_terms( $lower, $words, $other_map, $fuzzy, $threshold, $attributes, $assigned, $branch_rules ) );
 
         $sim = self::check_wheel_simulators( $lower, $attributes );
         if ( $sim ) {
@@ -885,7 +913,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
             $brand_found = true;
         }
 
-        $bm = self::check_brand_model( $lower, $words, $mapping, $fuzzy, $threshold, $csv_dir, $attributes );
+        $bm = self::check_brand_model( $lower, $words, $mapping, $fuzzy, $threshold, $csv_dir, $attributes, $assigned, $branch_rules );
         foreach ( $bm as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
@@ -897,7 +925,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
             $wheel_size     = $wheel_size_num . '"';
         }
 
-        $ws = self::check_wheel_size( $lower, $mapping, $wheel_size_num, $wheel_size, $brand_found, $attributes );
+        $ws = self::check_wheel_size( $lower, $mapping, $wheel_size_num, $wheel_size, $brand_found, $attributes, $assigned, $branch_rules );
         foreach ( $ws as $c ) {
             if ( ! in_array( $c, $cats, true ) ) {
                 $cats[] = $c;
@@ -994,8 +1022,6 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 $cats[] = $c;
             }
         }
-
-        $branch_rules = get_option( 'gm2_branch_rules', [] );
         if ( is_array( $branch_rules ) && $branch_rules ) {
             foreach ( $branch_rules as $slug => $rule ) {
                 $includes = array_filter( array_map( 'trim', explode( ',', $rule['include'] ?? '' ) ) );
@@ -1027,9 +1053,13 @@ class Gm2_Category_Sort_Product_Category_Generator {
                     continue;
                 }
                 $path = self::path_from_branch_slug( $slug );
-                foreach ( $path as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
+                if ( is_array( $assigned ) ) {
+                    self::add_path_categories( $path, $cats, $assigned, $branch_rules, $slug );
+                } else {
+                    foreach ( $path as $cat ) {
+                        if ( ! in_array( $cat, $cats, true ) ) {
+                            $cats[] = $cat;
+                        }
                     }
                 }
             }
@@ -1118,8 +1148,8 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @param array $attributes Mapping of attribute slugs to selected term slugs.
      * @return array List of category names that match the attribute rules.
      */
-    public static function assign_categories_from_attributes( array $attributes ) {
-        $rules = get_option( 'gm2_branch_rules', [] );
+    public static function assign_categories_from_attributes( array $attributes, array &$assigned = null, array $branch_rules_override = [] ) {
+        $rules = $branch_rules_override ? $branch_rules_override : get_option( 'gm2_branch_rules', [] );
         if ( ! is_array( $rules ) || ! $rules ) {
             return [];
         }
@@ -1170,9 +1200,13 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
 
             $path = self::path_from_branch_slug( $slug );
-            foreach ( $path as $cat ) {
-                if ( ! in_array( $cat, $cats, true ) ) {
-                    $cats[] = $cat;
+            if ( is_array( $assigned ) ) {
+                self::add_path_categories( $path, $cats, $assigned, $rules, $slug );
+            } else {
+                foreach ( $path as $cat ) {
+                    if ( ! in_array( $cat, $cats, true ) ) {
+                        $cats[] = $cat;
+                    }
                 }
             }
         }
@@ -1218,6 +1252,69 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
         }
         return $path;
+    }
+
+    /**
+     * Build a branch slug from a matched category path.
+     *
+     * @param array $path Category names from root to leaf.
+     * @return string Branch slug.
+     */
+    protected static function branch_slug_from_path( array $path ) {
+        $parts = array_map( [ __CLASS__, 'slugify_segment' ], $path );
+        return implode( '-', $parts );
+    }
+
+    /**
+     * Get the slug representing the parent portion of a branch path.
+     *
+     * @param array $path Category names from root to leaf.
+     * @return string|null Parent slug or null when not applicable.
+     */
+    protected static function branch_parent_slug( array $path ) {
+        if ( count( $path ) < 2 ) {
+            return null;
+        }
+        $parent = array_slice( $path, 0, -1 );
+        return implode( '-', array_map( [ __CLASS__, 'slugify_segment' ], $parent ) );
+    }
+
+    /**
+     * Add categories from a path while respecting branch allow_multi settings.
+     *
+     * @param array       $path       Category path from root to leaf.
+     * @param array       &$cats      Reference to the category list being built.
+     * @param array       &$assigned  Tracking of assigned leaves per branch slug.
+     * @param array       $rules      Branch rules option array.
+     * @param string|null $slug       Optional branch slug to use for lookup.
+     * @return void
+     */
+    protected static function add_path_categories( array $path, array &$cats, array &$assigned, array $rules, $slug = null ) {
+        if ( $slug === null ) {
+            $slug = self::branch_slug_from_path( $path );
+        }
+        $parent_slug = self::branch_parent_slug( $path );
+        $allow_multi = isset( $rules[ $slug ]['allow_multi'] ) ? (bool) $rules[ $slug ]['allow_multi'] : false;
+
+        if ( $parent_slug !== null && ! $allow_multi && ! empty( $assigned[ $parent_slug ] ) ) {
+            return;
+        }
+
+        foreach ( $path as $cat ) {
+            if ( ! in_array( $cat, $cats, true ) ) {
+                $cats[] = $cat;
+            }
+        }
+
+        if ( $parent_slug !== null ) {
+            if ( ! isset( $assigned[ $parent_slug ] ) ) {
+                $assigned[ $parent_slug ] = [];
+            }
+            $leaf = end( $path );
+            if ( ! in_array( $leaf, $assigned[ $parent_slug ], true ) ) {
+                $assigned[ $parent_slug ][] = $leaf;
+            }
+        }
     }
 
     /**
