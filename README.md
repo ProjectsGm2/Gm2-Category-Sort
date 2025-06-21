@@ -215,7 +215,8 @@ basic stemming so minor wording differences like `lugs` vs `lug`,
 
 Use **Tools → Branch Rules** (requires the `manage_options` capability) to set
 include and exclude keywords for each category branch. Each rule also provides
-**Include Attributes** and **Exclude Attributes** selectors. When you run **One
+**Include Attributes** and **Exclude Attributes** selectors along with an
+**Allow Multiple Leaves** checkbox. When you run **One
 Click Categories Assignment** with the **Product Attributes** option enabled,
 these attribute selections are checked in addition to the regular include and
 exclude keywords. A branch is applied when any include term or attribute is

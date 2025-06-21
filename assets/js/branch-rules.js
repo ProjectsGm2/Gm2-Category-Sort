@@ -85,6 +85,7 @@ jQuery(function($){
                     var excAttrs=Object.keys(r.exclude_attrs||{});
                     row.find('.gm2-include-attr').val(incAttrs);
                     row.find('.gm2-exclude-attr').val(excAttrs);
+                    row.find('input[data-type="allow_multi"]').prop('checked', !!r.allow_multi);
                     renderTerms(row.find('.gm2-include-terms'),incAttrs,r.include_attrs,true);
                     renderTerms(row.find('.gm2-exclude-terms'),excAttrs,r.exclude_attrs,true);
                     updateSummary(row);
@@ -169,7 +170,8 @@ jQuery(function($){
                 include:row.find('textarea[data-type="include"]').val(),
                 exclude:row.find('textarea[data-type="exclude"]').val(),
                 include_attrs:incAttrs,
-                exclude_attrs:excAttrs
+                exclude_attrs:excAttrs,
+                allow_multi:row.find('input[data-type="allow_multi"]').is(':checked')
             };
         });
         $.post(ajaxurl,{action:'gm2_branch_rules_save',nonce:gm2BranchRules.nonce,rules:rules})

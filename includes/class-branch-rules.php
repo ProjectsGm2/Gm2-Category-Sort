@@ -106,12 +106,13 @@ class Gm2_Category_Sort_Branch_Rules {
         }
 
         echo '<table class="widefat">';
-        echo '<thead><tr><th>' . esc_html__( 'Branch', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Include Keywords', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Exclude Keywords', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Include Attributes', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Exclude Attributes', 'gm2-category-sort' ) . '</th></tr></thead>';
+        echo '<thead><tr><th>' . esc_html__( 'Branch', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Include Keywords', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Exclude Keywords', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Include Attributes', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Exclude Attributes', 'gm2-category-sort' ) . '</th><th>' . esc_html__( 'Allow Multiple Leaves', 'gm2-category-sort' ) . '</th></tr></thead>';
         echo '<tbody>';
         foreach ( $branches as $parent => $children ) {
             foreach ( $children as $child => $slug ) {
-                $inc = $rules[ $slug ][ 'include' ] ?? '';
-                $exc = $rules[ $slug ][ 'exclude' ] ?? '';
+                $inc   = $rules[ $slug ][ 'include' ] ?? '';
+                $exc   = $rules[ $slug ][ 'exclude' ] ?? '';
+                $multi = ! empty( $rules[ $slug ]['allow_multi'] );
                 $clean_parent = preg_replace( '/\s*\([^\)]*\)/', '', $parent );
                 $clean_child  = preg_replace( '/\s*\([^\)]*\)/', '', $child );
                 echo '<tr data-slug="' . esc_attr( $slug ) . '">';
@@ -120,6 +121,7 @@ class Gm2_Category_Sort_Branch_Rules {
                 echo '<td><textarea data-slug="' . esc_attr( $slug ) . '" data-type="exclude" rows="2" style="width:100%;">' . esc_textarea( $exc ) . '</textarea></td>';
                 echo '<td><select multiple class="gm2-attr-select gm2-include-attr" data-type="include_attrs" data-slug="' . esc_attr( $slug ) . '" style="width:100%;">' . $options . '</select><div class="gm2-include-terms"></div><div class="gm2-include-tags"></div></td>';
                 echo '<td><select multiple class="gm2-attr-select gm2-exclude-attr" data-type="exclude_attrs" data-slug="' . esc_attr( $slug ) . '" style="width:100%;">' . $options . '</select><div class="gm2-exclude-terms"></div><div class="gm2-exclude-tags"></div></td>';
+                echo '<td class="gm2-allow-multi"><input type="checkbox" data-type="allow_multi" data-slug="' . esc_attr( $slug ) . '"' . ( $multi ? ' checked' : '' ) . '></td>';
                 echo '</tr>';
             }
         }
@@ -137,6 +139,9 @@ class Gm2_Category_Sort_Branch_Rules {
         if ( ! is_array( $rules ) ) {
             $rules = [];
         }
+        foreach ( $rules as $slug => $rule ) {
+            $rules[ $slug ]['allow_multi'] = ! empty( $rule['allow_multi'] );
+        }
         wp_send_json_success( $rules );
     }
 
@@ -151,6 +156,7 @@ class Gm2_Category_Sort_Branch_Rules {
             $slug    = sanitize_key( $slug );
             $include = sanitize_textarea_field( $rule['include'] ?? '' );
             $exclude = sanitize_textarea_field( $rule['exclude'] ?? '' );
+            $allow_multi = ! empty( $rule['allow_multi'] );
 
             $include_attrs = [];
             if ( isset( $rule['include_attrs'] ) && is_array( $rule['include_attrs'] ) ) {
@@ -173,6 +179,7 @@ class Gm2_Category_Sort_Branch_Rules {
                 'exclude'       => $exclude,
                 'include_attrs' => $include_attrs,
                 'exclude_attrs' => $exclude_attrs,
+                'allow_multi'   => $allow_multi,
             ];
         }
         update_option( 'gm2_branch_rules', $rules );
