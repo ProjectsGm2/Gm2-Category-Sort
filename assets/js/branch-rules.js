@@ -3,6 +3,7 @@ jQuery(function($){
     if(!form.length) return;
     var msg = $('#gm2-branch-rules-msg');
     var attrs = gm2BranchRules.attributes || {};
+    var allowMultiData = gm2BranchRules.allow_multi || {};
 
     function populate(select){
         $.each(attrs,function(slug,data){
@@ -72,7 +73,14 @@ jQuery(function($){
         opt.parent().trigger('change');
     });
 
+    function applyAllowMulti(){
+        $.each(allowMultiData,function(slug,val){
+            form.find('tr[data-slug="'+slug+'"]').find('input[data-type="allow_multi"]').prop('checked',!!val);
+        });
+    }
+
     function load(){
+        applyAllowMulti();
         $.post(ajaxurl,{action:'gm2_branch_rules_get',nonce:gm2BranchRules.nonce})
         .done(function(resp){
             if(resp.success){
