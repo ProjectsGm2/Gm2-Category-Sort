@@ -103,7 +103,9 @@ class Gm2_Category_Sort_Branch_Rules {
                     continue;
                 }
 
-                $path_slugs[] = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $segment );
+                $clean = preg_replace( '/\s*\([^\)]*\)$/', '', $segment );
+
+                $path_slugs[] = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $clean );
                 $path_names[] = preg_replace( '/\s*\([^\)]*\)/', '', $segment );
                 $slug = implode( '-', $path_slugs );
 

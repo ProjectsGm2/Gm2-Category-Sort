@@ -445,7 +445,8 @@ class Gm2_Category_Sort_One_Click_Assign {
                     continue;
                 }
 
-                $path_slugs[] = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $segment );
+                $clean      = preg_replace( '/\s*\([^\)]*\)$/', '', $segment );
+                $path_slugs[] = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $clean );
                 $slug         = implode( '-', $path_slugs );
 
                 // Previously branch CSVs were only written for categories that
