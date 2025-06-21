@@ -56,12 +56,6 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
                 'filter_type' => 'simple',
             ],
         ]);
-
-        $this->add_control('allow_multi_global', [
-            'label' => __('Allow Multiple Selection', 'gm2-category-sort'),
-            'type' => \Elementor\Controls_Manager::SWITCHER,
-            'default' => '',
-        ]);
         
         $this->end_controls_section();
         
@@ -876,7 +870,6 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'synonym_icon_position'=> $settings['synonym_icon_position'],
             'expand_icon'          => $settings['expand_icon'],
             'collapse_icon'        => $settings['collapse_icon'],
-            'allow_multi_global'   => $settings['allow_multi_global'] ?? '',
         ]);
         
         echo $renderer->generate_html();

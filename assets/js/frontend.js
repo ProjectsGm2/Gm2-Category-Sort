@@ -132,7 +132,6 @@ jQuery(document).ready(function($) {
             $link = $link.closest('.gm2-category-name-container').find('.gm2-category-name').first();
         }
         const $widget = $link.closest('.gm2-category-sort');
-        const allowMulti = $widget.data('allow-multi') === true || $widget.data('allow-multi') === 'true';
         const isSelected = $link.hasClass('selected');
 
         // Toggle selection on canonical label
