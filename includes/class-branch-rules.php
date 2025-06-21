@@ -140,7 +140,7 @@ class Gm2_Category_Sort_Branch_Rules {
             $rules = [];
         }
         foreach ( $rules as $slug => $rule ) {
-            $rules[ $slug ]['allow_multi'] = ! empty( $rule['allow_multi'] );
+            $rules[ $slug ]['allow_multi'] = isset( $rule['allow_multi'] ) ? (bool) $rule['allow_multi'] : false;
         }
         wp_send_json_success( $rules );
     }
@@ -156,7 +156,7 @@ class Gm2_Category_Sort_Branch_Rules {
             $slug    = sanitize_key( $slug );
             $include = sanitize_textarea_field( $rule['include'] ?? '' );
             $exclude = sanitize_textarea_field( $rule['exclude'] ?? '' );
-            $allow_multi = ! empty( $rule['allow_multi'] );
+            $allow_multi = isset( $rule['allow_multi'] ) ? (bool) $rule['allow_multi'] : false;
 
             $include_attrs = [];
             if ( isset( $rule['include_attrs'] ) && is_array( $rule['include_attrs'] ) ) {
