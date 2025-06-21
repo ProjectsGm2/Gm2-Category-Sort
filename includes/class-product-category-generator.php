@@ -1294,7 +1294,18 @@ class Gm2_Category_Sort_Product_Category_Generator {
             $slug = self::branch_slug_from_path( $path );
         }
         $parent_slug = self::branch_parent_slug( $path );
-        $allow_multi = isset( $rules[ $slug ]['allow_multi'] ) ? (bool) $rules[ $slug ]['allow_multi'] : false;
+
+        $allow_multi = null;
+        for ( $i = count( $path ); $i >= 1; $i-- ) {
+            $part_slug = self::branch_slug_from_path( array_slice( $path, 0, $i ) );
+            if ( isset( $rules[ $part_slug ] ) && array_key_exists( 'allow_multi', $rules[ $part_slug ] ) ) {
+                $allow_multi = (bool) $rules[ $part_slug ]['allow_multi'];
+                break;
+            }
+        }
+        if ( $allow_multi === null ) {
+            $allow_multi = false;
+        }
 
         if ( $parent_slug !== null && ! $allow_multi && ! empty( $assigned[ $parent_slug ] ) ) {
             return;
