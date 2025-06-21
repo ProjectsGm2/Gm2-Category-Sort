@@ -93,6 +93,26 @@ class BranchRulesTest extends TestCase {
         $this->assertTrue( $result['data']['branch-leaf']['allow_multi'] );
     }
 
+    public function test_save_rule_for_synonym_branch() {
+        $cat = wp_insert_term('Wheel Simulators','product_cat');
+        update_term_meta($cat['term_id'],'gm2_synonyms','Hubcaps');
+
+        $_POST['nonce'] = 't';
+        $_POST['rules'] = [ 'wheel-simulators' => [ 'include' => '', 'exclude' => '', 'allow_multi' => true ] ];
+
+        Gm2_Category_Sort_Branch_Rules::ajax_save_rules();
+        $saved = get_option('gm2_branch_rules');
+
+        $this->assertTrue( $saved['wheel-simulators']['allow_multi'] );
+
+        $_POST = [ 'nonce' => 't' ];
+        Gm2_Category_Sort_Branch_Rules::ajax_get_rules();
+        $result = $GLOBALS['gm2_json_result'];
+
+        $this->assertTrue( $result['success'] );
+        $this->assertTrue( $result['data']['wheel-simulators']['allow_multi'] );
+    }
+
     public function test_ajax_get_rules_returns_multiple_attributes() {
         $_POST['nonce'] = 't';
         $_POST['rules'] = [
