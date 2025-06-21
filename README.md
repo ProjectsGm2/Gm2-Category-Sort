@@ -225,7 +225,8 @@ checkbox is left unchecked, only the first matching leaf beneath that branch is
 assigned. Enabling the checkbox permits all matching leaves within the branch to
 be assigned.** The rules are stored in the `gm2_branch_rules` option. Each rule
 is saved using a slug that represents the full category path so even nested
-branches can be targeted.
+branches can be targeted. Every slug from `category-tree.csv` is displayed with
+its complete path so parent categories without children can also receive rules.
 
 ## SEO Improvements
 
