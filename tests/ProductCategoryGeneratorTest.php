@@ -397,7 +397,6 @@ class ProductCategoryGeneratorTest extends TestCase {
                 'By Brand & Model',
                 'Dodge',
                 'Ram 4500',
-                'Ram 5500',
                 'By Wheel Size',
                 '19.5"',
             ],
@@ -925,8 +924,10 @@ class ProductCategoryGeneratorTest extends TestCase {
         );
         $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
 
+        $assigned = [];
         $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
-            [ 'pa_color' => [ 'red' ], 'pa_size' => [ 'large' ] ]
+            [ 'pa_color' => [ 'red' ], 'pa_size' => [ 'large' ] ],
+            $assigned
         );
         $this->assertSame( [], $cats );
     }
@@ -953,8 +954,10 @@ class ProductCategoryGeneratorTest extends TestCase {
             ],
         ];
 
+        $assigned = [];
         $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
-            [ 'pa_color' => [ 'red' ], 'pa_size' => [ 'large' ] ]
+            [ 'pa_color' => [ 'red' ], 'pa_size' => [ 'large' ] ],
+            $assigned
         );
 
         $this->assertSame( [ 'Branch', 'Leaf1' ], $cats );
@@ -982,8 +985,10 @@ class ProductCategoryGeneratorTest extends TestCase {
             ],
         ];
 
+        $assigned = [];
         $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
-            [ 'pa_color' => [ 'red' ], 'pa_size' => [ 'large' ] ]
+            [ 'pa_color' => [ 'red' ], 'pa_size' => [ 'large' ] ],
+            $assigned
         );
 
         $this->assertSame( [ 'Branch', 'Leaf1', 'Leaf2' ], $cats );

@@ -84,6 +84,13 @@ class BranchRulesTest extends TestCase {
         $saved = get_option( 'gm2_branch_rules' );
 
         $this->assertTrue( $saved['branch-leaf']['allow_multi'] );
+
+        $_POST = [ 'nonce' => 't' ];
+        Gm2_Category_Sort_Branch_Rules::ajax_get_rules();
+        $result = $GLOBALS['gm2_json_result'];
+
+        $this->assertTrue( $result['success'] );
+        $this->assertTrue( $result['data']['branch-leaf']['allow_multi'] );
     }
 
     public function test_ajax_get_rules_returns_multiple_attributes() {
