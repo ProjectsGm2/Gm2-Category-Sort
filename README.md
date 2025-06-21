@@ -220,9 +220,12 @@ include and exclude keywords for each category branch. Each rule also provides
 Click Categories Assignment** with the **Product Attributes** option enabled,
 these attribute selections are checked in addition to the regular include and
 exclude keywords. A branch is applied when any include term or attribute is
-found and no exclude term or attribute matches. The rules are stored in the
-`gm2_branch_rules` option. Each rule is saved using a slug that represents the
-full category path so even nested branches can be targeted.
+found and no exclude term or attribute matches. **If the Allow Multiple Leaves
+checkbox is left unchecked, only the first matching leaf beneath that branch is
+assigned. Enabling the checkbox permits all matching leaves within the branch to
+be assigned.** The rules are stored in the `gm2_branch_rules` option. Each rule
+is saved using a slug that represents the full category path so even nested
+branches can be targeted.
 
 ## SEO Improvements
 
