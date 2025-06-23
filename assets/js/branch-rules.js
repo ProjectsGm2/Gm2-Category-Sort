@@ -11,8 +11,10 @@ jQuery(function($){
         });
     }
     
-  function renderTerms(container,attrList,selected,collapsed){
+function renderTerms(container,attrList,selected,collapsedState){
         container.empty();
+        var collapseAll = collapsedState === true;
+        var stateByAttr = (typeof collapsedState === 'object' && collapsedState) ? collapsedState : {};
         attrList.forEach(function(attr){
             var info=attrs[attr];
             if(!info) return;
@@ -30,7 +32,7 @@ jQuery(function($){
             group.append(toggle);
             group.append(remove);
             group.append(sel);
-            if(collapsed){
+            if(collapseAll || stateByAttr[attr]){
                 group.addClass('collapsed');
             }
             container.append(group);
@@ -104,7 +106,7 @@ jQuery(function($){
 
     load();
 
-    function gatherSelected(container){
+function gatherSelected(container){
         var selected={};
         container.find('.gm2-attr-group select').each(function(){
             var attr=$(this).data('attr');
@@ -113,11 +115,22 @@ jQuery(function($){
         return selected;
     }
 
+    function gatherCollapsed(container){
+        var state={};
+        container.find('.gm2-attr-group').each(function(){
+            var group=$(this);
+            var attr=group.find('select').data('attr');
+            state[attr]=group.hasClass('collapsed');
+        });
+        return state;
+    }
+
     form.on('change','.gm2-include-attr',function(){
         var row=$(this).closest('tr');
         var attrsSel=$(this).val()||[];
         var current=gatherSelected(row.find('.gm2-include-terms'));
-        renderTerms(row.find('.gm2-include-terms'),attrsSel,current,false);
+        var collapsed=gatherCollapsed(row.find('.gm2-include-terms'));
+        renderTerms(row.find('.gm2-include-terms'),attrsSel,current,collapsed);
         updateSummary(row);
     });
 
@@ -125,7 +138,8 @@ jQuery(function($){
         var row=$(this).closest('tr');
         var attrsSel=$(this).val()||[];
         var current=gatherSelected(row.find('.gm2-exclude-terms'));
-        renderTerms(row.find('.gm2-exclude-terms'),attrsSel,current,false);
+        var collapsed=gatherCollapsed(row.find('.gm2-exclude-terms'));
+        renderTerms(row.find('.gm2-exclude-terms'),attrsSel,current,collapsed);
         updateSummary(row);
     });
 
