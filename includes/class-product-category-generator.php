@@ -1124,9 +1124,11 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 $found_any = false;
                 foreach ( $include_attrs as $attr => $terms ) {
                     $attr = sanitize_key( $attr );
+                    $alt  = strpos( $attr, 'pa_' ) === 0 ? substr( $attr, 3 ) : 'pa_' . $attr;
                     foreach ( (array) $terms as $t ) {
                         $slug = sanitize_title( $t );
-                        if ( isset( $attributes[ $attr ] ) && in_array( $slug, $attributes[ $attr ], true ) ) {
+                        if ( ( isset( $attributes[ $attr ] ) && in_array( $slug, $attributes[ $attr ], true ) ) ||
+                             ( isset( $attributes[ $alt ] ) && in_array( $slug, $attributes[ $alt ], true ) ) ) {
                             $found_any = true;
                             break 2;
                         }
@@ -1140,9 +1142,11 @@ class Gm2_Category_Sort_Product_Category_Generator {
             $exclude_attrs = $rule['exclude_attrs'] ?? [];
             foreach ( $exclude_attrs as $attr => $terms ) {
                 $attr = sanitize_key( $attr );
+                $alt  = strpos( $attr, 'pa_' ) === 0 ? substr( $attr, 3 ) : 'pa_' . $attr;
                 foreach ( (array) $terms as $t ) {
                     $slug = sanitize_title( $t );
-                    if ( isset( $attributes[ $attr ] ) && in_array( $slug, $attributes[ $attr ], true ) ) {
+                    if ( ( isset( $attributes[ $attr ] ) && in_array( $slug, $attributes[ $attr ], true ) ) ||
+                         ( isset( $attributes[ $alt ] ) && in_array( $slug, $attributes[ $alt ], true ) ) ) {
                         return false;
                     }
                 }
@@ -1175,9 +1179,11 @@ class Gm2_Category_Sort_Product_Category_Generator {
             $skip = false;
             foreach ( $exc as $attr => $terms ) {
                 $attr = sanitize_key( $attr );
+                $alt  = strpos( $attr, 'pa_' ) === 0 ? substr( $attr, 3 ) : 'pa_' . $attr;
                 foreach ( (array) $terms as $t ) {
                     $t = sanitize_title( $t );
-                    if ( isset( $attributes[ $attr ] ) && in_array( $t, $attributes[ $attr ], true ) ) {
+                    if ( ( isset( $attributes[ $attr ] ) && in_array( $t, $attributes[ $attr ], true ) ) ||
+                         ( isset( $attributes[ $alt ] ) && in_array( $t, $attributes[ $alt ], true ) ) ) {
                         $skip = true;
                         break 2;
                     }
@@ -1190,9 +1196,11 @@ class Gm2_Category_Sort_Product_Category_Generator {
             $match = false;
             foreach ( $inc as $attr => $terms ) {
                 $attr = sanitize_key( $attr );
+                $alt  = strpos( $attr, 'pa_' ) === 0 ? substr( $attr, 3 ) : 'pa_' . $attr;
                 foreach ( (array) $terms as $t ) {
                     $t = sanitize_title( $t );
-                    if ( isset( $attributes[ $attr ] ) && in_array( $t, $attributes[ $attr ], true ) ) {
+                    if ( ( isset( $attributes[ $attr ] ) && in_array( $t, $attributes[ $attr ], true ) ) ||
+                         ( isset( $attributes[ $alt ] ) && in_array( $t, $attributes[ $alt ], true ) ) ) {
                         $match = true;
                         break 2;
                     }

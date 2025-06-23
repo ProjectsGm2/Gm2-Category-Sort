@@ -1095,5 +1095,31 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $this->assertSame( [ 'Branch', 'Leaf1', 'Leaf2' ], $cats );
     }
+
+    public function test_attribute_slug_aliases() {
+        $parent = wp_insert_term( 'Branch', 'product_cat' );
+        wp_insert_term( 'Leaf', 'product_cat', [ 'parent' => $parent['term_id'] ] );
+
+        $upload = wp_upload_dir();
+        $dir    = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        if ( ! is_dir( $dir ) ) { mkdir( $dir, 0777, true ); }
+        file_put_contents( $dir . '/branch-leaf.csv', "Branch,Leaf\n" );
+
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = [
+            'branch-leaf' => [ 'include_attrs' => [ 'pa_quantity' => [ '4' ] ] ],
+        ];
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
+            [ 'quantity' => [ '4' ] ]
+        );
+        $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
+
+        $GLOBALS['gm2_options']['gm2_branch_rules']['branch-leaf']['include_attrs'] = [ 'quantity' => [ '4' ] ];
+
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
+            [ 'pa_quantity' => [ '4' ] ]
+        );
+        $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
+    }
 }
 }
