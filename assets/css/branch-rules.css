@@ -1,7 +1,12 @@
 .gm2-attr-group {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     margin-bottom: 4px;
+}
+.gm2-attr-group select {
+    flex: 1 1 auto;
+    min-width: 0;
 }
 .gm2-remove-attr {
     cursor: pointer;
