@@ -6,6 +6,8 @@ class Gm2_Category_Sort_Branch_Rules {
         add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin_assets' ] );
         add_action( 'wp_ajax_gm2_branch_rules_get', [ __CLASS__, 'ajax_get_rules' ] );
         add_action( 'wp_ajax_gm2_branch_rules_save', [ __CLASS__, 'ajax_save_rules' ] );
+        add_action( 'admin_post_gm2_export_branch_rules', [ __CLASS__, 'handle_export' ] );
+        add_action( 'admin_post_gm2_import_branch_rules', [ __CLASS__, 'handle_import' ] );
     }
 
     public static function register_admin_page() {
@@ -135,6 +137,28 @@ class Gm2_Category_Sort_Branch_Rules {
 
         echo '<div class="wrap">';
         echo '<h1>' . esc_html__( 'Branch Rules', 'gm2-category-sort' ) . '</h1>';
+
+        $success = isset( $_GET['gm2_import_success'] );
+        $error   = isset( $_GET['gm2_import_error'] ) ? sanitize_text_field( wp_unslash( $_GET['gm2_import_error'] ) ) : '';
+        if ( $success ) {
+            echo '<div class="notice notice-success"><p>' . esc_html__( 'Rules imported.', 'gm2-category-sort' ) . '</p></div>';
+        } elseif ( $error ) {
+            echo '<div class="notice notice-error"><p>' . esc_html( $error ) . '</p></div>';
+        }
+
+        echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:inline;margin-right:10px;">';
+        wp_nonce_field( 'gm2_export_branch_rules', 'gm2_export_branch_rules_nonce' );
+        echo '<input type="hidden" name="action" value="gm2_export_branch_rules">';
+        submit_button( __( 'Download CSV', 'gm2-category-sort' ), 'secondary', 'submit', false );
+        echo '</form>';
+
+        echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:inline;margin-right:10px;">';
+        wp_nonce_field( 'gm2_import_branch_rules', 'gm2_import_branch_rules_nonce' );
+        echo '<input type="hidden" name="action" value="gm2_import_branch_rules">';
+        echo '<input type="file" name="gm2_branch_rules_file" accept=".csv" style="margin-right:6px;">';
+        submit_button( __( 'Upload CSV', 'gm2-category-sort' ), 'secondary', 'submit', false );
+        echo '</form>';
+
         echo '<form id="gm2-branch-rules-form">';
         wp_nonce_field( 'gm2_branch_rules', 'gm2_branch_rules_nonce' );
         $attrs = wc_get_attribute_taxonomies();
@@ -221,5 +245,179 @@ class Gm2_Category_Sort_Branch_Rules {
         }
         update_option( 'gm2_branch_rules', $rules );
         wp_send_json_success();
+    }
+
+    /**
+     * Convert attribute array to export string.
+     *
+     * @param array $attrs Attribute array.
+     * @return string
+     */
+    protected static function attrs_to_string( $attrs ) {
+        $parts = [];
+        foreach ( (array) $attrs as $tax => $terms ) {
+            $tax   = sanitize_key( $tax );
+            $terms = array_filter( array_map( 'sanitize_key', (array) $terms ) );
+            if ( empty( $terms ) ) {
+                continue;
+            }
+            $parts[] = $tax . ':' . implode( '|', $terms );
+        }
+        return implode( ';', $parts );
+    }
+
+    /**
+     * Parse attribute string back into array.
+     *
+     * @param string $str Attribute string.
+     * @return array
+     */
+    protected static function string_to_attrs( $str ) {
+        $result = [];
+        foreach ( explode( ';', (string) $str ) as $pair ) {
+            $pair = trim( $pair );
+            if ( $pair === '' ) {
+                continue;
+            }
+            list( $tax, $terms ) = array_pad( explode( ':', $pair, 2 ), 2, '' );
+            $tax   = sanitize_key( $tax );
+            $terms = array_filter( array_map( 'sanitize_key', array_map( 'trim', explode( '|', $terms ) ) ) );
+            if ( $tax !== '' && ! empty( $terms ) ) {
+                $result[ $tax ] = $terms;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Export branch rules to a CSV file.
+     *
+     * @param string $file Destination file path.
+     * @return true|WP_Error
+     */
+    public static function export_to_csv( $file ) {
+        $fh = fopen( $file, 'w' );
+        if ( ! $fh ) {
+            return new WP_Error( 'gm2_write_failed', __( 'Unable to write file.', 'gm2-category-sort' ) );
+        }
+
+        $upload = wp_upload_dir();
+        $tree   = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure/category-tree.csv';
+        $map    = file_exists( $tree ) ? self::build_slug_path_map( $tree ) : [];
+
+        fputcsv( $fh, [ 'slug', 'path', 'include', 'exclude', 'include_attrs', 'exclude_attrs', 'allow_multi' ] );
+
+        $rules = get_option( 'gm2_branch_rules', [] );
+        if ( is_array( $rules ) ) {
+            foreach ( $rules as $slug => $rule ) {
+                $row = [
+                    $slug,
+                    $map[ $slug ] ?? '',
+                    $rule['include'] ?? '',
+                    $rule['exclude'] ?? '',
+                    self::attrs_to_string( $rule['include_attrs'] ?? [] ),
+                    self::attrs_to_string( $rule['exclude_attrs'] ?? [] ),
+                    empty( $rule['allow_multi'] ) ? '0' : '1',
+                ];
+                fputcsv( $fh, $row );
+            }
+        }
+
+        fclose( $fh );
+        return true;
+    }
+
+    /**
+     * Import branch rules from a CSV file.
+     *
+     * @param string $file CSV file path.
+     * @return array|WP_Error Array of rules or error.
+     */
+    public static function import_from_csv( $file ) {
+        if ( ! file_exists( $file ) || ! is_readable( $file ) ) {
+            return new WP_Error( 'gm2_invalid_file', __( 'Invalid CSV file.', 'gm2-category-sort' ) );
+        }
+
+        $fh = fopen( $file, 'r' );
+        if ( ! $fh ) {
+            return new WP_Error( 'gm2_unreadable', __( 'Unable to read file.', 'gm2-category-sort' ) );
+        }
+
+        $header = fgetcsv( $fh );
+        if ( ! $header ) {
+            fclose( $fh );
+            return [];
+        }
+        $header[0] = preg_replace( "/^\xEF\xBB\xBF/", '', $header[0] );
+        $cols      = array_flip( $header );
+        $rules     = [];
+        while ( ( $row = fgetcsv( $fh ) ) !== false ) {
+            if ( empty( $row ) ) {
+                continue;
+            }
+            $slug = sanitize_key( $row[ $cols['slug'] ] ?? '' );
+            if ( $slug === '' ) {
+                continue;
+            }
+            $rules[ $slug ] = [
+                'include'       => $row[ $cols['include'] ] ?? '',
+                'exclude'       => $row[ $cols['exclude'] ] ?? '',
+                'include_attrs' => self::string_to_attrs( $row[ $cols['include_attrs'] ] ?? '' ),
+                'exclude_attrs' => self::string_to_attrs( $row[ $cols['exclude_attrs'] ] ?? '' ),
+                'allow_multi'   => ! empty( $row[ $cols['allow_multi'] ] ),
+            ];
+        }
+
+        fclose( $fh );
+        return $rules;
+    }
+
+    /**
+     * Handle CSV export request.
+     */
+    public static function handle_export() {
+        check_admin_referer( 'gm2_export_branch_rules', 'gm2_export_branch_rules_nonce' );
+
+        $file = wp_tempnam( 'branch-rules.csv' );
+        if ( ! $file ) {
+            wp_die( esc_html__( 'Unable to create temporary file.', 'gm2-category-sort' ) );
+        }
+
+        $result = self::export_to_csv( $file );
+        if ( is_wp_error( $result ) ) {
+            wp_die( esc_html( $result->get_error_message() ) );
+        }
+
+        header( 'Content-Type: text/csv' );
+        header( 'Content-Disposition: attachment; filename="branch-rules.csv"' );
+        readfile( $file );
+        unlink( $file );
+        exit;
+    }
+
+    /**
+     * Handle CSV import request.
+     */
+    public static function handle_import() {
+        check_admin_referer( 'gm2_import_branch_rules', 'gm2_import_branch_rules_nonce' );
+
+        if ( empty( $_FILES['gm2_branch_rules_file']['tmp_name'] ) ) {
+            $redirect = add_query_arg( 'gm2_import_error', rawurlencode( __( 'No file uploaded.', 'gm2-category-sort' ) ), admin_url( 'tools.php?page=gm2-branch-rules' ) );
+            wp_safe_redirect( $redirect );
+            exit;
+        }
+
+        $file   = $_FILES['gm2_branch_rules_file']['tmp_name'];
+        $result = self::import_from_csv( $file );
+        if ( is_wp_error( $result ) ) {
+            $redirect = add_query_arg( 'gm2_import_error', rawurlencode( $result->get_error_message() ), admin_url( 'tools.php?page=gm2-branch-rules' ) );
+            wp_safe_redirect( $redirect );
+            exit;
+        }
+
+        update_option( 'gm2_branch_rules', $result );
+        $redirect = add_query_arg( 'gm2_import_success', '1', admin_url( 'tools.php?page=gm2-branch-rules' ) );
+        wp_safe_redirect( $redirect );
+        exit;
     }
 }
