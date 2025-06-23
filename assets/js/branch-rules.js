@@ -154,7 +154,13 @@ function gatherSelected(container){
 
     form.on('click','.gm2-attr-group .gm2-remove-attr',function(){
         var group=$(this).closest('.gm2-attr-group');
-        group.toggleClass('collapsed');
+        var attr=group.find('select').data('attr');
+        var row=group.closest('tr');
+        var isInc=group.closest('.gm2-include-terms').length>0;
+        var attrSelect=isInc?row.find('.gm2-include-attr'):row.find('.gm2-exclude-attr');
+        group.remove();
+        attrSelect.find('option[value="'+attr+'"]').prop('selected',false);
+        updateSummary(row);
     });
 
     form.on('click','.gm2-remove-tag',function(){
