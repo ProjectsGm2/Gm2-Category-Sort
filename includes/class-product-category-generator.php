@@ -1081,13 +1081,20 @@ class Gm2_Category_Sort_Product_Category_Generator {
             return true;
         }
         for ( $i = 0; $i < count( $path ) - 1; $i++ ) {
-            $slug        = self::slugify_segment( $path[ $i ] ) . '-' . self::slugify_segment( $path[ $i + 1 ] );
-            $legacy_slug = sanitize_title( $path[ $i ] ) . '-' . sanitize_title( $path[ $i + 1 ] );
-            if ( isset( $rules[ $slug ] ) ) {
-                $rule = $rules[ $slug ];
-            } elseif ( isset( $rules[ $legacy_slug ] ) ) {
-                $rule = $rules[ $legacy_slug ];
-            } else {
+            $pair_slug     = self::slugify_segment( $path[ $i ] ) . '-' . self::slugify_segment( $path[ $i + 1 ] );
+            $legacy_pair   = sanitize_title( $path[ $i ] ) . '-' . sanitize_title( $path[ $i + 1 ] );
+
+            $full_slug      = self::branch_slug_from_path( array_slice( $path, 0, $i + 2 ) );
+            $legacy_full    = implode( '-', array_map( 'sanitize_title', array_slice( $path, 0, $i + 2 ) ) );
+
+            $rule = null;
+            foreach ( array_unique( [ $pair_slug, $legacy_pair, $full_slug, $legacy_full ] ) as $s ) {
+                if ( isset( $rules[ $s ] ) ) {
+                    $rule = $rules[ $s ];
+                    break;
+                }
+            }
+            if ( ! $rule ) {
                 continue;
             }
             $includes = array_filter( array_map( 'trim', explode( ',', $rule['include'] ?? '' ) ) );
