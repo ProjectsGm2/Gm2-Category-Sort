@@ -12,6 +12,7 @@ jQuery(function($){
     }
     
 function renderTerms(container,attrList,selected,collapsedState){
+        attrList = Array.from(new Set(attrList || []));
         container.empty();
         var collapseAll = collapsedState === true;
         var stateByAttr = (typeof collapsedState === 'object' && collapsedState) ? collapsedState : {};
