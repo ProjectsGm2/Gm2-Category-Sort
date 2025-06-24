@@ -66,10 +66,11 @@ class Gm2_Category_Sort_Branch_Rules {
             'gm2-branch-rules',
             'gm2BranchRules',
             [
-                'nonce'      => wp_create_nonce( 'gm2_branch_rules' ),
-                'saved'      => __( 'Rules saved.', 'gm2-category-sort' ),
-                'error'      => __( 'Error saving rules.', 'gm2-category-sort' ),
-                'attributes' => $attr_data,
+                'nonce'         => wp_create_nonce( 'gm2_branch_rules' ),
+                'saved'         => __( 'Rules saved.', 'gm2-category-sort' ),
+                'error'         => __( 'Error saving rules.', 'gm2-category-sort' ),
+                'attributes'    => $attr_data,
+                'max_input_vars'=> (int) ini_get( 'max_input_vars' ),
             ]
         );
     }
@@ -215,8 +216,10 @@ class Gm2_Category_Sort_Branch_Rules {
             wp_send_json_error( 'unauthorized' );
         }
         check_ajax_referer( 'gm2_branch_rules', 'nonce' );
-        $data  = isset( $_POST['rules'] ) && is_array( $_POST['rules'] ) ? wp_unslash( $_POST['rules'] ) : [];
-        $rules = [];
+        $page        = isset( $_POST['page'] ) ? max( 1, (int) $_POST['page'] ) : 1;
+        $total_pages = isset( $_POST['total_pages'] ) ? max( 1, (int) $_POST['total_pages'] ) : 1;
+        $data        = isset( $_POST['rules'] ) && is_array( $_POST['rules'] ) ? wp_unslash( $_POST['rules'] ) : [];
+        $rules       = [];
         foreach ( $data as $slug => $rule ) {
             $slug    = sanitize_key( $slug );
             $include = sanitize_textarea_field( $rule['include'] ?? '' );
@@ -247,7 +250,17 @@ class Gm2_Category_Sort_Branch_Rules {
                 'allow_multi'   => $allow_multi,
             ];
         }
-        update_option( 'gm2_branch_rules', $rules );
+        $partial_key = 'gm2_branch_rules_partial';
+        $existing    = get_option( $partial_key, [] );
+        $merged      = array_merge( $existing, $rules );
+
+        if ( $page >= $total_pages ) {
+            update_option( 'gm2_branch_rules', $merged );
+            delete_option( $partial_key );
+        } else {
+            update_option( $partial_key, $merged );
+        }
+
         wp_send_json_success();
     }
 
