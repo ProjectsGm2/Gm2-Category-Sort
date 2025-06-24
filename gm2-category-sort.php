@@ -37,6 +37,20 @@ function gm2_category_sort_deactivate() {
 // Load after WooCommerce so product CSV tools can access WC classes.
 add_action('plugins_loaded', 'gm2_category_sort_init', 20);
 function gm2_category_sort_init() {
+    $rules   = get_option( 'gm2_branch_rules', [] );
+    $updated = false;
+    if ( is_array( $rules ) ) {
+        foreach ( $rules as $slug => $rule ) {
+            if ( isset( $rule['allow_multi'] ) && is_string( $rule['allow_multi'] ) ) {
+                $rules[ $slug ]['allow_multi'] = filter_var( $rule['allow_multi'], FILTER_VALIDATE_BOOLEAN );
+                $updated = true;
+            }
+        }
+        if ( $updated ) {
+            update_option( 'gm2_branch_rules', $rules );
+        }
+    }
+
     // Check for required plugins
     if (!did_action('elementor/loaded') || !function_exists('WC')) {
         add_action('admin_notices', 'gm2_category_sort_admin_notice');
