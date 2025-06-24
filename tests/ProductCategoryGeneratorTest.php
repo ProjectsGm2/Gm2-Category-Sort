@@ -1095,5 +1095,99 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $this->assertSame( [ 'Branch', 'Leaf1', 'Leaf2' ], $cats );
     }
+
+    public function test_helper_branches_allow_multi_blocks_extra_leaves() {
+        $segments = [
+            'By Wheel Type'        => [ 'TypeA', 'TypeB' ],
+            'By Wheel Set Sizes'   => [ 'SetA', 'SetB' ],
+            'By Fit Type'          => [ 'FitA', 'FitB' ],
+            'By Vehicle Type'      => [ 'VehicleA', 'VehicleB' ],
+            'Ring Mount'           => [ 'RingA', 'RingB' ],
+            'Dayton Spoke'         => [ 'DaytonA', 'DaytonB' ],
+            'Wheel Center Caps'    => [ 'CapA', 'CapB' ],
+            'Wheel Cover Parts'    => [ 'CoverA', 'CoverB' ],
+            'Seat Covers'          => [ 'SeatA', 'SeatB' ],
+            'Coverking Accessories'=> [ 'AccessoryA', 'AccessoryB' ],
+            'Accessories & Hardware'=> [ 'HardwareA', 'HardwareB' ],
+        ];
+
+        foreach ( $segments as $segment => $leaves ) {
+            $parent = wp_insert_term( $segment, 'product_cat' );
+            foreach ( $leaves as $leaf ) {
+                wp_insert_term( $leaf, 'product_cat', [ 'parent' => $parent['term_id'] ] );
+            }
+        }
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        $rules = [];
+        $text_parts = [];
+        foreach ( $segments as $segment => $leaves ) {
+            $slug = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $segment );
+            $rules[ $slug ] = [ 'allow_multi' => false ];
+            $text_parts = array_merge( $text_parts, $leaves );
+        }
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = $rules;
+
+        $text = implode( ' ', $text_parts );
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        foreach ( $segments as $segment => $leaves ) {
+            $count = 0;
+            foreach ( $leaves as $leaf ) {
+                if ( in_array( $leaf, $cats, true ) ) {
+                    $count++;
+                }
+            }
+            $this->assertSame( 1, $count, $segment );
+        }
+    }
+
+    public function test_helper_branches_allow_multi_allows_multiple_leaves() {
+        $segments = [
+            'By Wheel Type'        => [ 'TypeA', 'TypeB' ],
+            'By Wheel Set Sizes'   => [ 'SetA', 'SetB' ],
+            'By Fit Type'          => [ 'FitA', 'FitB' ],
+            'By Vehicle Type'      => [ 'VehicleA', 'VehicleB' ],
+            'Ring Mount'           => [ 'RingA', 'RingB' ],
+            'Dayton Spoke'         => [ 'DaytonA', 'DaytonB' ],
+            'Wheel Center Caps'    => [ 'CapA', 'CapB' ],
+            'Wheel Cover Parts'    => [ 'CoverA', 'CoverB' ],
+            'Seat Covers'          => [ 'SeatA', 'SeatB' ],
+            'Coverking Accessories'=> [ 'AccessoryA', 'AccessoryB' ],
+            'Accessories & Hardware'=> [ 'HardwareA', 'HardwareB' ],
+        ];
+
+        foreach ( $segments as $segment => $leaves ) {
+            $parent = wp_insert_term( $segment, 'product_cat' );
+            foreach ( $leaves as $leaf ) {
+                wp_insert_term( $leaf, 'product_cat', [ 'parent' => $parent['term_id'] ] );
+            }
+        }
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+
+        $rules = [];
+        $text_parts = [];
+        foreach ( $segments as $segment => $leaves ) {
+            $slug = Gm2_Category_Sort_Product_Category_Generator::slugify_segment( $segment );
+            $rules[ $slug ] = [ 'allow_multi' => true ];
+            $text_parts = array_merge( $text_parts, $leaves );
+        }
+        $GLOBALS['gm2_options']['gm2_branch_rules'] = $rules;
+
+        $text = implode( ' ', $text_parts );
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+
+        foreach ( $segments as $segment => $leaves ) {
+            $count = 0;
+            foreach ( $leaves as $leaf ) {
+                if ( in_array( $leaf, $cats, true ) ) {
+                    $count++;
+                }
+            }
+            $this->assertSame( 2, $count, $segment );
+        }
+    }
 }
 }
