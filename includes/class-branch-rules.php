@@ -217,7 +217,7 @@ class Gm2_Category_Sort_Branch_Rules {
             $slug    = sanitize_key( $slug );
             $include = sanitize_textarea_field( $rule['include'] ?? '' );
             $exclude = sanitize_textarea_field( $rule['exclude'] ?? '' );
-            $allow_multi = isset( $rule['allow_multi'] ) ? (bool) $rule['allow_multi'] : false;
+            $allow_multi = isset( $rule['allow_multi'] ) ? filter_var( $rule['allow_multi'], FILTER_VALIDATE_BOOLEAN ) : false;
 
             $include_attrs = [];
             if ( isset( $rule['include_attrs'] ) && is_array( $rule['include_attrs'] ) ) {
