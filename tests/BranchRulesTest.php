@@ -93,6 +93,23 @@ class BranchRulesTest extends TestCase {
         $this->assertTrue( $result['data']['branch-leaf']['allow_multi'] );
     }
 
+    public function test_ajax_save_rules_unchecked_multi() {
+        $_POST['nonce'] = 't';
+        $_POST['rules'] = [ 'branch-leaf' => [ 'include' => '', 'exclude' => '', 'allow_multi' => 'false' ] ];
+
+        Gm2_Category_Sort_Branch_Rules::ajax_save_rules();
+        $saved = get_option( 'gm2_branch_rules' );
+
+        $this->assertFalse( $saved['branch-leaf']['allow_multi'] );
+
+        $_POST = [ 'nonce' => 't' ];
+        Gm2_Category_Sort_Branch_Rules::ajax_get_rules();
+        $result = $GLOBALS['gm2_json_result'];
+
+        $this->assertTrue( $result['success'] );
+        $this->assertFalse( $result['data']['branch-leaf']['allow_multi'] );
+    }
+
     public function test_save_rule_for_synonym_branch() {
         $cat = wp_insert_term('Wheel Simulators','product_cat');
         update_term_meta($cat['term_id'],'gm2_synonyms','Hubcaps');
