@@ -201,7 +201,11 @@ class Gm2_Category_Sort_Branch_Rules {
             $rules = [];
         }
         foreach ( $rules as $slug => $rule ) {
-            $rules[ $slug ]['allow_multi'] = isset( $rule['allow_multi'] ) ? (bool) $rule['allow_multi'] : false;
+            if ( array_key_exists( 'allow_multi', $rule ) ) {
+                $rules[ $slug ]['allow_multi'] = filter_var( $rule['allow_multi'], FILTER_VALIDATE_BOOLEAN );
+            } else {
+                $rules[ $slug ]['allow_multi'] = false;
+            }
         }
         wp_send_json_success( $rules );
     }
