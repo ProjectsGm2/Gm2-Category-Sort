@@ -20,6 +20,7 @@
     --gm2-synonym-icon-hover-bg: var(--gm2-synonym-icon-bg);
     --gm2-synonym-icon-active-size: var(--gm2-synonym-icon-size);
     --gm2-synonym-icon-active-bg: var(--gm2-synonym-icon-bg);
+    --gm2-synonym-below-spacing: 5px;
 }
 /* Full-width tree layout */
 .gm2-category-tree {
@@ -153,7 +154,7 @@
 
 .elementor-widget-gm2-category-sort.gm2-synonym-pos-below .gm2-synonyms-container {
     margin-left: 0;
-    margin-top: 5px;
+    margin-top: var(--gm2-synonym-below-spacing, 5px);
     flex-basis: 100%;
     order: 3;
 }
