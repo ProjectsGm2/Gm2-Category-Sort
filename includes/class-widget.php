@@ -653,8 +653,8 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'label' => __('Text Color', 'gm2-category-sort'),
             'type'  => \Elementor\Controls_Manager::COLOR,
             'selectors' => [
-                '{{WRAPPER}} .gm2-category-synonym' => 'color: {{VALUE}};',
-                '{{WRAPPER}} .gm2-synonyms'        => 'color: {{VALUE}};',
+                '{{WRAPPER}} .gm2-category-synonym, {{WRAPPER}} .gm2-category-synonym:visited' => 'color: {{VALUE}};',
+                '{{WRAPPER}} .gm2-synonyms' => 'color: {{VALUE}};',
             ],
         ]);
 
