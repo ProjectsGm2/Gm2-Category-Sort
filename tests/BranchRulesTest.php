@@ -186,4 +186,35 @@ class BranchRulesTest extends TestCase {
         $terms = get_terms( [ 'taxonomy' => $tax, 'hide_empty' => false ] );
         $this->assertCount( 1, $terms );
     }
+
+    public function test_paged_ajax_save_rules_merges_all_pages() {
+        $rules = [];
+        for ( $i = 1; $i <= 201; $i++ ) {
+            $slug = 'branch-' . $i;
+            $rules[ $slug ] = [
+                'include'       => 'inc' . $i,
+                'exclude'       => 'exc' . $i,
+                'include_attrs' => [],
+                'exclude_attrs' => [],
+                'allow_multi'   => false,
+            ];
+        }
+
+        $page1 = array_slice( $rules, 0, 120, true );
+        $page2 = array_slice( $rules, 120, null, true );
+
+        $_POST = [ 'nonce' => 't', 'page' => 1, 'total_pages' => 2, 'rules' => $page1 ];
+        Gm2_Category_Sort_Branch_Rules::ajax_save_rules();
+
+        // Partial option should exist after first page
+        $partial = get_option( 'gm2_branch_rules_partial' );
+        $this->assertCount( 120, $partial );
+
+        $_POST = [ 'nonce' => 't', 'page' => 2, 'total_pages' => 2, 'rules' => $page2 ];
+        Gm2_Category_Sort_Branch_Rules::ajax_save_rules();
+
+        $saved = get_option( 'gm2_branch_rules' );
+        $this->assertSame( $rules, $saved );
+        $this->assertNull( get_option( 'gm2_branch_rules_partial', null ) );
+    }
 }
