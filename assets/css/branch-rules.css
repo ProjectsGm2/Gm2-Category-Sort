@@ -3,6 +3,7 @@
     flex-wrap: wrap;
     align-items: center;
     margin-bottom: 4px;
+    width: 350px;
 }
 .gm2-attr-group select {
     flex: 1 1 auto;
