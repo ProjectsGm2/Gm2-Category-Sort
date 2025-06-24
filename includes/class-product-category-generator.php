@@ -646,6 +646,13 @@ class Gm2_Category_Sort_Product_Category_Generator {
     /** Lug/Hole configuration branch logic. */
     protected static function check_lug_hole( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [] ) {
         $subset      = self::filter_by_segment( $mapping, 'By Lug/Hole Configuration' );
+
+        if ( strpos( $lower, 'lug' ) === false && strpos( $lower, 'hole' ) === false ) {
+            if ( ! preg_match( '/\b\d+\s*lugs?\b/', $lower ) ) {
+                return [];
+            }
+        }
+
         $candidates  = [];
         $word_count  = count( $words );
         foreach ( $subset as $term => $paths ) {
