@@ -37,6 +37,20 @@
     transform: scale(1.2);
 }
 
+.gm2-include-terms,
+.gm2-exclude-terms {
+    width: 100%;
+    max-width: 350px;
+    box-sizing: border-box;
+}
+
+.gm2-include-tags,
+.gm2-exclude-tags {
+    width: 100%;
+    max-width: 350px;
+    box-sizing: border-box;
+}
+
 .gm2-tag {
     display: inline-block;
     background: #f1f1f1;
