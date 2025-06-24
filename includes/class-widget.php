@@ -721,6 +721,23 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             ],
         ]);
 
+        $this->add_responsive_control('synonym_below_spacing', [
+            'label' => __('Below Spacing', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => ['px'],
+            'range' => [ 'px' => ['min' => 0, 'max' => 50] ],
+            'default' => [
+                'size' => 5,
+                'unit' => 'px',
+            ],
+            'selectors' => [
+                '{{WRAPPER}}' => '--gm2-synonym-below-spacing: {{SIZE}}{{UNIT}};',
+            ],
+            'condition' => [
+                'synonym_position' => 'below',
+            ],
+        ]);
+
         $this->add_control('synonym_icon', [
             'label' => __('Icon', 'gm2-category-sort'),
             'type'  => \Elementor\Controls_Manager::ICONS,
