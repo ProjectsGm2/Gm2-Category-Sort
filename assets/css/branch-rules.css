@@ -3,6 +3,14 @@
     flex-wrap: wrap;
     align-items: center;
     margin-bottom: 4px;
+    width: 100%;
+    max-width: 350px;
+    box-sizing: border-box;
+}
+.gm2-attr-group select {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
 }
 .gm2-attr-group select {
     flex: 1 1 auto;
