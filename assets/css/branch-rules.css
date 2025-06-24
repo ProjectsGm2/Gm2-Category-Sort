@@ -3,18 +3,14 @@
     flex-wrap: wrap;
     align-items: center;
     margin-bottom: 4px;
-    width: 100%;
-    max-width: 350px;
+    width: 350px;
+    max-width: 100%;
     box-sizing: border-box;
 }
 .gm2-attr-group select {
     flex: 1 1 auto;
     min-width: 0;
     width: 100%;
-}
-.gm2-attr-group select {
-    flex: 1 1 auto;
-    min-width: 0;
 }
 .gm2-remove-attr {
     cursor: pointer;
@@ -39,6 +35,20 @@
 .gm2-remove-attr:hover {
     color: red;
     transform: scale(1.2);
+}
+
+.gm2-include-terms,
+.gm2-exclude-terms {
+    width: 350px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.gm2-include-tags,
+.gm2-exclude-tags {
+    width: 350px;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .gm2-tag {
