@@ -56,13 +56,33 @@ class ProductCategoryGeneratorTest extends TestCase {
         update_term_meta( $child['term_id'], 'gm2_synonyms', 'Alt' );
     }
 
+    private function flattenCats( array $map ): array {
+        $result = [];
+        foreach ( $map as $path ) {
+            foreach ( $path as $n ) {
+                if ( ! in_array( $n, $result, true ) ) {
+                    $result[] = $n;
+                }
+            }
+        }
+        return $result;
+    }
+
+    private function assign( ...$args ) {
+        return $this->flattenCats( Gm2_Category_Sort_Product_Category_Generator::assign_categories( ...$args ) );
+    }
+
+    private function assignAttrs( ...$args ) {
+        return $this->flattenCats( Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes( ...$args ) );
+    }
+
     public function test_assigns_using_synonyms_and_hierarchy() {
         $this->create_categories();
 
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = 'This product matches alt keyword';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertSame( [ 'Parent', 'Child' ], $cats );
     }
@@ -73,7 +93,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = 'A main category item';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertSame( [ 'Parent' ], $cats );
     }
@@ -90,7 +110,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertArrayHasKey( $key, $mapping );
         $this->assertCount( 2, $mapping[ $key ] );
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'Great common item', $mapping );
+        $cats = $this->assign( 'Great common item', $mapping );
 
         $this->assertContains( 'CatA', $cats );
         $this->assertContains( 'CatB', $cats );
@@ -102,7 +122,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = 'This item is not for alt usage.';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertSame( [], $cats );
     }
@@ -113,7 +133,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = 'All models except for alt type';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertSame( [], $cats );
     }
@@ -126,7 +146,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = 'Fits 10 lugs 2 hh trucks';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertSame( [ 'Wheel' ], $cats );
     }
@@ -138,7 +158,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = 'Premium wheelcovers and hub caps included';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertSame(
             [ 'Hubcap', 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators' ],
@@ -157,7 +177,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         ];
 
         foreach ( $phrases as $phrase ) {
-            $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $phrase, $mapping );
+            $cats = $this->assign( $phrase, $mapping );
             $this->assertSame( [], $cats, $phrase );
         }
     }
@@ -169,7 +189,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = 'Works with over the lug wheels';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertSame( [ 'Over-Lug' ], $cats );
     }
@@ -180,7 +200,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = 'Heavy duty wheell cover';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, true );
+        $cats = $this->assign( $text, $mapping, true );
 
         $this->assertSame( [ 'Wheel' ], $cats );
     }
@@ -195,7 +215,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = '19.5" Dodge Ram 4500 5500 2008 Wheel Rim Liner Hubcap Covers 10 Lug 5 Hole';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertSame(
             [
@@ -218,7 +238,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = '19.5" wheel simulator for trucks';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertContains( 'By Wheel Size', $cats );
         $this->assertContains( '19.5"', $cats );
@@ -231,7 +251,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = "19.5' rim liner kit";
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertContains( 'By Wheel Size', $cats );
         $this->assertContains( '19.5"', $cats );
@@ -244,7 +264,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = '19.5 wheel cover';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertContains( 'By Wheel Size', $cats );
         $this->assertContains( '19.5"', $cats );
@@ -261,7 +281,7 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         foreach ( $sizes as $s ) {
             foreach ( [ $s . '" wheel cover', $s . "' wheel cover" ] as $text ) {
-                $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+                $cats = $this->assign( $text, $mapping );
                 $this->assertContains( 'By Wheel Size', $cats );
                 $this->assertContains( $s . '"', $cats );
             }
@@ -275,7 +295,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = '19.5" rim liner kit';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertContains( 'By Wheel Size', $cats );
         $this->assertContains( "19.5\xE2\x80\xB3", $cats );
@@ -293,7 +313,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = '19.5" wheel simulator cover';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertSame(
             [
@@ -315,7 +335,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = 'Premium 19.5"x8 wheel simulator';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertContains( 'By Wheel Size', $cats );
         $this->assertContains( '19.5"', $cats );
@@ -328,7 +348,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = '19.5&quot; wheel simulator';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertContains( 'By Wheel Size', $cats );
         $this->assertContains( '19.5"', $cats );
@@ -351,7 +371,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         ];
 
         foreach ( $cases as $text => $cat ) {
-            $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+            $cats = $this->assign( $text, $mapping );
             $this->assertContains( 'By Wheel Size', $cats );
             $this->assertContains( $cat, $cats );
         }
@@ -365,7 +385,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = 'Premium rim liner kit for trucks';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertSame( [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators' ], $cats );
     }
@@ -387,7 +407,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = '19.5" Dodge Ram 4500 5500 2008 Wheel Rim Liner Hubcap Covers';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertSame(
             [
@@ -413,7 +433,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = 'Dodge ... ' . str_repeat( 'x ', 30 ) . 'Ram 4500 truck';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertSame( [ 'Wheel Simulators', 'By Brand & Model', 'Dodge' ], $cats );
     }
@@ -527,7 +547,7 @@ class ProductCategoryGeneratorTest extends TestCase {
             'branch-leaf' => [ 'include' => 'foo', 'exclude' => '' ],
         ];
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'Great foo product', $mapping );
+        $cats = $this->assign( 'Great foo product', $mapping );
 
         $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
     }
@@ -547,7 +567,7 @@ class ProductCategoryGeneratorTest extends TestCase {
             'branch-leaf' => [ 'include' => 'foo', 'exclude' => 'bar' ],
         ];
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'foo bar thing', $mapping );
+        $cats = $this->assign( 'foo bar thing', $mapping );
 
         $this->assertSame( [], $cats );
     }
@@ -568,13 +588,13 @@ class ProductCategoryGeneratorTest extends TestCase {
             'branch-leaf' => [ 'include' => 'foo', 'exclude' => 'bar' ],
         ];
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'LeafSyn foo item', $mapping );
+        $cats = $this->assign( 'LeafSyn foo item', $mapping );
         $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'LeafSyn item', $mapping );
+        $cats = $this->assign( 'LeafSyn item', $mapping );
         $this->assertSame( [], $cats );
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'LeafSyn foo bar', $mapping );
+        $cats = $this->assign( 'LeafSyn foo bar', $mapping );
         $this->assertSame( [], $cats );
     }
 
@@ -593,7 +613,7 @@ class ProductCategoryGeneratorTest extends TestCase {
             'branch-leaf' => [ 'include' => '19"', 'exclude' => '' ],
         ];
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'Nice 19" accessory', $mapping );
+        $cats = $this->assign( 'Nice 19" accessory', $mapping );
 
         $this->assertSame( [ 'By Wheel Size', '19"', 'Branch', 'Leaf' ], $cats );
     }
@@ -613,7 +633,7 @@ class ProductCategoryGeneratorTest extends TestCase {
             'branch-leaf' => [ 'include' => "19'", 'exclude' => '' ],
         ];
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( "Cool 19' part", $mapping );
+        $cats = $this->assign( "Cool 19' part", $mapping );
 
         $this->assertSame( [ 'By Wheel Size', "19'", 'Branch', 'Leaf' ], $cats );
     }
@@ -633,7 +653,7 @@ class ProductCategoryGeneratorTest extends TestCase {
             'branch-leaf' => [ 'include' => 'foo_bar', 'exclude' => '' ],
         ];
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'Great foo awesome bar product', $mapping );
+        $cats = $this->assign( 'Great foo awesome bar product', $mapping );
 
         $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
     }
@@ -653,7 +673,7 @@ class ProductCategoryGeneratorTest extends TestCase {
             'branch-leaf' => [ 'include' => 'foo', 'exclude' => 'bar_baz' ],
         ];
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'foo bar weird baz thing', $mapping );
+        $cats = $this->assign( 'foo bar weird baz thing', $mapping );
 
         $this->assertSame( [], $cats );
     }
@@ -678,7 +698,7 @@ class ProductCategoryGeneratorTest extends TestCase {
             'branch-leaf' => [ 'include' => '', 'exclude' => '', 'include_attrs' => [ 'pa_color' => [ 'red' ] ] ],
         ];
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories(
+        $cats = $this->assign(
             'LeafSyn red part',
             $mapping,
             false,
@@ -688,7 +708,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         );
         $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories(
+        $cats = $this->assign(
             'LeafSyn part',
             $mapping,
             false,
@@ -719,7 +739,7 @@ class ProductCategoryGeneratorTest extends TestCase {
             'branch-leaf' => [ 'include' => '', 'exclude' => '', 'exclude_attrs' => [ 'pa_color' => [ 'blue' ] ] ],
         ];
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories(
+        $cats = $this->assign(
             'LeafSyn blue part',
             $mapping,
             false,
@@ -729,7 +749,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         );
         $this->assertSame( [], $cats );
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories(
+        $cats = $this->assign(
             'LeafSyn part',
             $mapping,
             false,
@@ -766,7 +786,7 @@ class ProductCategoryGeneratorTest extends TestCase {
             ],
         ];
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories(
+        $cats = $this->assign(
             'LeafSyn red',
             $mapping,
             false,
@@ -776,7 +796,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         );
         $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories(
+        $cats = $this->assign(
             'LeafSyn large',
             $mapping,
             false,
@@ -786,7 +806,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         );
         $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories(
+        $cats = $this->assign(
             'LeafSyn',
             $mapping,
             false,
@@ -796,17 +816,17 @@ class ProductCategoryGeneratorTest extends TestCase {
         );
         $this->assertSame( [], $cats );
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
+        $cats = $this->assignAttrs(
             [ 'pa_color' => [ 'red' ] ]
         );
         $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
+        $cats = $this->assignAttrs(
             [ 'pa_size' => [ 'large' ] ]
         );
         $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes( [] );
+        $cats = $this->assignAttrs( [] );
         $this->assertSame( [], $cats );
     }
     public function test_exports_category_tree_csv() {
@@ -844,7 +864,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         Gm2_Category_Sort_Product_Category_Generator::export_brand_model_csv( $mapping, $dir );
 
         $text = 'Dodge Ram 3500 wheel simulator';
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, false, 85, $dir );
+        $cats = $this->assign( $text, $mapping, false, 85, $dir );
 
         $this->assertContains( 'Dodge', $cats );
         $this->assertContains( 'Ram 3500', $cats );
@@ -884,7 +904,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = 'Heavy duty trailer for 5 lug wheels';
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         $this->assertSame( [ 'By Lug/Hole Configuration', '5 Lug' ], $cats );
     }
@@ -927,7 +947,7 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
         $text    = '19.5" Dodge Ram 4500 wheel simulator';
-        $cats    = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats    = $this->assign( $text, $mapping );
 
         $this->assertSame(
             [ 'Wheel Simulators', 'Brands', 'Eagle Flight Wheel Simulators', 'By Brand & Model', 'Dodge', 'Ram 4500', 'By Wheel Size', '19.5"' ],
@@ -989,13 +1009,13 @@ class ProductCategoryGeneratorTest extends TestCase {
             ],
         ];
 
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
+        $cats = $this->assignAttrs(
             [ 'pa_color' => [ 'red' ] ]
         );
         $this->assertSame( [ 'Branch', 'Leaf' ], $cats );
 
         $assigned = [];
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
+        $cats = $this->assignAttrs(
             [ 'pa_color' => [ 'red' ], 'pa_size' => [ 'large' ] ],
             $assigned
         );
@@ -1025,7 +1045,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         ];
 
         $assigned = [];
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
+        $cats = $this->assignAttrs(
             [ 'pa_color' => [ 'red' ], 'pa_size' => [ 'large' ] ],
             $assigned
         );
@@ -1056,7 +1076,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         ];
 
         $assigned = [];
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
+        $cats = $this->assignAttrs(
             [ 'pa_color' => [ 'red' ], 'pa_size' => [ 'large' ] ],
             $assigned
         );
@@ -1088,7 +1108,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         ];
 
         $assigned = [];
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes(
+        $cats = $this->assignAttrs(
             [ 'pa_color' => [ 'red' ], 'pa_size' => [ 'large' ] ],
             $assigned
         );
@@ -1130,7 +1150,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $GLOBALS['gm2_options']['gm2_branch_rules'] = $rules;
 
         $text = implode( ' ', $text_parts );
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         foreach ( $segments as $segment => $leaves ) {
             $count = 0;
@@ -1177,7 +1197,7 @@ class ProductCategoryGeneratorTest extends TestCase {
         $GLOBALS['gm2_options']['gm2_branch_rules'] = $rules;
 
         $text = implode( ' ', $text_parts );
-        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping );
+        $cats = $this->assign( $text, $mapping );
 
         foreach ( $segments as $segment => $leaves ) {
             $count = 0;
@@ -1188,6 +1208,21 @@ class ProductCategoryGeneratorTest extends TestCase {
             }
             $this->assertSame( 2, $count, $segment );
         }
+    }
+
+    public function test_same_leaf_name_different_branches() {
+        $p1 = wp_insert_term( 'BranchA', 'product_cat' );
+        $l1 = wp_insert_term( 'Leaf', 'product_cat', [ 'parent' => $p1['term_id'] ] );
+        update_term_meta( $l1['term_id'], 'gm2_synonyms', 'Dup' );
+        $p2 = wp_insert_term( 'BranchB', 'product_cat' );
+        $l2 = wp_insert_term( 'Leaf', 'product_cat', [ 'parent' => $p2['term_id'] ] );
+        update_term_meta( $l2['term_id'], 'gm2_synonyms', 'Dup' );
+
+        $mapping = Gm2_Category_Sort_Product_Category_Generator::build_mapping_from_globals();
+        $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( 'Dup item', $mapping );
+
+        $this->assertArrayHasKey( 'brancha-leaf', $cats );
+        $this->assertArrayHasKey( 'branchb-leaf', $cats );
     }
 }
 }

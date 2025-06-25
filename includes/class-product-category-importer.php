@@ -206,9 +206,11 @@ class Gm2_Category_Sort_Product_Category_Importer {
                 if ( $name === '' ) {
                     continue;
                 }
-                $term = get_term_by( 'name', $name, 'product_cat' );
-                if ( $term && ! is_wp_error( $term ) ) {
-                    $term_ids[] = (int) $term->term_id;
+                $slug = Gm2_Category_Sort_Product_Category_Generator::branch_slug_from_path( [ $name ] );
+                $path = Gm2_Category_Sort_Product_Category_Generator::path_from_branch_slug( $slug );
+                $id   = Gm2_Category_Sort_Product_Category_Generator::term_id_from_path( $path );
+                if ( $id ) {
+                    $term_ids[] = $id;
                 }
             }
 
