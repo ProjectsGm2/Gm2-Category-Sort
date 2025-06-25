@@ -314,12 +314,12 @@ class Gm2_Category_Sort_Product_Category_Generator {
     /**
      * Basic term matching helper used by many category checks.
      *
-     * @param string $lower    Normalized text.
-     * @param array  $words    Tokenized words from $lower.
-     * @param array  $mapping  Filtered mapping to check.
-     * @param bool   $fuzzy    Whether to allow fuzzy matching.
-     * @param int    $threshold Fuzzy matching threshold.
-     * @return array List of category names to assign.
+     * @param string      $lower      Normalized text.
+     * @param array       $words      Tokenized words from $lower.
+     * @param array       $mapping    Filtered mapping to check.
+     * @param bool        $fuzzy      Whether to allow fuzzy matching.
+     * @param int         $threshold  Fuzzy matching threshold.
+     * @return array      When $assigned is provided, returns mapping of branch slug => path. Otherwise list of category names.
      */
     protected static function match_terms( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
         $cats       = [];
@@ -908,23 +908,20 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
         }
 
-        $cats = array_merge( $cats, self::match_terms( $lower, $words, $other_map, $fuzzy, $threshold, $attributes, $assigned, $branch_rules ) );
+        foreach ( self::match_terms( $lower, $words, $other_map, $fuzzy, $threshold, $attributes, $assigned, $branch_rules ) as $slug => $path ) {
+            $cats[ $slug ] = $path;
+        }
 
         $sim = self::check_wheel_simulators( $lower, $attributes );
         if ( $sim ) {
-            foreach ( $sim as $c ) {
-                if ( ! in_array( $c, $cats, true ) ) {
-                    $cats[] = $c;
-                }
-            }
+            $slug = self::branch_slug_from_path( $sim );
+            $cats[ $slug ] = $sim;
             $brand_found = true;
         }
 
         $bm = self::check_brand_model( $lower, $words, $mapping, $fuzzy, $threshold, $csv_dir, $attributes, $assigned, $branch_rules );
-        foreach ( $bm as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+        foreach ( $bm as $slug => $path ) {
+            $cats[ $slug ] = $path;
         }
 
         if ( ! $wheel_size_num && $brand_found && preg_match('/(?<![\\d.])(\\d{1,2}(?:\\.\\d+)?)(?=\\s)/u', $decoded, $m) ) {
@@ -933,101 +930,75 @@ class Gm2_Category_Sort_Product_Category_Generator {
         }
 
         $ws = self::check_wheel_size( $lower, $mapping, $wheel_size_num, $wheel_size, $brand_found, $attributes, $assigned, $branch_rules );
-        foreach ( $ws as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+        foreach ( $ws as $slug => $path ) {
+            $cats[ $slug ] = $path;
         }
 
         $lh = self::check_lug_hole( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
-        foreach ( $lh as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+        if ( $lh ) {
+            $slug = self::branch_slug_from_path( $lh );
+            $cats[ $slug ] = $lh;
         }
 
         $wt = self::check_wheel_type( $lower, $words, $mapping, $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
-        foreach ( $wt as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+        foreach ( $wt as $slug => $path ) {
+            $cats[ $slug ] = $path;
         }
 
         $ss = self::check_set_sizes( $lower, $words, $mapping, $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
-        foreach ( $ss as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+        foreach ( $ss as $slug => $path ) {
+            $cats[ $slug ] = $path;
         }
 
         $ft = self::check_fit_type( $lower, $words, $mapping, $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
-        foreach ( $ft as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+        foreach ( $ft as $slug => $path ) {
+            $cats[ $slug ] = $path;
         }
 
         $vt = self::check_vehicle_type( $lower, $words, $mapping, $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
-        foreach ( $vt as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+        foreach ( $vt as $slug => $path ) {
+            $cats[ $slug ] = $path;
         }
 
         $rm = self::check_ring_mount( $lower, $words, $mapping, $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
-        foreach ( $rm as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+        foreach ( $rm as $slug => $path ) {
+            $cats[ $slug ] = $path;
         }
 
         $ds = self::check_dayton_spoke( $lower, $words, $mapping, $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
-        foreach ( $ds as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+        foreach ( $ds as $slug => $path ) {
+            $cats[ $slug ] = $path;
         }
 
         $cap = self::check_wheel_center_caps( $lower, $words, $mapping, $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
-        foreach ( $cap as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+        foreach ( $cap as $slug => $path ) {
+            $cats[ $slug ] = $path;
         }
 
         $wcp = self::check_wheel_cover_parts( $lower, $words, $mapping, $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
-        foreach ( $wcp as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+        foreach ( $wcp as $slug => $path ) {
+            $cats[ $slug ] = $path;
         }
 
         $sc = self::check_seat_covers( $lower, $words, $mapping, $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
-        foreach ( $sc as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+        foreach ( $sc as $slug => $path ) {
+            $cats[ $slug ] = $path;
         }
 
         $cka = self::check_coverking_accessories( $lower, $words, $mapping, $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
-        foreach ( $cka as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+        foreach ( $cka as $slug => $path ) {
+            $cats[ $slug ] = $path;
         }
 
         $ah = self::check_accessories_hardware( $lower, $words, $mapping, $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
-        foreach ( $ah as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+        foreach ( $ah as $slug => $path ) {
+            $cats[ $slug ] = $path;
         }
 
         $br = self::check_brands( $lower, $words, $mapping, $fuzzy, $threshold, $attributes );
         foreach ( $br as $c ) {
-            if ( ! in_array( $c, $cats, true ) ) {
-                $cats[] = $c;
-            }
+            $slug = self::branch_slug_from_path( [ $c ] );
+            $cats[ $slug ] = [ $c ];
         }
         if ( is_array( $branch_rules ) && $branch_rules ) {
             foreach ( $branch_rules as $slug => $rule ) {
@@ -1063,11 +1034,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 if ( is_array( $assigned ) ) {
                     self::add_path_categories( $path, $cats, $assigned, $branch_rules, $slug );
                 } else {
-                    foreach ( $path as $cat ) {
-                        if ( ! in_array( $cat, $cats, true ) ) {
-                            $cats[] = $cat;
-                        }
-                    }
+                    $cats[ $slug ] = $path;
                 }
             }
         }
@@ -1162,7 +1129,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * Assign categories based solely on attribute rules.
      *
      * @param array $attributes Mapping of attribute slugs to selected term slugs.
-     * @return array List of category names that match the attribute rules.
+     * @return array Mapping of branch slug => path that match the attribute rules.
      */
     public static function assign_categories_from_attributes( array $attributes, array &$assigned = null, array $branch_rules_override = [] ) {
         $rules = $branch_rules_override ? $branch_rules_override : get_option( 'gm2_branch_rules', [] );
@@ -1214,11 +1181,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
             if ( is_array( $assigned ) ) {
                 self::add_path_categories( $path, $cats, $assigned, $rules, $slug );
             } else {
-                foreach ( $path as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
-                    }
-                }
+                $cats[ $slug ] = $path;
             }
         }
 
@@ -1291,6 +1254,40 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /**
+     * Resolve a category path to a term ID.
+     *
+     * @param array $path Category names from root to leaf.
+     * @return int|null Term ID of the leaf category or null when not found.
+     */
+    protected static function term_id_from_path( array $path ) {
+        $parent = 0;
+        foreach ( $path as $segment ) {
+            $terms = get_terms(
+                [
+                    'taxonomy'   => 'product_cat',
+                    'hide_empty' => false,
+                    'parent'     => $parent,
+                ]
+            );
+            if ( is_wp_error( $terms ) ) {
+                return null;
+            }
+            $found = null;
+            foreach ( $terms as $term ) {
+                if ( $term->name === $segment ) {
+                    $found = (int) $term->term_id;
+                    break;
+                }
+            }
+            if ( $found === null ) {
+                return null;
+            }
+            $parent = $found;
+        }
+        return $parent ?: null;
+    }
+
+    /**
      * Add categories from a path while respecting branch allow_multi settings.
      *
      * @param array       $path       Category path from root to leaf.
@@ -1322,10 +1319,8 @@ class Gm2_Category_Sort_Product_Category_Generator {
             return;
         }
 
-        foreach ( $path as $cat ) {
-            if ( ! in_array( $cat, $cats, true ) ) {
-                $cats[] = $cat;
-            }
+        if ( ! isset( $cats[ $slug ] ) ) {
+            $cats[ $slug ] = $path;
         }
 
         if ( $parent_slug !== null ) {

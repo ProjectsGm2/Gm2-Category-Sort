@@ -285,23 +285,32 @@ class Gm2_Category_Sort_One_Click_Assign {
                 }
             }
 
-            $cats = [];
+            $cat_names = [];
             if ( in_array( 'title', $fields, true ) || in_array( 'description', $fields, true ) ) {
-                $cats = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, false, 85, null, $attr_slugs );
+                $cats_map = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, false, 85, null, $attr_slugs );
+                foreach ( $cats_map as $path ) {
+                    foreach ( $path as $n ) {
+                        if ( ! in_array( $n, $cat_names, true ) ) {
+                            $cat_names[] = $n;
+                        }
+                    }
+                }
             }
             if ( in_array( 'attributes', $fields, true ) ) {
-                $extra = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes( $attr_slugs );
-                foreach ( $extra as $cat ) {
-                    if ( ! in_array( $cat, $cats, true ) ) {
-                        $cats[] = $cat;
+                $extra_map = Gm2_Category_Sort_Product_Category_Generator::assign_categories_from_attributes( $attr_slugs );
+                foreach ( $extra_map as $path ) {
+                    foreach ( $path as $n ) {
+                        if ( ! in_array( $n, $cat_names, true ) ) {
+                            $cat_names[] = $n;
+                        }
                     }
                 }
             }
             $term_ids = [];
-            foreach ( $cats as $name ) {
-                $term = get_term_by( 'name', $name, 'product_cat' );
-                if ( $term && ! is_wp_error( $term ) ) {
-                    $term_ids[] = (int) $term->term_id;
+            foreach ( array_merge( $cats_map ?? [], $extra_map ?? [] ) as $slug => $path ) {
+                $id = Gm2_Category_Sort_Product_Category_Generator::term_id_from_path( Gm2_Category_Sort_Product_Category_Generator::path_from_branch_slug( $slug ) );
+                if ( $id ) {
+                    $term_ids[] = $id;
                 }
             }
             wp_set_object_terms( $product_id, $term_ids ?: [], 'product_cat', ! $overwrite );
@@ -309,9 +318,9 @@ class Gm2_Category_Sort_One_Click_Assign {
             $items[] = [
                 'sku'   => $product->get_sku(),
                 'title' => $product->get_name(),
-                'cats'  => array_values( $cats ),
+                'cats'  => $cat_names,
             ];
-            $log[] = $product->get_sku() . ' - ' . $product->get_name() . ' => ' . implode( ', ', $cats );
+            $log[] = $product->get_sku() . ' - ' . $product->get_name() . ' => ' . implode( ', ', $cat_names );
         }
 
         $new_offset = $offset + count( $query->posts );

@@ -315,12 +315,18 @@ class Gm2_Category_Sort_Auto_Assign {
                 }
             }
 
-            $cats      = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy, 85, $export_dir, $attr_slugs );
-            $term_ids  = [];
-            foreach ( $cats as $name ) {
-                $term = get_term_by( 'name', $name, 'product_cat' );
-                if ( $term && ! is_wp_error( $term ) ) {
-                    $term_ids[] = (int) $term->term_id;
+            $cats_map = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy, 85, $export_dir, $attr_slugs );
+            $term_ids   = [];
+            $cat_names  = [];
+            foreach ( $cats_map as $slug => $path ) {
+                $id = Gm2_Category_Sort_Product_Category_Generator::term_id_from_path( Gm2_Category_Sort_Product_Category_Generator::path_from_branch_slug( $slug ) );
+                if ( $id ) {
+                    $term_ids[] = $id;
+                }
+                foreach ( $path as $n ) {
+                    if ( ! in_array( $n, $cat_names, true ) ) {
+                        $cat_names[] = $n;
+                    }
                 }
             }
             if ( $term_ids ) {
@@ -330,9 +336,9 @@ class Gm2_Category_Sort_Auto_Assign {
             $items[] = [
                 'sku'   => $product->get_sku(),
                 'title' => $product->get_name(),
-                'cats'  => $cats,
+                'cats'  => $cat_names,
             ];
-            $log[] = $product->get_sku() . ' - ' . $product->get_name() . ' => ' . implode( ', ', $cats );
+            $log[] = $product->get_sku() . ' - ' . $product->get_name() . ' => ' . implode( ', ', $cat_names );
         }
 
         $new_offset = $offset + count( $query->posts );
@@ -599,12 +605,12 @@ class Gm2_Category_Sort_Auto_Assign {
                     }
                 }
 
-                $cats     = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy, 85, $export_dir, $attr_slugs );
+                $cats_map = Gm2_Category_Sort_Product_Category_Generator::assign_categories( $text, $mapping, $fuzzy, 85, $export_dir, $attr_slugs );
                 $term_ids = [];
-                foreach ( $cats as $name ) {
-                    $term = get_term_by( 'name', $name, 'product_cat' );
-                    if ( $term && ! is_wp_error( $term ) ) {
-                        $term_ids[] = (int) $term->term_id;
+                foreach ( $cats_map as $slug => $path ) {
+                    $id = Gm2_Category_Sort_Product_Category_Generator::term_id_from_path( Gm2_Category_Sort_Product_Category_Generator::path_from_branch_slug( $slug ) );
+                    if ( $id ) {
+                        $term_ids[] = $id;
                     }
                 }
                 if ( $term_ids ) {
