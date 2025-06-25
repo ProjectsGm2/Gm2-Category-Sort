@@ -1194,7 +1194,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @param string $slug Branch slug from branch CSV filename.
      * @return array<string>
      */
-    protected static function path_from_branch_slug( $slug ) {
+    public static function path_from_branch_slug( $slug ) {
         $upload = wp_upload_dir();
         $dir    = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
         $file   = rtrim( $dir, '/' ) . '/' . sanitize_key( $slug ) . '.csv';
@@ -1234,7 +1234,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @param array $path Category names from root to leaf.
      * @return string Branch slug.
      */
-    protected static function branch_slug_from_path( array $path ) {
+    public static function branch_slug_from_path( array $path ) {
         $parts = array_map( [ __CLASS__, 'slugify_segment' ], $path );
         return implode( '-', $parts );
     }
@@ -1259,7 +1259,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @param array $path Category names from root to leaf.
      * @return int|null Term ID of the leaf category or null when not found.
      */
-    protected static function term_id_from_path( array $path ) {
+    public static function term_id_from_path( array $path ) {
         $parent = 0;
         foreach ( $path as $segment ) {
             $terms = get_terms(
