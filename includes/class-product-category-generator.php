@@ -842,9 +842,13 @@ class Gm2_Category_Sort_Product_Category_Generator {
     /**
      * Assign categories to a block of text using a mapping.
      *
+     * The result is keyed by branch slug where each value is the array of
+     * category names from root to leaf. Callers may flatten the values when
+     * only the names are required.
+     *
      * @param string $text    Product text.
      * @param array  $mapping Term mapping from build_mapping_from_globals().
-     * @return array List of category names.
+     * @return array Mapping of branch slugs to category paths.
      */
     public static function assign_categories( $text, array $mapping, $fuzzy = false, $threshold = 85, $csv_dir = null, array $attributes = [] ) {
         $decoded       = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5 );
