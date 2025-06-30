@@ -34,7 +34,9 @@ Sort** widget. It only renders when categories are selected so it won’t leave
 empty space. Visitors can remove individual categories from the list to refine
 their search without clearing all filters. Use the **Title** control to change
 the header text and adjust typography, colors and borders under the **Style**
-tab.
+tab. A **Widget Box** section lets you style the surrounding container with a
+background, border, radius, padding, margin and box shadow so it matches your
+theme.
 
 ## Styling
 
