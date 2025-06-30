@@ -76,7 +76,19 @@ jQuery(document).ready(function ($) {
       $target = $('.gm2-category-sort').first();
     }
     if ($target.length) {
-      var offset = parseInt($target.closest('.gm2-category-sort').data('scroll-offset')) || 0;
+      var $widget = $target.closest('.gm2-category-sort');
+      var offset = parseInt($widget.data('scroll-offset')) || 0;
+      if (window.elementorFrontend && elementorFrontend.config && elementorFrontend.config.breakpoints) {
+        var bp = elementorFrontend.config.breakpoints;
+        var width = window.innerWidth;
+        var offTablet = parseInt($widget.data('scroll-offset-tablet'));
+        var offMobile = parseInt($widget.data('scroll-offset-mobile'));
+        if (width <= bp.md && !isNaN(offMobile)) {
+          offset = offMobile;
+        } else if (width <= bp.lg && !isNaN(offTablet)) {
+          offset = offTablet;
+        }
+      }
       $('html, body').animate({
         scrollTop: $target.offset().top - offset
       }, 300);
