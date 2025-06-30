@@ -145,7 +145,9 @@ function gm2_register_widget($widgets_manager) {
     }
 
     require_once GM2_CAT_SORT_PATH . 'includes/class-widget.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-selected-widget.php';
     $widgets_manager->register(new Gm2_Category_Sort_Widget());
+    $widgets_manager->register(new Gm2_Selected_Category_Widget());
 }
 
 // Add custom widget category
