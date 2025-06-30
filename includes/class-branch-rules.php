@@ -11,7 +11,8 @@ class Gm2_Category_Sort_Branch_Rules {
     }
 
     public static function register_admin_page() {
-        add_management_page(
+        add_submenu_page(
+            GM2_CAT_SORT_MENU_SLUG,
             __( 'Branch Rules', 'gm2-category-sort' ),
             __( 'Branch Rules', 'gm2-category-sort' ),
             'manage_options',
@@ -21,7 +22,7 @@ class Gm2_Category_Sort_Branch_Rules {
     }
 
     public static function enqueue_admin_assets( $hook ) {
-        if ( $hook !== 'tools_page_gm2-branch-rules' ) {
+        if ( $hook !== GM2_CAT_SORT_MENU_SLUG . '_page_gm2-branch-rules' ) {
             return;
         }
 
@@ -419,7 +420,7 @@ class Gm2_Category_Sort_Branch_Rules {
         check_admin_referer( 'gm2_import_branch_rules', 'gm2_import_branch_rules_nonce' );
 
         if ( empty( $_FILES['gm2_branch_rules_file']['tmp_name'] ) ) {
-            $redirect = add_query_arg( 'gm2_import_error', rawurlencode( __( 'No file uploaded.', 'gm2-category-sort' ) ), admin_url( 'tools.php?page=gm2-branch-rules' ) );
+            $redirect = add_query_arg( 'gm2_import_error', rawurlencode( __( 'No file uploaded.', 'gm2-category-sort' ) ), admin_url( 'admin.php?page=gm2-branch-rules' ) );
             wp_safe_redirect( $redirect );
             exit;
         }
@@ -427,13 +428,13 @@ class Gm2_Category_Sort_Branch_Rules {
         $file   = $_FILES['gm2_branch_rules_file']['tmp_name'];
         $result = self::import_from_csv( $file );
         if ( is_wp_error( $result ) ) {
-            $redirect = add_query_arg( 'gm2_import_error', rawurlencode( $result->get_error_message() ), admin_url( 'tools.php?page=gm2-branch-rules' ) );
+            $redirect = add_query_arg( 'gm2_import_error', rawurlencode( $result->get_error_message() ), admin_url( 'admin.php?page=gm2-branch-rules' ) );
             wp_safe_redirect( $redirect );
             exit;
         }
 
         update_option( 'gm2_branch_rules', $result );
-        $redirect = add_query_arg( 'gm2_import_success', '1', admin_url( 'tools.php?page=gm2-branch-rules' ) );
+        $redirect = add_query_arg( 'gm2_import_success', '1', admin_url( 'admin.php?page=gm2-branch-rules' ) );
         wp_safe_redirect( $redirect );
         exit;
     }
