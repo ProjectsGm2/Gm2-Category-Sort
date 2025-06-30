@@ -287,6 +287,12 @@ jQuery(document).ready(function ($) {
         columns = parseInt(widgetColumns, 10) || 0;
       }
     }
+    if (!perPage && settings && settings.rows && columns) {
+      var rows = parseInt(settings.rows, 10);
+      if (!isNaN(rows)) {
+        perPage = rows * columns;
+      }
+    }
     if (!perPage) {
       var widgetPerPage = $widget.data('per-page');
       if (widgetPerPage) {

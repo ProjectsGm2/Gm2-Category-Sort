@@ -299,6 +299,13 @@ jQuery(document).ready(function($) {
             }
         }
 
+        if (!perPage && settings && settings.rows && columns) {
+            const rows = parseInt(settings.rows, 10);
+            if (!isNaN(rows)) {
+                perPage = rows * columns;
+            }
+        }
+
         if (!perPage) {
             const widgetPerPage = $widget.data('per-page');
             if (widgetPerPage) {
