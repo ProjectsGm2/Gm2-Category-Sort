@@ -303,6 +303,7 @@
 
 /* Styles for the selected category widget */
 .gm2-selected-category-widget {
+    display: none;
     margin-bottom: 30px;
     border: 1px solid #eaeaea;
     padding: 20px;
