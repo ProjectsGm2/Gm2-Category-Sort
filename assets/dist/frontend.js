@@ -76,8 +76,21 @@ jQuery(document).ready(function ($) {
       $target = $('.gm2-category-sort').first();
     }
     if ($target.length) {
+      var $widget = $target.closest('.gm2-category-sort');
+      var offset = parseInt($widget.data('scroll-offset')) || 0;
+      if (window.elementorFrontend && elementorFrontend.config && elementorFrontend.config.breakpoints) {
+        var bp = elementorFrontend.config.breakpoints;
+        var width = window.innerWidth;
+        var offTablet = parseInt($widget.data('scroll-offset-tablet'));
+        var offMobile = parseInt($widget.data('scroll-offset-mobile'));
+        if (width <= bp.md && !isNaN(offMobile)) {
+          offset = offMobile;
+        } else if (width <= bp.lg && !isNaN(offTablet)) {
+          offset = offTablet;
+        }
+      }
       $('html, body').animate({
-        scrollTop: $target.offset().top
+        scrollTop: $target.offset().top - offset
       }, 300);
     }
   }
@@ -157,10 +170,14 @@ jQuery(document).ready(function ($) {
     e.stopPropagation();
     var $target = $(this).closest('.gm2-selected-category');
     var termId = $target.data('term-id');
-    var $widget = $target.closest('.gm2-category-sort');
     $target.remove();
-    $widget.find('.gm2-category-name[data-term-id="' + termId + '"]').removeClass('selected');
-    gm2RefreshSelectedList($widget);
+    $('.gm2-category-sort').each(function () {
+      $(this).find('.gm2-category-name[data-term-id="' + termId + '"]').removeClass('selected');
+    });
+    $('.gm2-category-sort').each(function () {
+      gm2RefreshSelectedList($(this));
+    });
+    var $widget = $('.gm2-category-sort').first();
     gm2UpdateProductFiltering($widget, 1);
   }
   function gm2RefreshSelectedList($widget) {
@@ -182,6 +199,33 @@ jQuery(document).ready(function ($) {
       $header.hide();
       $container.hide();
     }
+    var selectedMap = {};
+    $('.gm2-category-sort .gm2-category-name.selected').each(function () {
+      var termId = $(this).data('term-id');
+      if (!selectedMap[termId]) {
+        selectedMap[termId] = $(this).text().trim();
+      }
+    });
+    $('.gm2-selected-category-widget').each(function () {
+      var $w = $(this);
+      var $cont = $w.find('.gm2-selected-categories');
+      var $head = $w.find('.gm2-selected-header');
+      $cont.empty();
+      for (var id in selectedMap) {
+        if (!Object.prototype.hasOwnProperty.call(selectedMap, id)) continue;
+        var $item = $('<div class="gm2-selected-category" data-term-id="' + id + '"></div>');
+        $item.text(selectedMap[id]);
+        $item.append('<span class="gm2-remove-category">✕</span>');
+        $cont.append($item);
+      }
+      if ($cont.children().length > 0) {
+        $head.show();
+        $cont.show();
+      } else {
+        $head.hide();
+        $cont.hide();
+      }
+    });
   }
   function gm2UpdateProductFiltering($widget) {
     var page = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;

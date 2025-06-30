@@ -17,8 +17,11 @@ class Gm2_Category_Sort_Renderer {
              data-filter-type="<?= esc_attr($this->settings['filter_type']) ?>"
              data-simple-operator="<?= esc_attr($this->settings['simple_operator'] ?? 'IN') ?>"
              data-columns="<?= esc_attr(wc_get_loop_prop('columns')) ?>"
-             data-per-page="<?= esc_attr(wc_get_loop_prop('per_page')) ?>">
-             
+             data-per-page="<?= esc_attr(wc_get_loop_prop('per_page')) ?>"
+             data-scroll-offset="<?= esc_attr($this->settings['scroll_offset'] ?? 0) ?>"
+             data-scroll-offset-tablet="<?= esc_attr($this->settings['scroll_offset_tablet'] ?? '') ?>"
+             data-scroll-offset-mobile="<?= esc_attr($this->settings['scroll_offset_mobile'] ?? '') ?>">
+
             <nav class="gm2-category-tree">
                 <?php $this->render_category_tree(); ?>
             </nav>
@@ -71,9 +74,10 @@ class Gm2_Category_Sort_Renderer {
     private function render_category_node($term, $depth) {
         $children = get_terms([
             'taxonomy' => 'product_cat',
-            'parent' => $term->term_id,
+            'parent'    => $term->term_id,
             'hide_empty' => false,
-            'orderby' => 'name'
+            'orderby'   => 'term_order',
+            'order'     => 'ASC',
         ]);
         foreach ($children as $child) {
             if (is_wp_error($child) || !is_object($child)) {

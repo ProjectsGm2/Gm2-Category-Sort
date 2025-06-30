@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gm2 Category Sort
  * Description: Adds a collapsible category filter widget for WooCommerce products in Elementor.
- * Version: 1.0.16
+ * Version: 1.0.17
  * Author: ProjectsGm2
  * Text Domain: gm2-category-sort
  */
@@ -10,12 +10,14 @@
 defined('ABSPATH') || exit;
 
 // Plugin version used for cache busting
-define('GM2_CAT_SORT_VERSION', '1.0.16');
+define('GM2_CAT_SORT_VERSION', '1.0.17');
 
 // Define plugin constants
 define('GM2_CAT_SORT_PATH', plugin_dir_path(__FILE__));
 define('GM2_CAT_SORT_URL', plugin_dir_url(__FILE__));
 define('GM2_CAT_SORT_CRON_HOOK', 'gm2_category_sort_generate_sitemap');
+// Slug for the top-level admin menu
+define('GM2_CAT_SORT_MENU_SLUG', 'gm2-sort-filter');
 
 register_activation_hook( __FILE__, 'gm2_category_sort_activate' );
 register_deactivation_hook( __FILE__, 'gm2_category_sort_deactivate' );
@@ -31,6 +33,27 @@ function gm2_category_sort_deactivate() {
     if ( $timestamp ) {
         wp_unschedule_event( $timestamp, GM2_CAT_SORT_CRON_HOOK );
     }
+}
+
+// Register top-level admin menu
+add_action( 'admin_menu', 'gm2_category_sort_register_menu' );
+function gm2_category_sort_register_menu() {
+    add_menu_page(
+        __( 'Gm2 Sort & Filter', 'gm2-category-sort' ),
+        __( 'Gm2 Sort & Filter', 'gm2-category-sort' ),
+        'manage_options',
+        GM2_CAT_SORT_MENU_SLUG,
+        'gm2_category_sort_main_page',
+        'dashicons-filter'
+    );
+}
+
+// Default top-level page callback
+function gm2_category_sort_main_page() {
+    echo '<div class="wrap">';
+    echo '<h1>' . esc_html__( 'Gm2 Sort & Filter', 'gm2-category-sort' ) . '</h1>';
+    echo '<p>' . esc_html__( 'Use the submenu links to access the plugin tools.', 'gm2-category-sort' ) . '</p>';
+    echo '</div>';
 }
 
 // Initialize plugin
@@ -122,7 +145,9 @@ function gm2_register_widget($widgets_manager) {
     }
 
     require_once GM2_CAT_SORT_PATH . 'includes/class-widget.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-selected-widget.php';
     $widgets_manager->register(new Gm2_Category_Sort_Widget());
+    $widgets_manager->register(new Gm2_Selected_Category_Widget());
 }
 
 // Add custom widget category

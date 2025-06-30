@@ -22,6 +22,17 @@ Gm2 Category Sort adds a product category sorting widget for WooCommerce shops w
 4. Save the page. On the frontend, shoppers can expand categories and filter the product list.
    After each filter update, the page automatically scrolls back to the selected
    categories list so it's easy to refine choices.
+5. Drag the **GM2 Selected Category** widget anywhere on the page to display the
+   currently active categories. Each item includes a remove icon so filters can
+   be cleared individually.
+
+## GM2 Selected Category Widget
+
+This companion widget lists every selected filter from the main **GM2 Category
+Sort** widget. Visitors can remove individual categories from the list to refine
+their search without clearing all filters. Use the **Title** control to change
+the header text and adjust typography, colors and borders under the **Style**
+tab.
 
 ## Styling
 
@@ -72,7 +83,7 @@ list category names from top to bottom, separated by commas. For example:
 Wheel Simulators,By Brand & Model,Ford Wheel Simulators,F350 Wheel Simulators
 ```
 
-Upload a CSV through **Tools → Import Categories** in the admin area or run
+Upload a CSV through **Gm2 Sort & Filter → Import Categories** in the admin area or run
 `wp gm2-category-sort import &lt;file&gt;` from WP‑CLI. An example file is
 available at `assets/example-categories.csv`.
 
@@ -95,7 +106,7 @@ SKU123,Accessories
 SKU124,Wheel Simulators,By Brand & Model
 ```
 
-Upload a CSV through **Tools → Assign Product Categories** or run
+Upload a CSV through **Gm2 Sort & Filter → Assign Product Categories** or run
 `wp gm2-category-sort assign-categories <file> --overwrite` to replace existing
 categories (omit `--overwrite` to append). An example file is available at
 `assets/example-product-categories.csv`.
@@ -107,11 +118,11 @@ rows. For huge imports consider WP‑CLI which displays a terminal progress bar.
 ## Product CSV Export & Import
 
 All WooCommerce product data can be exported to a CSV file along with any
-assigned categories. Visit **Tools → Export Products** to download the file or
+assigned categories. Visit **Gm2 Sort & Filter → Export Products** to download the file or
 run `wp gm2-category-sort export-products <path>` from WP‑CLI. The CSV matches
 WooCommerce's built‑in format so it can be re‑imported later.
 
-To import product information, open **Tools → Import Products** and upload a
+To import product information, open **Gm2 Sort & Filter → Import Products** and upload a
 CSV created by the exporter (or run `wp gm2-category-sort import-products <file>`
 from WP‑CLI). Existing products are updated when their IDs or SKUs match.
 An example export is provided at `assets/example-products.csv`.
@@ -152,9 +163,9 @@ remove the BOM before reading the headers.
 ## Auto Assign Categories
 
 The plugin can analyze existing products and automatically assign categories
-based on their titles. (Matching on descriptions and attributes has been
+based on their titles and attributes. (Matching on descriptions has been
 temporarily disabled.) Run the tool from
-**Tools → Auto Assign Categories** in the admin area and choose whether to
+**Gm2 Sort & Filter → Auto Assign Categories** in the admin area and choose whether to
 **Add categories** or **Overwrite categories** before clicking **Start Auto
 Assign**. Use the **Reset All Categories** button to remove every product's
 assigned categories before starting a fresh assignment. A progress bar shows
@@ -186,7 +197,7 @@ exact words being checked.
 ## One Click Categories Assignment
 
 This tool exports the full category tree and individual branch files in one step.
-Open **Tools → One Click Categories Assignment** and click **Study Category Tree**.
+Open **Gm2 Sort & Filter → One Click Categories Assignment** and click **Study Category Tree**.
 The plugin saves `category-tree.csv` plus separate CSVs for every category
 branch under `wp-content/uploads/gm2-category-sort/categories-structure`.
 Use these files to review or modify the structure of specific sections.
@@ -213,7 +224,7 @@ basic stemming so minor wording differences like `lugs` vs `lug`,
 
 ### Branch Rules
 
-Use **Tools → Branch Rules** (requires the `manage_options` capability) to set
+Use **Gm2 Sort & Filter → Branch Rules** (requires the `manage_options` capability) to set
 include and exclude keywords for each category branch. Each rule also provides
 **Include Attributes** and **Exclude Attributes** selectors along with an
 **Allow Multiple Leaves** checkbox. When you run **One
