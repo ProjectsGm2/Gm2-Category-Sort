@@ -10,6 +10,7 @@
 - Export and import WooCommerce products via CSV including assigned categories.
 - Allow Multiple Leaves checkbox to enable multi-leaf category assignment per branch.
 - **GM2 Selected Category** widget to display chosen filters with remove icons.
+- Selected Category widget stays hidden until categories are selected.
 ### Fixed
 - Product CSV export no longer reports WooCommerce missing when the WC_ABSPATH constant is undefined.
 - Branch and rule slugs remove trailing synonym text to match the product categorizer.

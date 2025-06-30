@@ -221,9 +221,11 @@ jQuery(document).ready(function ($) {
       if ($cont.children().length > 0) {
         $head.show();
         $cont.show();
+        $w.show();
       } else {
         $head.hide();
         $cont.hide();
+        $w.hide();
       }
     });
   }

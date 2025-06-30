@@ -149,7 +149,9 @@ class Gm2_Selected_Category_Widget extends \Elementor\Widget_Base {
         $settings  = $this->get_settings_for_display();
         $selected  = $this->get_selected_categories();
 
-        echo '<div class="gm2-selected-category-widget">';
+        $visible  = ! empty( $selected );
+        $style    = $visible ? ' style="display:block"' : ' style="display:none"';
+        echo '<div class="gm2-selected-category-widget"' . $style . '>'; 
         if ( ! empty( $settings['title'] ) ) {
             echo '<div class="gm2-selected-header">' . esc_html( $settings['title'] ) . '</div>';
         }
