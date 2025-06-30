@@ -76,8 +76,9 @@ jQuery(document).ready(function ($) {
       $target = $('.gm2-category-sort').first();
     }
     if ($target.length) {
+      var offset = parseInt($target.closest('.gm2-category-sort').data('scroll-offset')) || 0;
       $('html, body').animate({
-        scrollTop: $target.offset().top
+        scrollTop: $target.offset().top - offset
       }, 300);
     }
   }
