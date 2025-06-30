@@ -82,5 +82,48 @@ class AjaxFilterTest extends TestCase {
         preg_match_all('/<li class="product">item<\/li>/', $html, $matches);
         $this->assertCount(6, $matches[0]);
     }
+
+    public function test_uses_rows_and_columns_when_per_page_missing() {
+        wc_setup_loop(['per_page' => 3]);
+
+        $_POST = [
+            'gm2_cat' => '',
+            'gm2_filter_type' => 'simple',
+            'gm2_simple_operator' => 'IN',
+            'gm2_paged' => '1',
+            'gm2_per_page' => 0,
+            'gm2_columns' => 2,
+            'gm2_rows' => 2,
+            'orderby' => '',
+            'gm2_nonce' => 't'
+        ];
+
+        Gm2_Category_Sort_Ajax::filter_products();
+        $this->assertNotNull($GLOBALS['gm2_json_result']);
+        $html = $GLOBALS['gm2_json_result']['data']['html'];
+        preg_match_all('/<li class="product">item<\/li>/', $html, $matches);
+        $this->assertCount(4, $matches[0]);
+    }
+
+    public function test_falls_back_to_loop_per_page_when_rows_missing() {
+        wc_setup_loop(['per_page' => 3]);
+
+        $_POST = [
+            'gm2_cat' => '',
+            'gm2_filter_type' => 'simple',
+            'gm2_simple_operator' => 'IN',
+            'gm2_paged' => '1',
+            'gm2_per_page' => 0,
+            'gm2_columns' => 2,
+            'orderby' => '',
+            'gm2_nonce' => 't'
+        ];
+
+        Gm2_Category_Sort_Ajax::filter_products();
+        $this->assertNotNull($GLOBALS['gm2_json_result']);
+        $html = $GLOBALS['gm2_json_result']['data']['html'];
+        preg_match_all('/<li class="product">item<\/li>/', $html, $matches);
+        $this->assertCount(3, $matches[0]);
+    }
 }
 }
