@@ -152,7 +152,7 @@ remove the BOM before reading the headers.
 ## Auto Assign Categories
 
 The plugin can analyze existing products and automatically assign categories
-based on their titles. (Matching on descriptions and attributes has been
+based on their titles and attributes. (Matching on descriptions has been
 temporarily disabled.) Run the tool from
 **Gm2 Sort & Filter → Auto Assign Categories** in the admin area and choose whether to
 **Add categories** or **Overwrite categories** before clicking **Start Auto
