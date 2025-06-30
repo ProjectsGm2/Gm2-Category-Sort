@@ -65,7 +65,8 @@ class Gm2_Category_Sort_Product_Category_Importer {
      * Register the admin import page under Tools.
      */
     public static function register_admin_page() {
-        add_management_page(
+        add_submenu_page(
+            GM2_CAT_SORT_MENU_SLUG,
             __( 'Assign Product Categories', 'gm2-category-sort' ),
             __( 'Assign Product Categories', 'gm2-category-sort' ),
             'manage_options',
@@ -262,7 +263,7 @@ class Gm2_Category_Sort_Product_Category_Importer {
      * @param string $hook Current admin page hook.
      */
     public static function enqueue_admin_assets( $hook ) {
-        if ( $hook !== 'tools_page_gm2-product-category-import' ) {
+        if ( $hook !== GM2_CAT_SORT_MENU_SLUG . '_page_gm2-product-category-import' ) {
             return;
         }
 

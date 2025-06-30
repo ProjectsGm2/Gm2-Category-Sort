@@ -25,17 +25,19 @@ class Gm2_Category_Sort_Product_CSV {
     }
 
     /**
-     * Add pages under Tools.
+     * Add pages under the Gm2 Sort & Filter menu.
      */
     public static function register_admin_pages() {
-        add_management_page(
+        add_submenu_page(
+            GM2_CAT_SORT_MENU_SLUG,
             __( 'Export Products', 'gm2-category-sort' ),
             __( 'Export Products', 'gm2-category-sort' ),
             'manage_options',
             'gm2-product-export',
             [ __CLASS__, 'export_page' ]
         );
-        add_management_page(
+        add_submenu_page(
+            GM2_CAT_SORT_MENU_SLUG,
             __( 'Import Products', 'gm2-category-sort' ),
             __( 'Import Products', 'gm2-category-sort' ),
             'manage_options',
@@ -50,7 +52,7 @@ class Gm2_Category_Sort_Product_CSV {
      * @param string $hook Current admin page hook.
      */
     public static function enqueue_admin_assets( $hook ) {
-        if ( $hook !== 'tools_page_gm2-product-export' ) {
+        if ( $hook !== GM2_CAT_SORT_MENU_SLUG . '_page_gm2-product-export' ) {
             return;
         }
 
@@ -96,7 +98,7 @@ class Gm2_Category_Sort_Product_CSV {
             $redirect = add_query_arg(
                 'gm2_export_error',
                 rawurlencode( __( 'Unable to create temporary file.', 'gm2-category-sort' ) ),
-                admin_url( 'tools.php?page=gm2-product-export' )
+                admin_url( 'admin.php?page=gm2-product-export' )
             );
             wp_safe_redirect( $redirect );
             exit;

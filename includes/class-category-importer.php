@@ -44,7 +44,8 @@ class Gm2_Category_Sort_Category_Importer {
      * Register the admin import page under Tools.
      */
     public static function register_admin_page() {
-        add_management_page(
+        add_submenu_page(
+            GM2_CAT_SORT_MENU_SLUG,
             __( 'Import Categories', 'gm2-category-sort' ),
             __( 'Import Categories', 'gm2-category-sort' ),
             'manage_options',

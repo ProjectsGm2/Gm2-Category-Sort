@@ -15,7 +15,8 @@ class Gm2_Category_Sort_Attribute_Fixer {
      * Register the Tools page.
      */
     public static function register_admin_page() {
-        add_management_page(
+        add_submenu_page(
+            GM2_CAT_SORT_MENU_SLUG,
             __( 'Attributes Fixer', 'gm2-category-sort' ),
             __( 'Attributes Fixer', 'gm2-category-sort' ),
             'manage_options',
