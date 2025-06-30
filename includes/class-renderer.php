@@ -71,9 +71,10 @@ class Gm2_Category_Sort_Renderer {
     private function render_category_node($term, $depth) {
         $children = get_terms([
             'taxonomy' => 'product_cat',
-            'parent' => $term->term_id,
+            'parent'    => $term->term_id,
             'hide_empty' => false,
-            'orderby' => 'name'
+            'orderby'   => 'term_order',
+            'order'     => 'ASC',
         ]);
         foreach ($children as $child) {
             if (is_wp_error($child) || !is_object($child)) {
