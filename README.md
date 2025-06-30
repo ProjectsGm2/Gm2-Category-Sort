@@ -22,6 +22,17 @@ Gm2 Category Sort adds a product category sorting widget for WooCommerce shops w
 4. Save the page. On the frontend, shoppers can expand categories and filter the product list.
    After each filter update, the page automatically scrolls back to the selected
    categories list so it's easy to refine choices.
+5. Drag the **GM2 Selected Category** widget anywhere on the page to display the
+   currently active categories. Each item includes a remove icon so filters can
+   be cleared individually.
+
+## GM2 Selected Category Widget
+
+This companion widget lists every selected filter from the main **GM2 Category
+Sort** widget. Visitors can remove individual categories from the list to refine
+their search without clearing all filters. Use the **Title** control to change
+the header text and adjust typography, colors and borders under the **Style**
+tab.
 
 ## Styling
 
