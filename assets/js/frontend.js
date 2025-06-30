@@ -64,7 +64,20 @@ jQuery(document).ready(function($) {
             $target = $('.gm2-category-sort').first();
         }
         if ($target.length) {
-            $('html, body').animate({ scrollTop: $target.offset().top }, 300);
+            const $widget = $target.closest('.gm2-category-sort');
+            let offset = parseInt($widget.data('scroll-offset')) || 0;
+            if (window.elementorFrontend && elementorFrontend.config && elementorFrontend.config.breakpoints) {
+                const bp = elementorFrontend.config.breakpoints;
+                const width = window.innerWidth;
+                const offTablet = parseInt($widget.data('scroll-offset-tablet'));
+                const offMobile = parseInt($widget.data('scroll-offset-mobile'));
+                if (width <= bp.md && !isNaN(offMobile)) {
+                    offset = offMobile;
+                } else if (width <= bp.lg && !isNaN(offTablet)) {
+                    offset = offTablet;
+                }
+            }
+            $('html, body').animate({ scrollTop: $target.offset().top - offset }, 300);
         }
     }
 
