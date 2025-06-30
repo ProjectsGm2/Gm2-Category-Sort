@@ -56,6 +56,62 @@ class Gm2_Selected_Category_Widget extends \Elementor\Widget_Base {
 
         $this->end_controls_section();
 
+        // Widget Box styles.
+        $this->start_controls_section( 'gm2_widget_box_section', [
+            'label' => __( 'Widget Box', 'gm2-category-sort' ),
+            'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+        ] );
+
+        $this->add_group_control(
+            \Elementor\Group_Control_Background::get_type(),
+            [
+                'name'     => 'widget_box_bg',
+                'selector' => '{{WRAPPER}} .gm2-selected-category-widget',
+            ]
+        );
+
+        $this->add_group_control(
+            \Elementor\Group_Control_Border::get_type(),
+            [
+                'name'     => 'widget_box_border',
+                'selector' => '{{WRAPPER}} .gm2-selected-category-widget',
+            ]
+        );
+
+        $this->add_responsive_control( 'widget_box_radius', [
+            'label' => __( 'Border Radius', 'gm2-category-sort' ),
+            'type'  => \Elementor\Controls_Manager::DIMENSIONS,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-selected-category-widget' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+            ],
+        ] );
+
+        $this->add_group_control(
+            \Elementor\Group_Control_Box_Shadow::get_type(),
+            [
+                'name'     => 'widget_box_shadow',
+                'selector' => '{{WRAPPER}} .gm2-selected-category-widget',
+            ]
+        );
+
+        $this->add_responsive_control( 'widget_box_padding', [
+            'label' => __( 'Padding', 'gm2-category-sort' ),
+            'type'  => \Elementor\Controls_Manager::DIMENSIONS,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-selected-category-widget' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+            ],
+        ] );
+
+        $this->add_responsive_control( 'widget_box_margin', [
+            'label' => __( 'Margin', 'gm2-category-sort' ),
+            'type'  => \Elementor\Controls_Manager::DIMENSIONS,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-selected-category-widget' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+            ],
+        ] );
+
+        $this->end_controls_section();
+
         // Selected Categories styles copied from the main widget.
         $this->start_controls_section( 'gm2_selected_section', [
             'label' => __( 'Selected Categories', 'gm2-category-sort' ),
