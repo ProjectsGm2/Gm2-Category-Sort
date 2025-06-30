@@ -16,6 +16,7 @@ class Gm2_Category_Sort_Ajax {
      * - gm2_per_page: number of products per page.
      * - orderby: orderby string for sorting products.
      * - gm2_columns: number of columns in the product loop.
+     * - gm2_rows:    number of rows in the product loop (optional).
      *
      * Sends a JSON response with the rendered product HTML, result count and
      * pagination for the filtered and sorted products.
@@ -60,9 +61,15 @@ class Gm2_Category_Sort_Ajax {
 
         $paged = isset($_POST['gm2_paged']) ? absint($_POST['gm2_paged']) : 1;
 
+        $columns  = isset($_POST['gm2_columns']) ? absint($_POST['gm2_columns']) : 0;
         $per_page = isset($_POST['gm2_per_page']) ? absint($_POST['gm2_per_page']) : 0;
         if (!$per_page) {
-            $per_page = wc_get_loop_prop('per_page');
+            $rows = isset($_POST['gm2_rows']) ? absint($_POST['gm2_rows']) : 0;
+            if ($columns && $rows) {
+                $per_page = $columns * $rows;
+            } else {
+                $per_page = wc_get_loop_prop('per_page');
+            }
         }
 
         $orderby = isset($_POST['orderby']) ? wc_clean($_POST['orderby']) : '';
@@ -81,7 +88,6 @@ class Gm2_Category_Sort_Ajax {
         }
 
         // Respect column settings from the current product archive
-        $columns = isset($_POST['gm2_columns']) ? absint($_POST['gm2_columns']) : 0;
 
         wc_setup_loop([
             'columns'      => $columns ?: wc_get_loop_prop('columns'),
