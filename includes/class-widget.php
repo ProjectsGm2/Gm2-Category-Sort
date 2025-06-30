@@ -896,6 +896,7 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'expand_icon'          => $settings['expand_icon'],
             'collapse_icon'        => $settings['collapse_icon'],
             'scroll_offset'        => intval( $settings['scroll_offset'] ),
+            'scroll_offset'        => intval( $settings['scroll_offset'] ),
             'scroll_offset_tablet' => isset( $settings['scroll_offset_tablet'] ) ? intval( $settings['scroll_offset_tablet'] ) : null,
             'scroll_offset_mobile' => isset( $settings['scroll_offset_mobile'] ) ? intval( $settings['scroll_offset_mobile'] ) : null,
         ]);

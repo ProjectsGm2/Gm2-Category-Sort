@@ -21,7 +21,7 @@ class Gm2_Category_Sort_Renderer {
              data-scroll-offset="<?= esc_attr($this->settings['scroll_offset'] ?? 0) ?>"
              data-scroll-offset-tablet="<?= esc_attr($this->settings['scroll_offset_tablet'] ?? '') ?>"
              data-scroll-offset-mobile="<?= esc_attr($this->settings['scroll_offset_mobile'] ?? '') ?>">
-             
+
             <nav class="gm2-category-tree">
                 <?php $this->render_category_tree(); ?>
             </nav>
