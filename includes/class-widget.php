@@ -56,7 +56,14 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
                 'filter_type' => 'simple',
             ],
         ]);
-        
+
+        $this->add_control('scroll_offset', [
+            'label'       => __('Scroll Offset', 'gm2-category-sort'),
+            'type'        => \Elementor\Controls_Manager::NUMBER,
+            'default'     => 0,
+            'description' => __('Pixels to offset when scrolling to the selected list', 'gm2-category-sort'),
+        ]);
+
         $this->end_controls_section();
         
         // Style Section
@@ -888,6 +895,7 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'synonym_icon_position'=> $settings['synonym_icon_position'],
             'expand_icon'          => $settings['expand_icon'],
             'collapse_icon'        => $settings['collapse_icon'],
+            'scroll_offset'        => intval( $settings['scroll_offset'] ),
         ]);
         
         echo $renderer->generate_html();

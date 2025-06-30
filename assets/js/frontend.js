@@ -64,7 +64,8 @@ jQuery(document).ready(function($) {
             $target = $('.gm2-category-sort').first();
         }
         if ($target.length) {
-            $('html, body').animate({ scrollTop: $target.offset().top }, 300);
+            const offset = parseInt($target.closest('.gm2-category-sort').data('scroll-offset')) || 0;
+            $('html, body').animate({ scrollTop: $target.offset().top - offset }, 300);
         }
     }
 
