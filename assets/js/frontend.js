@@ -163,13 +163,20 @@ jQuery(document).ready(function($) {
         e.stopPropagation();
         const $target = $(this).closest('.gm2-selected-category');
         const termId = $target.data('term-id');
-        const $widget = $target.closest('.gm2-category-sort');
-        
+
         $target.remove();
-        $widget.find('.gm2-category-name[data-term-id="' + termId + '"]').removeClass('selected');
-        gm2RefreshSelectedList($widget);
+
+        $('.gm2-category-sort').each(function() {
+            $(this).find('.gm2-category-name[data-term-id="' + termId + '"]').removeClass('selected');
+        });
+
+        $('.gm2-category-sort').each(function() {
+            gm2RefreshSelectedList($(this));
+        });
+
+        const $widget = $('.gm2-category-sort').first();
         gm2UpdateProductFiltering($widget, 1);
-        }
+    }
 
      function gm2RefreshSelectedList($widget) {
         const $container = $widget.find('.gm2-selected-categories');
@@ -186,13 +193,42 @@ jQuery(document).ready(function($) {
             $container.append($item);
         });
 
-     if ($container.children().length > 0) {
+        if ($container.children().length > 0) {
             $header.show();
             $container.show();
         } else {
             $header.hide();
             $container.hide();
         }
+
+        const selectedMap = {};
+        $('.gm2-category-sort .gm2-category-name.selected').each(function() {
+            const termId = $(this).data('term-id');
+            if (!selectedMap[termId]) {
+                selectedMap[termId] = $(this).text().trim();
+            }
+        });
+
+        $('.gm2-selected-category-widget').each(function() {
+            const $w = $(this);
+            const $cont = $w.find('.gm2-selected-categories');
+            const $head = $w.find('.gm2-selected-header');
+            $cont.empty();
+            for (const id in selectedMap) {
+                if (!Object.prototype.hasOwnProperty.call(selectedMap, id)) continue;
+                const $item = $('<div class="gm2-selected-category" data-term-id="' + id + '"></div>');
+                $item.text(selectedMap[id]);
+                $item.append('<span class="gm2-remove-category">✕</span>');
+                $cont.append($item);
+            }
+            if ($cont.children().length > 0) {
+                $head.show();
+                $cont.show();
+            } else {
+                $head.hide();
+                $cont.hide();
+            }
+        });
     }
       
       function gm2UpdateProductFiltering($widget, page = 1, orderby = null) {
