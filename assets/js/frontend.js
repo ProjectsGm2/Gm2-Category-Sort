@@ -235,7 +235,25 @@ jQuery(document).ready(function($) {
             }
         });
     }
-      
+
+    function gm2GetResponsiveRows(settings) {
+        if (!settings) return 0;
+        let rows = settings.rows ? parseInt(settings.rows, 10) : 0;
+        if (window.elementorFrontend && elementorFrontend.config && elementorFrontend.config.breakpoints) {
+            const bp = elementorFrontend.config.breakpoints;
+            const width = window.innerWidth;
+            if (width <= bp.md && settings.rows_mobile) {
+                rows = parseInt(settings.rows_mobile, 10);
+            } else if (width <= bp.lg && settings.rows_tablet) {
+                rows = parseInt(settings.rows_tablet, 10);
+            }
+        }
+        if (isNaN(rows)) rows = 0;
+        return rows;
+    }
+
+    window.gm2GetResponsiveRows = gm2GetResponsiveRows;
+
       function gm2UpdateProductFiltering($widget, page = 1, orderby = null) {
         const selectedIds = [];
         $widget.find('.gm2-category-name.selected').each(function() {
@@ -285,7 +303,10 @@ jQuery(document).ready(function($) {
             if (settings.columns) {
                 columns = parseInt(settings.columns, 10) || 0;
             }
-            if (settings.posts_per_page) {
+            rows = gm2GetResponsiveRows(settings);
+            if (rows && columns) {
+                perPage = rows * columns;
+            } else if (settings.posts_per_page) {
                 perPage = parseInt(settings.posts_per_page, 10) || 0;
             }
         }
@@ -303,13 +324,8 @@ jQuery(document).ready(function($) {
             }
         }
 
-        if (!perPage && settings && settings.rows) {
-            rows = parseInt(settings.rows, 10);
-            if (!isNaN(rows) && columns) {
-                perPage = rows * columns;
-            } else if (isNaN(rows)) {
-                rows = 0;
-            }
+        if (!perPage && settings && rows) {
+            perPage = rows * columns;
         }
 
         if (!perPage) {

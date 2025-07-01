@@ -232,6 +232,22 @@ jQuery(document).ready(function ($) {
       }
     });
   }
+  function gm2GetResponsiveRows(settings) {
+    if (!settings) return 0;
+    var rows = settings.rows ? parseInt(settings.rows, 10) : 0;
+    if (window.elementorFrontend && elementorFrontend.config && elementorFrontend.config.breakpoints) {
+      var bp = elementorFrontend.config.breakpoints;
+      var width = window.innerWidth;
+      if (width <= bp.md && settings.rows_mobile) {
+        rows = parseInt(settings.rows_mobile, 10);
+      } else if (width <= bp.lg && settings.rows_tablet) {
+        rows = parseInt(settings.rows_tablet, 10);
+      }
+    }
+    if (isNaN(rows)) rows = 0;
+    return rows;
+  }
+  window.gm2GetResponsiveRows = gm2GetResponsiveRows;
   function gm2UpdateProductFiltering($widget) {
     var page = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
     var orderby = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
@@ -276,7 +292,10 @@ jQuery(document).ready(function ($) {
       if (settings.columns) {
         columns = parseInt(settings.columns, 10) || 0;
       }
-      if (settings.posts_per_page) {
+      rows = gm2GetResponsiveRows(settings);
+      if (rows && columns) {
+        perPage = rows * columns;
+      } else if (settings.posts_per_page) {
         perPage = parseInt(settings.posts_per_page, 10) || 0;
       }
     }
@@ -291,13 +310,8 @@ jQuery(document).ready(function ($) {
         columns = parseInt(widgetColumns, 10) || 0;
       }
     }
-    if (!perPage && settings && settings.rows) {
-      rows = parseInt(settings.rows, 10);
-      if (!isNaN(rows) && columns) {
-        perPage = rows * columns;
-      } else if (isNaN(rows)) {
-        rows = 0;
-      }
+    if (!perPage && settings && rows) {
+      perPage = rows * columns;
     }
     if (!perPage) {
       var widgetPerPage = $widget.data('per-page');
