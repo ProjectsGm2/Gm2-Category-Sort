@@ -117,12 +117,24 @@ class Gm2_Category_Sort_Ajax {
         // widget, use the widget renderer so the wrapper classes and data
         // attributes remain intact.
         if ($query->have_posts()) {
-            $is_elementor = $widget_type && strpos($widget_type, 'products') !== false &&
-                class_exists('\\ElementorPro\\Modules\\Woocommerce\\Widgets\\Products');
+            $widget_class = null;
 
-            if ($is_elementor) {
-                $class  = '\\ElementorPro\\Modules\\Woocommerce\\Widgets\\Products';
-                $widget = new $class();
+            if (
+                $widget_type &&
+                strpos($widget_type, 'archive-products') === 0 &&
+                class_exists('\\ElementorPro\\Modules\\Woocommerce\\Widgets\\Archive_Products')
+            ) {
+                $widget_class = '\\ElementorPro\\Modules\\Woocommerce\\Widgets\\Archive_Products';
+            } elseif (
+                $widget_type &&
+                strpos($widget_type, 'products') !== false &&
+                class_exists('\\ElementorPro\\Modules\\Woocommerce\\Widgets\\Products')
+            ) {
+                $widget_class = '\\ElementorPro\\Modules\\Woocommerce\\Widgets\\Products';
+            }
+
+            if ($widget_class) {
+                $widget = new $widget_class();
                 if (method_exists($widget, 'render')) {
                     $widget->render();
                 }
