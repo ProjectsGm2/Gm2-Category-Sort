@@ -20,7 +20,8 @@ class Gm2_Category_Sort_Renderer {
              data-per-page="<?= esc_attr(wc_get_loop_prop('per_page')) ?>"
              data-scroll-offset="<?= esc_attr($this->settings['scroll_offset'] ?? 0) ?>"
              data-scroll-offset-tablet="<?= esc_attr($this->settings['scroll_offset_tablet'] ?? '') ?>"
-             data-scroll-offset-mobile="<?= esc_attr($this->settings['scroll_offset_mobile'] ?? '') ?>">
+             data-scroll-offset-mobile="<?= esc_attr($this->settings['scroll_offset_mobile'] ?? '') ?>"
+             data-disable-scroll="<?= $this->settings['disable_auto_scroll'] ? 'true' : 'false' ?>">
 
             <nav class="gm2-category-tree">
                 <?php $this->render_category_tree(); ?>

@@ -21,7 +21,8 @@ Gm2 Category Sort adds a product category sorting widget for WooCommerce shops w
 3. Choose optional parent categories and select the filter logic (Simple or Advanced) in the widget settings.
 4. Save the page. On the frontend, shoppers can expand categories and filter the product list.
    After each filter update, the page automatically scrolls back to the selected
-   categories list so it's easy to refine choices.
+   categories list so it's easy to refine choices. Enable **Disable Auto Scroll**
+   in the widget settings if you prefer to keep the page position.
 5. Drag the **GM2 Selected Category** widget anywhere on the page to display the
    currently active categories. The widget stays hidden until at least one
    category is chosen and disappears again when all selections are cleared. Each
