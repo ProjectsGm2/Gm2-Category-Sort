@@ -69,8 +69,14 @@ class Gm2_Category_Sort_Ajax {
             if ($columns && $rows) {
                 $per_page = $columns * $rows;
             } else {
+                // Fall back to the loop's per_page setting when rows are unknown.
                 $per_page = wc_get_loop_prop('per_page');
             }
+        }
+
+        // If still zero, use the shop default via the woocommerce_products_per_page filter.
+        if ( ! $per_page ) {
+            $per_page = apply_filters( 'woocommerce_products_per_page', 12 );
         }
 
         $orderby = isset($_POST['orderby']) ? wc_clean($_POST['orderby']) : '';

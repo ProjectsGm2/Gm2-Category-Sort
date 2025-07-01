@@ -49,6 +49,15 @@ if (!function_exists('sanitize_key')) { function sanitize_key($str) { return $st
 if (!function_exists('sanitize_title')) { function sanitize_title($str){ $s=strtolower($str); $s=preg_replace('/[^a-z0-9]+/','-', $s); return trim($s, '-'); } }
 if (!function_exists('wp_send_json_success')) { function wp_send_json_success($data=null){ $GLOBALS['gm2_json_result']=['success'=>true,'data'=>$data]; return $GLOBALS['gm2_json_result']; } }
 if (!function_exists('wp_send_json_error')) { function wp_send_json_error($data=null){ $GLOBALS['gm2_json_result']=['success'=>false,'data'=>$data]; return $GLOBALS['gm2_json_result']; } }
+
+if (!function_exists('apply_filters')) {
+    function apply_filters( $tag, $value ) {
+        if ( isset( $GLOBALS['gm2_filters'][ $tag ] ) && is_callable( $GLOBALS['gm2_filters'][ $tag ] ) ) {
+            return call_user_func( $GLOBALS['gm2_filters'][ $tag ], $value );
+        }
+        return $value;
+    }
+}
 }
 
 namespace ElementorPro\Modules\Woocommerce\Widgets {
@@ -97,6 +106,7 @@ class AjaxFilterTest extends TestCase {
         $GLOBALS['gm2_json_result'] = null;
         $GLOBALS['gm2_wc_loop'] = [];
         $GLOBALS['wp_query'] = null;
+        $GLOBALS['gm2_filters'] = [];
         $_POST = [];
     }
 
@@ -202,6 +212,30 @@ class AjaxFilterTest extends TestCase {
         $this->assertStringContainsString('archive-widget-container', $html);
         preg_match_all('/<li class="product">item<\/li>/', $html, $matches);
         $this->assertCount(6, $matches[0]);
+    }
+
+    public function test_loop_per_page_zero_defaults_to_shop_setting() {
+        wc_setup_loop(['per_page' => 0]);
+        $GLOBALS['gm2_filters']['woocommerce_products_per_page'] = function ( $default ) {
+            return 8;
+        };
+
+        $_POST = [
+            'gm2_cat' => '',
+            'gm2_filter_type' => 'simple',
+            'gm2_simple_operator' => 'IN',
+            'gm2_paged' => '1',
+            'gm2_per_page' => 0,
+            'gm2_columns' => 0,
+            'orderby' => '',
+            'gm2_nonce' => 't'
+        ];
+
+        Gm2_Category_Sort_Ajax::filter_products();
+        $this->assertNotNull($GLOBALS['gm2_json_result']);
+        $html = $GLOBALS['gm2_json_result']['data']['html'];
+        preg_match_all('/<li class="product">item<\/li>/', $html, $matches);
+        $this->assertCount(8, $matches[0]);
     }
 }
 }
