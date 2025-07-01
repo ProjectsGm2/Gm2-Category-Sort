@@ -248,6 +248,22 @@ jQuery(document).ready(function ($) {
     return rows;
   }
   window.gm2GetResponsiveRows = gm2GetResponsiveRows;
+  function gm2GetResponsiveColumns(settings) {
+    if (!settings) return 0;
+    var columns = settings.columns ? parseInt(settings.columns, 10) : 0;
+    if (window.elementorFrontend && elementorFrontend.config && elementorFrontend.config.breakpoints) {
+      var bp = elementorFrontend.config.breakpoints;
+      var width = window.innerWidth;
+      if (width <= bp.md && settings.columns_mobile) {
+        columns = parseInt(settings.columns_mobile, 10);
+      } else if (width <= bp.lg && settings.columns_tablet) {
+        columns = parseInt(settings.columns_tablet, 10);
+      }
+    }
+    if (isNaN(columns)) columns = 0;
+    return columns;
+  }
+  window.gm2GetResponsiveColumns = gm2GetResponsiveColumns;
   function gm2UpdateProductFiltering($widget) {
     var page = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
     var orderby = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
@@ -289,9 +305,7 @@ jQuery(document).ready(function ($) {
     var rows = 0;
     var settings = $elementorWidget.data('settings');
     if (settings) {
-      if (settings.columns) {
-        columns = parseInt(settings.columns, 10) || 0;
-      }
+      columns = gm2GetResponsiveColumns(settings);
       rows = gm2GetResponsiveRows(settings);
       if (rows && columns) {
         perPage = rows * columns;
