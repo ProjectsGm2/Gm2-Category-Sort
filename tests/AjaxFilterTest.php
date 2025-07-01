@@ -51,6 +51,25 @@ if (!function_exists('wp_send_json_success')) { function wp_send_json_success($d
 if (!function_exists('wp_send_json_error')) { function wp_send_json_error($data=null){ $GLOBALS['gm2_json_result']=['success'=>false,'data'=>$data]; return $GLOBALS['gm2_json_result']; } }
 }
 
+namespace ElementorPro\Modules\Woocommerce\Widgets {
+    class Products {
+        public function render() {
+            echo '<div class="elementor-widget-container">';
+            if ($GLOBALS['wp_query'] && $GLOBALS['wp_query']->have_posts()) {
+                woocommerce_product_loop_start();
+                while ($GLOBALS['wp_query']->have_posts()) {
+                    $GLOBALS['wp_query']->the_post();
+                    wc_get_template_part('content', 'product');
+                }
+                woocommerce_product_loop_end();
+            } else {
+                woocommerce_no_products_found();
+            }
+            echo '</div>';
+        }
+    }
+}
+
 namespace {
 use PHPUnit\Framework\TestCase;
 
@@ -124,6 +143,27 @@ class AjaxFilterTest extends TestCase {
         $html = $GLOBALS['gm2_json_result']['data']['html'];
         preg_match_all('/<li class="product">item<\/li>/', $html, $matches);
         $this->assertCount(3, $matches[0]);
+    }
+
+    public function test_elementor_products_widget_wrapper_preserved() {
+        $_POST = [
+            'gm2_cat' => '',
+            'gm2_filter_type' => 'simple',
+            'gm2_simple_operator' => 'IN',
+            'gm2_paged' => '1',
+            'gm2_per_page' => 6,
+            'gm2_columns' => 3,
+            'gm2_widget_type' => 'products.default',
+            'orderby' => '',
+            'gm2_nonce' => 't'
+        ];
+
+        Gm2_Category_Sort_Ajax::filter_products();
+        $this->assertNotNull($GLOBALS['gm2_json_result']);
+        $html = $GLOBALS['gm2_json_result']['data']['html'];
+        $this->assertStringContainsString('elementor-widget-container', $html);
+        preg_match_all('/<li class="product">item<\/li>/', $html, $matches);
+        $this->assertCount(6, $matches[0]);
     }
 }
 }

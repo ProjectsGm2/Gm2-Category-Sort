@@ -63,6 +63,7 @@ class Gm2_Category_Sort_Ajax {
 
         $columns  = isset($_POST['gm2_columns']) ? absint($_POST['gm2_columns']) : 0;
         $per_page = isset($_POST['gm2_per_page']) ? absint($_POST['gm2_per_page']) : 0;
+        $widget_type = isset($_POST['gm2_widget_type']) ? sanitize_key($_POST['gm2_widget_type']) : '';
         if (!$per_page) {
             $rows = isset($_POST['gm2_rows']) ? absint($_POST['gm2_rows']) : 0;
             if ($columns && $rows) {
@@ -111,16 +112,28 @@ class Gm2_Category_Sort_Ajax {
         $GLOBALS['wp_query'] = $query;
 
         ob_start();
-        // Product markup is generated solely via WooCommerce template
-        // functions. Altering these calls may change or remove the
-        // structured data that WooCommerce outputs.
+        // Product markup is generated via WooCommerce template functions by
+        // default. When filtering a list created with Elementor's Products
+        // widget, use the widget renderer so the wrapper classes and data
+        // attributes remain intact.
         if ($query->have_posts()) {
-            woocommerce_product_loop_start();
-            while ($query->have_posts()) {
-                $query->the_post();
-                wc_get_template_part('content', 'product');
+            $is_elementor = $widget_type && strpos($widget_type, 'products') !== false &&
+                class_exists('\\ElementorPro\\Modules\\Woocommerce\\Widgets\\Products');
+
+            if ($is_elementor) {
+                $class  = '\\ElementorPro\\Modules\\Woocommerce\\Widgets\\Products';
+                $widget = new $class();
+                if (method_exists($widget, 'render')) {
+                    $widget->render();
+                }
+            } else {
+                woocommerce_product_loop_start();
+                while ($query->have_posts()) {
+                    $query->the_post();
+                    wc_get_template_part('content', 'product');
+                }
+                woocommerce_product_loop_end();
             }
-            woocommerce_product_loop_end();
         } else {
             woocommerce_no_products_found();
         }
