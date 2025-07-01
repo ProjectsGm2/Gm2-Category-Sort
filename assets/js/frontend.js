@@ -278,6 +278,7 @@ jQuery(document).ready(function($) {
         const $elementorWidget = $oldList.closest('.elementor-widget');
         let columns = 0;
         let perPage = 0;
+        let rows = 0;
 
         const settings = $elementorWidget.data('settings');
         if (settings) {
@@ -302,10 +303,12 @@ jQuery(document).ready(function($) {
             }
         }
 
-        if (!perPage && settings && settings.rows && columns) {
-            const rows = parseInt(settings.rows, 10);
-            if (!isNaN(rows)) {
+        if (!perPage && settings && settings.rows) {
+            rows = parseInt(settings.rows, 10);
+            if (!isNaN(rows) && columns) {
                 perPage = rows * columns;
+            } else if (isNaN(rows)) {
+                rows = 0;
             }
         }
 
@@ -323,6 +326,7 @@ jQuery(document).ready(function($) {
             gm2_simple_operator: simpleOperator,
             gm2_columns: columns,
             gm2_per_page: perPage,
+            gm2_rows: rows,
             gm2_paged: page,
             orderby: orderby,
             gm2_nonce: gm2CategorySort.nonce || ''

@@ -270,6 +270,7 @@ jQuery(document).ready(function ($) {
     var $elementorWidget = $oldList.closest('.elementor-widget');
     var columns = 0;
     var perPage = 0;
+    var rows = 0;
     var settings = $elementorWidget.data('settings');
     if (settings) {
       if (settings.columns) {
@@ -290,10 +291,12 @@ jQuery(document).ready(function ($) {
         columns = parseInt(widgetColumns, 10) || 0;
       }
     }
-    if (!perPage && settings && settings.rows && columns) {
-      var rows = parseInt(settings.rows, 10);
-      if (!isNaN(rows)) {
+    if (!perPage && settings && settings.rows) {
+      rows = parseInt(settings.rows, 10);
+      if (!isNaN(rows) && columns) {
         perPage = rows * columns;
+      } else if (isNaN(rows)) {
+        rows = 0;
       }
     }
     if (!perPage) {
@@ -309,6 +312,7 @@ jQuery(document).ready(function ($) {
       gm2_simple_operator: simpleOperator,
       gm2_columns: columns,
       gm2_per_page: perPage,
+      gm2_rows: rows,
       gm2_paged: page,
       orderby: orderby,
       gm2_nonce: gm2CategorySort.nonce || ''
