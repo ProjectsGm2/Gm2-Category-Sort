@@ -26,3 +26,28 @@ describe('gm2GetResponsiveRows', () => {
     expect(rows).toBe(3);
   });
 });
+
+describe('gm2GetResponsiveColumns', () => {
+  let window;
+  beforeEach(() => {
+    const dom = new JSDOM('', {runScripts: 'dangerously'});
+    window = dom.window;
+    window.elementorFrontend = {config: {breakpoints: {md: 768, lg: 1024}}};
+    Object.defineProperty(window, 'innerWidth', {writable: true, configurable: true, value: 1200});
+    const src = fs.readFileSync(path.resolve(__dirname, '../../assets/js/frontend.js'), 'utf8');
+    const fnCode = src.match(/function gm2GetResponsiveColumns([\s\S]+?window.gm2GetResponsiveColumns = gm2GetResponsiveColumns;)/);
+    window.eval(fnCode[0]);
+  });
+
+  test('uses mobile columns when width <= md', () => {
+    window.innerWidth = 500;
+    const cols = window.gm2GetResponsiveColumns({columns: 4, columns_tablet: 3, columns_mobile: 2});
+    expect(cols).toBe(2);
+  });
+
+  test('uses tablet columns when width <= lg', () => {
+    window.innerWidth = 800;
+    const cols = window.gm2GetResponsiveColumns({columns: 5, columns_tablet: 3, columns_mobile: 2});
+    expect(cols).toBe(3);
+  });
+});

@@ -254,6 +254,24 @@ jQuery(document).ready(function($) {
 
     window.gm2GetResponsiveRows = gm2GetResponsiveRows;
 
+    function gm2GetResponsiveColumns(settings) {
+        if (!settings) return 0;
+        let columns = settings.columns ? parseInt(settings.columns, 10) : 0;
+        if (window.elementorFrontend && elementorFrontend.config && elementorFrontend.config.breakpoints) {
+            const bp = elementorFrontend.config.breakpoints;
+            const width = window.innerWidth;
+            if (width <= bp.md && settings.columns_mobile) {
+                columns = parseInt(settings.columns_mobile, 10);
+            } else if (width <= bp.lg && settings.columns_tablet) {
+                columns = parseInt(settings.columns_tablet, 10);
+            }
+        }
+        if (isNaN(columns)) columns = 0;
+        return columns;
+    }
+
+    window.gm2GetResponsiveColumns = gm2GetResponsiveColumns;
+
       function gm2UpdateProductFiltering($widget, page = 1, orderby = null) {
         const selectedIds = [];
         $widget.find('.gm2-category-name.selected').each(function() {
@@ -300,9 +318,7 @@ jQuery(document).ready(function($) {
 
         const settings = $elementorWidget.data('settings');
         if (settings) {
-            if (settings.columns) {
-                columns = parseInt(settings.columns, 10) || 0;
-            }
+            columns = gm2GetResponsiveColumns(settings);
             rows = gm2GetResponsiveRows(settings);
             if (rows && columns) {
                 perPage = rows * columns;
