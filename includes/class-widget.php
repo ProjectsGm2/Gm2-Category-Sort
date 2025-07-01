@@ -64,6 +64,13 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'description' => __('Pixels to offset when scrolling to the selected list', 'gm2-category-sort'),
         ]);
 
+        $this->add_control('disable_auto_scroll', [
+            'label'       => __('Disable Auto Scroll', 'gm2-category-sort'),
+            'type'        => \Elementor\Controls_Manager::SWITCHER,
+            'return_value'=> 'yes',
+            'description' => __('Prevent automatic scrolling after each filter update', 'gm2-category-sort'),
+        ]);
+
         $this->end_controls_section();
         
         // Style Section
@@ -898,6 +905,7 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'scroll_offset'        => intval( $settings['scroll_offset'] ),
             'scroll_offset_tablet' => isset( $settings['scroll_offset_tablet'] ) ? intval( $settings['scroll_offset_tablet'] ) : null,
             'scroll_offset_mobile' => isset( $settings['scroll_offset_mobile'] ) ? intval( $settings['scroll_offset_mobile'] ) : null,
+            'disable_auto_scroll'  => ! empty( $settings['disable_auto_scroll'] ),
         ]);
         
         echo $renderer->generate_html();

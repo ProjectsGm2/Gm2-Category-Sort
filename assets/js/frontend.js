@@ -65,6 +65,9 @@ jQuery(document).ready(function($) {
         }
         if ($target.length) {
             const $widget = $target.closest('.gm2-category-sort');
+            if ($widget.data('disable-scroll')) {
+                return;
+            }
             let offset = parseInt($widget.data('scroll-offset')) || 0;
             if (window.elementorFrontend && elementorFrontend.config && elementorFrontend.config.breakpoints) {
                 const bp = elementorFrontend.config.breakpoints;
