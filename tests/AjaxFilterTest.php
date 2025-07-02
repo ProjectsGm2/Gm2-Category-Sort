@@ -37,7 +37,16 @@ if (!function_exists('wc_reset_loop')) { function wc_reset_loop() { $GLOBALS['gm
 if (!function_exists('wc_clean')) { function wc_clean($v) { return $v; } }
 if (!function_exists('absint')) { function absint($v) { return abs(intval($v)); } }
 if (!function_exists('wc_get_template_part')) { function wc_get_template_part($slug, $name='') { echo '<li class="product">item</li>'; } }
-if (!function_exists('woocommerce_product_loop_start')) { function woocommerce_product_loop_start() { echo '<ul class="products">'; } }
+if (!function_exists('woocommerce_product_loop_start')) {
+    function woocommerce_product_loop_start() {
+        $cols = wc_get_loop_prop('columns');
+        $class = 'products';
+        if ($cols) {
+            $class .= ' columns-' . $cols;
+        }
+        echo '<ul class="' . $class . '">';
+    }
+}
 if (!function_exists('woocommerce_product_loop_end')) { function woocommerce_product_loop_end() { echo '</ul>'; } }
 if (!function_exists('woocommerce_no_products_found')) { function woocommerce_no_products_found() { echo '<div class="woocommerce-info">No products</div>'; } }
 if (!function_exists('woocommerce_result_count')) { function woocommerce_result_count() { echo '<span class="count">0</span>'; } }
@@ -62,8 +71,14 @@ if (!function_exists('apply_filters')) {
 
 namespace ElementorPro\Modules\Woocommerce\Widgets {
     class Products {
+        protected $settings = [];
+        public function set_settings( $settings ) {
+            $this->settings = $settings;
+        }
         public function render() {
-            echo '<div class="elementor-widget-container">';
+            $cols = $this->settings['columns'] ?? '';
+            $rows = $this->settings['rows'] ?? '';
+            echo '<div class="elementor-widget-container" data-columns="' . $cols . '" data-rows="' . $rows . '">';
             if ($GLOBALS['wp_query'] && $GLOBALS['wp_query']->have_posts()) {
                 woocommerce_product_loop_start();
                 while ($GLOBALS['wp_query']->have_posts()) {
@@ -79,8 +94,14 @@ namespace ElementorPro\Modules\Woocommerce\Widgets {
     }
 
     class Archive_Products {
+        protected $settings = [];
+        public function set_settings( $settings ) {
+            $this->settings = $settings;
+        }
         public function render() {
-            echo '<div class="archive-widget-container">';
+            $cols = $this->settings['columns'] ?? '';
+            $rows = $this->settings['rows'] ?? '';
+            echo '<div class="archive-widget-container" data-columns="' . $cols . '" data-rows="' . $rows . '">';
             if ($GLOBALS['wp_query'] && $GLOBALS['wp_query']->have_posts()) {
                 woocommerce_product_loop_start();
                 while ($GLOBALS['wp_query']->have_posts()) {
@@ -236,6 +257,30 @@ class AjaxFilterTest extends TestCase {
         $html = $GLOBALS['gm2_json_result']['data']['html'];
         preg_match_all('/<li class="product">item<\/li>/', $html, $matches);
         $this->assertCount(8, $matches[0]);
+    }
+
+    public function test_widget_settings_respected() {
+        $_POST = [
+            'gm2_cat' => '',
+            'gm2_filter_type' => 'simple',
+            'gm2_simple_operator' => 'IN',
+            'gm2_paged' => '1',
+            'gm2_per_page' => 4,
+            'gm2_columns' => 2,
+            'gm2_rows' => 2,
+            'gm2_widget_type' => 'products.default',
+            'gm2_widget_settings' => json_encode(['columns' => 2, 'rows' => 2]),
+            'orderby' => '',
+            'gm2_nonce' => 't'
+        ];
+
+        Gm2_Category_Sort_Ajax::filter_products();
+        $this->assertNotNull($GLOBALS['gm2_json_result']);
+        $html = $GLOBALS['gm2_json_result']['data']['html'];
+        $this->assertStringContainsString('data-columns="2"', $html);
+        $this->assertStringContainsString('data-rows="2"', $html);
+        preg_match_all('/<li class="product">item<\/li>/', $html, $matches);
+        $this->assertCount(4, $matches[0]);
     }
 }
 }

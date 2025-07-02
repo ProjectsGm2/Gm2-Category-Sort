@@ -388,7 +388,8 @@ jQuery(document).ready(function($) {
             gm2_paged: page,
             orderby: orderby,
             gm2_nonce: gm2CategorySort.nonce || '',
-            gm2_widget_type: $elementorWidget.data('widget_type') || ''
+            gm2_widget_type: $elementorWidget.data('widget_type') || '',
+            gm2_widget_settings: JSON.stringify($elementorWidget.data('settings') || {})
         };
 
         if (typeof gm2CategorySort === 'undefined' || !gm2CategorySort.ajax_url) {
