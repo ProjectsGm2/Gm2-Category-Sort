@@ -58,27 +58,34 @@ jQuery(document).ready(function ($) {
     $('body').append('<div id="gm2-loading-overlay"><div class="gm2-spinner"></div></div>');
   }
   function gm2FindProductList(root) {
-    if (window.jQuery) {
-      var $scope = root ? jQuery(root) : jQuery(document);
-      var $list = $scope.find('.elementor-widget[data-widget_type*="products"] ul.products:visible').first();
-      if ($list.length) return $list;
-      $list = $scope.find('ul.products:visible').first();
-      if ($list.length) return $list;
-      return $scope.find('ul.products').first();
+    function search(scope) {
+      if (window.jQuery) {
+        var $list = jQuery(scope).find('.elementor-widget[data-widget_type*="products"] ul.products:visible').first();
+        if ($list.length) return $list;
+        $list = jQuery(scope).find('ul.products:visible').first();
+        if ($list.length) return $list;
+        return jQuery(scope).find('ul.products').first();
+      }
+      function isVisible(el) {
+        if (!el) return false;
+        var style = el.style || {};
+        return style.display !== 'none' && style.visibility !== 'hidden';
+      }
+      var widgetLists = Array.from(scope.querySelectorAll('.elementor-widget[data-widget_type*="products"] ul.products'));
+      var element = widgetLists.find(isVisible);
+      if (!element) {
+        var lists = Array.from(scope.querySelectorAll('ul.products'));
+        element = lists.find(isVisible) || lists[0] || null;
+      }
+      return element;
     }
-    function isVisible(el) {
-      if (!el) return false;
-      var style = el.style || {};
-      return style.display !== 'none' && style.visibility !== 'hidden';
+    if (root) {
+      var found = search(root);
+      if (found && (found.length ? found.length : found)) {
+        return found;
+      }
     }
-    var scope = root || document;
-    var widgetLists = Array.from(scope.querySelectorAll('.elementor-widget[data-widget_type*="products"] ul.products'));
-    var element = widgetLists.find(isVisible);
-    if (!element) {
-      var lists = Array.from(scope.querySelectorAll('ul.products'));
-      element = lists.find(isVisible) || lists[0] || null;
-    }
-    return element;
+    return search(document);
   }
   window.gm2FindProductList = gm2FindProductList;
   function gm2GetListRows(root) {
