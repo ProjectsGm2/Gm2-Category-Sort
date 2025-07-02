@@ -347,7 +347,7 @@ jQuery(document).ready(function($) {
             url.searchParams.delete('orderby');
         }
         
-        const $oldList = gm2FindProductList();
+        const $oldList = gm2FindProductList($widget);
         const $elementorWidget = $oldList.closest('.elementor-widget');
         let columns = 0;
         let perPage = 0;
