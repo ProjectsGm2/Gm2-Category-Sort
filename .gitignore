@@ -1,0 +1,6 @@
+*.DS_Store
+.phpunit.result.cache
+vendor/
+!assets/vendor/
+node_modules/
+mapping-logs/

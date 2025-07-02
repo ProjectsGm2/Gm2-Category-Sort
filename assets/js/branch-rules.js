@@ -1,0 +1,238 @@
+jQuery(function($){
+    var form = $('#gm2-branch-rules-form');
+    if(!form.length) return;
+    var msg = $('#gm2-branch-rules-msg');
+    var attrs = gm2BranchRules.attributes || {};
+    var allowMultiData = gm2BranchRules.allow_multi || {};
+    var maxVars = parseInt(gm2BranchRules.max_input_vars || 1000,10);
+
+    function populate(select){
+        $.each(attrs,function(slug,data){
+            select.append($('<option>').val(slug).text(data.label));
+        });
+    }
+    
+function renderTerms(container,attrList,selected,collapsedState){
+        attrList = Array.from(new Set(attrList || []));
+        container.empty();
+        var collapseAll = collapsedState === true;
+        var stateByAttr = (typeof collapsedState === 'object' && collapsedState) ? collapsedState : {};
+        attrList.forEach(function(attr){
+            var info=attrs[attr];
+            if(!info) return;
+            var group=$('<span class="gm2-attr-group">');
+            var toggle=$('<span class="gm2-toggle-attr" data-attr="'+attr+'">&#9660;</span>');
+            var remove=$('<span class="gm2-remove-attr" data-attr="'+attr+'">&times;</span>');
+            var sel=$('<select multiple>').attr('data-attr',attr);
+            $.each(info.terms,function(slug,name){
+                var opt=$('<option>').val(slug).text(name);
+                if(selected && selected[attr] && selected[attr].indexOf(slug)!==-1){
+                    opt.prop('selected',true);
+                }
+                sel.append(opt);
+            });
+            group.append(toggle);
+            group.append(remove);
+            group.append(sel);
+            if(collapseAll || stateByAttr[attr]){
+                group.addClass('collapsed');
+            }
+            container.append(group);
+        });
+    }
+
+    function renderTags(container, selected){
+        container.empty();
+        $.each(selected,function(attr,terms){
+            if(!terms.length) return;
+            var info=attrs[attr]||{};
+            var label=info.label||attr;
+            var names=[];
+            $.each(terms,function(i,slug){
+                names.push(info.terms && info.terms[slug] ? info.terms[slug] : slug);
+            });
+            var tag=$('<span class="gm2-tag" data-attr="'+attr+'">');
+            var remove=$('<span class="gm2-remove-tag" data-attr="'+attr+'">&times;</span>');
+            tag.append(remove).append(' '+label+': '+names.join(', '));
+            container.append(tag);
+        });
+    }
+
+    function updateSummary(row){
+        var inc=gatherSelected(row.find('.gm2-include-terms'));
+        var exc=gatherSelected(row.find('.gm2-exclude-terms'));
+        renderTags(row.find('.gm2-include-tags'),inc);
+        renderTags(row.find('.gm2-exclude-tags'),exc);
+    }
+
+    form.find('.gm2-attr-select').each(function(){
+        populate($(this));
+    });
+
+    // Allow selecting multiple attributes without holding Ctrl/Command
+    form.on('mousedown', '.gm2-attr-select option', function(e){
+        e.preventDefault();
+        var opt=$(this);
+        opt.prop('selected', !opt.prop('selected'));
+        opt.parent().trigger('change');
+    });
+
+    function applyAllowMulti(){
+        $.each(allowMultiData,function(slug,val){
+            form.find('tr[data-slug="'+slug+'"]').find('input[data-type="allow_multi"]').prop('checked',!!val);
+        });
+    }
+
+    function load(){
+        applyAllowMulti();
+        $.post(ajaxurl,{action:'gm2_branch_rules_get',nonce:gm2BranchRules.nonce})
+        .done(function(resp){
+            if(resp.success){
+                for(var slug in resp.data){
+                    var r=resp.data[slug];
+                    var row=form.find('tr[data-slug="'+slug+'"]');
+                    row.find('textarea[data-type="include"]').val(r.include);
+                    row.find('textarea[data-type="exclude"]').val(r.exclude);
+                    var incAttrs=Object.keys(r.include_attrs||{});
+                    var excAttrs=Object.keys(r.exclude_attrs||{});
+                    row.find('.gm2-include-attr').val(incAttrs);
+                    row.find('.gm2-exclude-attr').val(excAttrs);
+                    row.find('input[data-type="allow_multi"]').prop('checked', !!r.allow_multi);
+                    renderTerms(row.find('.gm2-include-terms'),incAttrs,r.include_attrs,true);
+                    renderTerms(row.find('.gm2-exclude-terms'),excAttrs,r.exclude_attrs,true);
+                    updateSummary(row);
+                }
+            }
+        });
+    }
+
+    load();
+
+function gatherSelected(container){
+        var selected={};
+        container.find('.gm2-attr-group select').each(function(){
+            var attr=$(this).data('attr');
+            selected[attr]=$(this).val()||[];
+        });
+        return selected;
+    }
+
+    function gatherCollapsed(container){
+        var state={};
+        container.find('.gm2-attr-group').each(function(){
+            var group=$(this);
+            var attr=group.find('select').data('attr');
+            state[attr]=group.hasClass('collapsed');
+        });
+        return state;
+    }
+
+    form.on('change','.gm2-include-attr',function(){
+        var row=$(this).closest('tr');
+        var attrsSel=$(this).val()||[];
+        var current=gatherSelected(row.find('.gm2-include-terms'));
+        var collapsed=gatherCollapsed(row.find('.gm2-include-terms'));
+        renderTerms(row.find('.gm2-include-terms'),attrsSel,current,collapsed);
+        updateSummary(row);
+    });
+
+    form.on('change','.gm2-exclude-attr',function(){
+        var row=$(this).closest('tr');
+        var attrsSel=$(this).val()||[];
+        var current=gatherSelected(row.find('.gm2-exclude-terms'));
+        var collapsed=gatherCollapsed(row.find('.gm2-exclude-terms'));
+        renderTerms(row.find('.gm2-exclude-terms'),attrsSel,current,collapsed);
+        updateSummary(row);
+    });
+
+    form.on('change','.gm2-include-terms select,.gm2-exclude-terms select',function(){
+        updateSummary($(this).closest('tr'));
+    });
+
+    form.on('click','.gm2-attr-group .gm2-toggle-attr',function(){
+        var group=$(this).closest('.gm2-attr-group');
+        group.toggleClass('collapsed');
+    });
+
+    form.on('click','.gm2-attr-group .gm2-remove-attr',function(){
+        var group=$(this).closest('.gm2-attr-group');
+        var attr=group.find('select').data('attr');
+        var row=group.closest('tr');
+        var isInc=group.closest('.gm2-include-terms').length>0;
+        var attrSelect=isInc?row.find('.gm2-include-attr'):row.find('.gm2-exclude-attr');
+        group.remove();
+        attrSelect.find('option[value="'+attr+'"]').prop('selected',false);
+        updateSummary(row);
+    });
+
+    form.on('click','.gm2-remove-tag',function(){
+        var tag=$(this).closest('.gm2-tag');
+        var attr=$(this).data('attr');
+        var row=tag.closest('tr');
+        var isInc=tag.closest('.gm2-include-tags').length>0;
+        var attrSelect=isInc?row.find('.gm2-include-attr'):row.find('.gm2-exclude-attr');
+        var termsContainer=isInc?row.find('.gm2-include-terms'):row.find('.gm2-exclude-terms');
+        attrSelect.find('option[value="'+attr+'"]').prop('selected',false);
+        termsContainer.find('select[data-attr="'+attr+'"]').closest('.gm2-attr-group').remove();
+        tag.remove();
+        updateSummary(row);
+    });
+
+    form.on('submit',function(e){
+        e.preventDefault();
+        msg.text('');
+        var rows=form.find('tr[data-slug]');
+        var perPage=Math.max(1,Math.floor(maxVars/10));
+        var totalPages=Math.ceil(rows.length/perPage);
+        var page=0;
+
+        function gather(start,end){
+            var rules={};
+            rows.slice(start,end).each(function(){
+                var row=$(this);
+                var slug=row.data('slug');
+                var incAttrs={};
+                var excAttrs={};
+                row.find('.gm2-include-terms select').each(function(){
+                    var attr=$(this).data('attr');
+                    var terms=$(this).val()||[];
+                    if(terms.length) incAttrs[attr]=terms;
+                });
+                row.find('.gm2-exclude-terms select').each(function(){
+                    var attr=$(this).data('attr');
+                    var terms=$(this).val()||[];
+                    if(terms.length) excAttrs[attr]=terms;
+                });
+                rules[slug]={
+                    include:row.find('textarea[data-type="include"]').val(),
+                    exclude:row.find('textarea[data-type="exclude"]').val(),
+                    include_attrs:incAttrs,
+                    exclude_attrs:excAttrs,
+                    allow_multi:row.find('input[data-type="allow_multi"]').is(':checked')
+                };
+            });
+            return rules;
+        }
+
+        function sendNext(){
+            if(page>=totalPages){
+                msg.text(gm2BranchRules.saved);
+                return;
+            }
+            var start=page*perPage;
+            var end=Math.min(start+perPage,rows.length);
+            var rules=gather(start,end);
+            $.post(ajaxurl,{action:'gm2_branch_rules_save',nonce:gm2BranchRules.nonce,page:page+1,total_pages:totalPages,rules:rules})
+            .done(function(resp){
+                if(resp.success){
+                    page++;
+                    sendNext();
+                }else{
+                    msg.text(gm2BranchRules.error);
+                }
+            }).fail(function(){msg.text(gm2BranchRules.error);});
+        }
+
+        sendNext();
+    });
+});

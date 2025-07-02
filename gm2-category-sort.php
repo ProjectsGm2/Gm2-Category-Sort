@@ -1,0 +1,251 @@
+<?php
+/**
+ * Plugin Name: Gm2 Category Sort
+ * Description: Adds a collapsible category filter widget for WooCommerce products in Elementor.
+ * Version: 1.0.16
+ * Author: ProjectsGm2
+ * Text Domain: gm2-category-sort
+ */
+
+defined('ABSPATH') || exit;
+
+// Plugin version used for cache busting
+define('GM2_CAT_SORT_VERSION', '1.0.16');
+
+// Define plugin constants
+define('GM2_CAT_SORT_PATH', plugin_dir_path(__FILE__));
+define('GM2_CAT_SORT_URL', plugin_dir_url(__FILE__));
+define('GM2_CAT_SORT_CRON_HOOK', 'gm2_category_sort_generate_sitemap');
+// Slug for the top-level admin menu
+define('GM2_CAT_SORT_MENU_SLUG', 'gm2-sort-filter');
+
+register_activation_hook( __FILE__, 'gm2_category_sort_activate' );
+register_deactivation_hook( __FILE__, 'gm2_category_sort_deactivate' );
+
+function gm2_category_sort_activate() {
+    if ( ! wp_next_scheduled( GM2_CAT_SORT_CRON_HOOK ) ) {
+        wp_schedule_event( time(), 'daily', GM2_CAT_SORT_CRON_HOOK );
+    }
+}
+
+function gm2_category_sort_deactivate() {
+    $timestamp = wp_next_scheduled( GM2_CAT_SORT_CRON_HOOK );
+    if ( $timestamp ) {
+        wp_unschedule_event( $timestamp, GM2_CAT_SORT_CRON_HOOK );
+    }
+}
+
+// Register top-level admin menu
+add_action( 'admin_menu', 'gm2_category_sort_register_menu' );
+function gm2_category_sort_register_menu() {
+    add_menu_page(
+        __( 'Gm2 Sort & Filter', 'gm2-category-sort' ),
+        __( 'Gm2 Sort & Filter', 'gm2-category-sort' ),
+        'manage_options',
+        GM2_CAT_SORT_MENU_SLUG,
+        'gm2_category_sort_main_page',
+        'dashicons-filter'
+    );
+}
+
+// Default top-level page callback
+function gm2_category_sort_main_page() {
+    echo '<div class="wrap">';
+    echo '<h1>' . esc_html__( 'Gm2 Sort & Filter', 'gm2-category-sort' ) . '</h1>';
+    echo '<p>' . esc_html__( 'Use the submenu links to access the plugin tools.', 'gm2-category-sort' ) . '</p>';
+    echo '</div>';
+}
+
+// Initialize plugin
+// Load after WooCommerce so product CSV tools can access WC classes.
+add_action('plugins_loaded', 'gm2_category_sort_init', 20);
+function gm2_category_sort_init() {
+    $rules   = get_option( 'gm2_branch_rules', [] );
+    $updated = false;
+    if ( is_array( $rules ) ) {
+        foreach ( $rules as $slug => $rule ) {
+            if ( isset( $rule['allow_multi'] ) && is_string( $rule['allow_multi'] ) ) {
+                $rules[ $slug ]['allow_multi'] = filter_var( $rule['allow_multi'], FILTER_VALIDATE_BOOLEAN );
+                $updated = true;
+            }
+        }
+        if ( $updated ) {
+            update_option( 'gm2_branch_rules', $rules );
+        }
+    }
+
+    // Check for required plugins
+    if (!did_action('elementor/loaded') || !function_exists('WC')) {
+        add_action('admin_notices', 'gm2_category_sort_admin_notice');
+        return;
+    }
+
+    // Load translations
+    load_plugin_textdomain( 'gm2-category-sort', false, basename( dirname( __FILE__ ) ) . '/languages' );
+
+    // Include non-widget files
+    require_once GM2_CAT_SORT_PATH . 'includes/utilities.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-enqueuer.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-query-handler.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-renderer.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-ajax.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-canonical.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-schema.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-sitemap.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-term-meta.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-category-importer.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-product-category-generator.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-product-category-importer.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-product-csv.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-attribute-fixer.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-auto-assign.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-one-click-assign.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-branch-rules.php';
+    
+    // Initialize components
+    Gm2_Category_Sort_Enqueuer::init();
+    Gm2_Category_Sort_Query_Handler::init();
+    Gm2_Category_Sort_Ajax::init();
+    Gm2_Category_Sort_Canonical::init();
+    Gm2_Category_Sort_Sitemap::init();
+    Gm2_Category_Sort_Term_Meta::init();
+    Gm2_Category_Sort_Category_Importer::init();
+    Gm2_Category_Sort_Product_Category_Importer::init();
+    Gm2_Category_Sort_Attribute_Fixer::init();
+    Gm2_Category_Sort_Auto_Assign::init();
+    Gm2_Category_Sort_One_Click_Assign::init();
+    Gm2_Category_Sort_Branch_Rules::init();
+    Gm2_Category_Sort_Product_CSV::init();
+    
+    add_filter('pre_get_document_title', 'gm2_category_sort_modify_title');
+    add_action('wp_head', 'gm2_category_sort_meta_description');
+
+    // Enqueue icon styles early when widget is used on the page.
+    add_action(
+        'elementor/frontend/widget/before_render',
+        function( $widget ) {
+            if ( $widget instanceof Gm2_Category_Sort_Widget ) {
+                add_action( 'wp_enqueue_scripts', [ $widget, 'enqueue_icon_styles' ] );
+            }
+        },
+        10,
+        1
+    );
+    
+    // Register widget for both modern and legacy Elementor hooks
+    add_action('elementor/widgets/register', 'gm2_register_widget');
+    // Fallback for older Elementor versions
+    add_action('elementor/widgets/widgets_registered', 'gm2_register_widget');
+}
+
+// Register widget callback
+function gm2_register_widget($widgets_manager) {
+    if ( ! class_exists('\\Elementor\\Widget_Base') ) {
+        return;
+    }
+
+    require_once GM2_CAT_SORT_PATH . 'includes/class-widget.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-selected-widget.php';
+    $widgets_manager->register(new Gm2_Category_Sort_Widget());
+    $widgets_manager->register(new Gm2_Selected_Category_Widget());
+}
+
+// Add custom widget category
+add_action('elementor/elements/categories_registered', 'add_gm2_widget_category');
+function add_gm2_widget_category($elements_manager) {
+    $elements_manager->add_category('gm2-widgets', [
+        'title' => __('GM2 Widgets', 'gm2-category-sort'),
+        'icon' => 'fa fa-filter',
+    ]);
+}
+
+// Admin notice for missing dependencies
+function gm2_category_sort_admin_notice() {
+    $missing = [];
+    if (!did_action('elementor/loaded')) $missing[] = 'Elementor';
+    if (!function_exists('WC')) $missing[] = 'WooCommerce';
+    
+    if (!empty($missing)) {
+        echo '<div class="notice notice-error"><p>';
+        printf(
+            /* translators: 1: plugin name. 2: comma separated list of missing plugins. */
+            esc_html__( '%1$s requires the following plugins: %2$s.', 'gm2-category-sort' ),
+            '<strong>Gm2 Category Sort</strong>',
+            implode( ', ', array_map( 'esc_html', $missing ) )
+        );
+        echo ' ' . esc_html__( 'Please install and activate them.', 'gm2-category-sort' );
+        echo '</p></div>';
+    }
+}
+
+/**
+ * Determine if filter parameters are present in the request.
+ *
+ * @return bool
+ */
+function gm2_category_sort_has_filters() {
+    foreach ( ['gm2_cat', 'gm2_filter_type', 'gm2_simple_operator'] as $key ) {
+        if ( isset( $_GET[ $key ] ) ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Get the names of selected categories from the gm2_cat query param.
+ *
+ * @return array
+ */
+function gm2_category_sort_get_selected_names() {
+    if ( empty( $_GET['gm2_cat'] ) ) {
+        return [];
+    }
+
+    $ids   = array_map( 'intval', explode( ',', $_GET['gm2_cat'] ) );
+    $names = [];
+    foreach ( $ids as $id ) {
+        $term = get_term( $id, 'product_cat' );
+        if ( $term && ! is_wp_error( $term ) ) {
+            $names[] = $term->name;
+        }
+    }
+
+    return $names;
+}
+
+/**
+ * Append selected category names to the document title.
+ *
+ * @param string $title The existing title.
+ * @return string       Modified title when filters are active.
+ */
+function gm2_category_sort_modify_title( $title ) {
+    if ( ! gm2_category_sort_has_filters() ) {
+        return $title;
+    }
+
+    $names = gm2_category_sort_get_selected_names();
+    if ( empty( $names ) ) {
+        return $title;
+    }
+
+    return $title . ' – ' . implode( ', ', $names );
+}
+
+/**
+ * Output a meta description based on the selected categories.
+ */
+function gm2_category_sort_meta_description() {
+    if ( ! gm2_category_sort_has_filters() ) {
+        return;
+    }
+
+    $names = gm2_category_sort_get_selected_names();
+    if ( empty( $names ) ) {
+        return;
+    }
+
+    $desc = sprintf( __( 'Products filtered by: %s', 'gm2-category-sort' ), implode( ', ', $names ) );
+    echo '<meta name="description" content="' . esc_attr( $desc ) . '">' . "\n";
+}
