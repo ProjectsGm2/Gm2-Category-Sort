@@ -333,7 +333,7 @@ jQuery(document).ready(function ($) {
     } else {
       url.searchParams.delete('orderby');
     }
-    var $oldList = gm2FindProductList();
+    var $oldList = gm2FindProductList($widget);
     var $elementorWidget = $oldList.closest('.elementor-widget');
     var columns = 0;
     var perPage = 0;
