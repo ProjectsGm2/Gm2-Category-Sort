@@ -163,15 +163,19 @@ jQuery(document).ready(function($) {
         e.stopPropagation();
         const $target = $(this).closest('.gm2-selected-category');
         const termId = $target.data('term-id');
-        const $widget = $target.closest('.gm2-category-sort');
-        
-        $target.remove();
-        $widget.find('.gm2-category-name[data-term-id="' + termId + '"]').removeClass('selected');
-        gm2RefreshSelectedList($widget);
-        gm2UpdateProductFiltering($widget, 1);
+        let $widget = $target.closest('.gm2-category-sort');
+
+        if (!$widget.length) {
+            $widget = $('.gm2-category-sort').first();
         }
 
-     function gm2RefreshSelectedList($widget) {
+        $target.remove();
+        $('.gm2-category-name[data-term-id="' + termId + '"]').removeClass('selected');
+        gm2RefreshSelectedList($widget);
+        gm2UpdateProductFiltering($widget, 1);
+    }
+
+    function gm2RefreshSelectedList($widget) {
         const $container = $widget.find('.gm2-selected-categories');
         const $header = $widget.find('.gm2-selected-header');
 
@@ -193,6 +197,40 @@ jQuery(document).ready(function($) {
             $header.hide();
             $container.hide();
         }
+
+        gm2RefreshSelectedCategoryWidgets();
+    }
+
+    function gm2RefreshSelectedCategoryWidgets() {
+        const selected = [];
+        $('.gm2-category-name.selected').each(function() {
+            selected.push({
+                id: $(this).data('term-id'),
+                name: $(this).text().trim()
+            });
+        });
+
+        $('.gm2-selected-category-widget').each(function() {
+            const $widget = $(this);
+            const $header = $widget.find('.gm2-selected-header');
+            const $container = $widget.find('.gm2-selected-categories');
+
+            $container.empty();
+            selected.forEach(function(item) {
+                const $el = $('<div class="gm2-selected-category" data-term-id="' + item.id + '"></div>');
+                $el.text(item.name);
+                $el.append('<span class="gm2-remove-category">✕</span>');
+                $container.append($el);
+            });
+
+            if (selected.length > 0) {
+                $header.show();
+                $container.show();
+            } else {
+                $header.hide();
+                $container.hide();
+            }
+        });
     }
       
       function gm2UpdateProductFiltering($widget, page = 1, orderby = null) {
@@ -462,4 +500,6 @@ jQuery(document).ready(function($) {
             gm2HideLoading();
         });
     });
+
+    gm2RefreshSelectedCategoryWidgets();
 });

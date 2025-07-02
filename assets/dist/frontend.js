@@ -171,8 +171,11 @@ jQuery(document).ready(function ($) {
     var $target = $(this).closest('.gm2-selected-category');
     var termId = $target.data('term-id');
     var $widget = $target.closest('.gm2-category-sort');
+    if (!$widget.length) {
+      $widget = $('.gm2-category-sort').first();
+    }
     $target.remove();
-    $widget.find('.gm2-category-name[data-term-id="' + termId + '"]').removeClass('selected');
+    $('.gm2-category-name[data-term-id="' + termId + '"]').removeClass('selected');
     gm2RefreshSelectedList($widget);
     gm2UpdateProductFiltering($widget, 1);
   }
@@ -195,6 +198,35 @@ jQuery(document).ready(function ($) {
       $header.hide();
       $container.hide();
     }
+    gm2RefreshSelectedCategoryWidgets();
+  }
+  function gm2RefreshSelectedCategoryWidgets() {
+    var selected = [];
+    $('.gm2-category-name.selected').each(function () {
+      selected.push({
+        id: $(this).data('term-id'),
+        name: $(this).text().trim()
+      });
+    });
+    $('.gm2-selected-category-widget').each(function () {
+      var $widget = $(this);
+      var $header = $widget.find('.gm2-selected-header');
+      var $container = $widget.find('.gm2-selected-categories');
+      $container.empty();
+      selected.forEach(function (item) {
+        var $el = $('<div class="gm2-selected-category" data-term-id="' + item.id + '"></div>');
+        $el.text(item.name);
+        $el.append('<span class="gm2-remove-category">✕</span>');
+        $container.append($el);
+      });
+      if (selected.length > 0) {
+        $header.show();
+        $container.show();
+      } else {
+        $header.hide();
+        $container.hide();
+      }
+    });
   }
   function gm2UpdateProductFiltering($widget) {
     var page = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
@@ -433,4 +465,5 @@ jQuery(document).ready(function ($) {
       gm2HideLoading();
     });
   });
+  gm2RefreshSelectedCategoryWidgets();
 });
