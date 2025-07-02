@@ -22,16 +22,19 @@ class Gm2_Category_Sort_Query_Handler {
         $filter_type = sanitize_key($_GET['gm2_filter_type'] ?? 'simple');
         $simple_operator = sanitize_key($_GET['gm2_simple_operator'] ?? 'IN');
         
-        // Get existing tax query
-        $tax_query = $query->get('tax_query') ?: [];
-        
+        // Get existing tax query ensuring it's an array
+        $tax_query = $query->get( 'tax_query' );
+        if ( ! is_array( $tax_query ) ) {
+            $tax_query = [];
+        }
+
         // Remove any existing product_cat queries to prevent conflicts
-        foreach ($tax_query as $index => $tax) {
-            if ($tax['taxonomy'] === 'product_cat') {
-                unset($tax_query[$index]);
+        foreach ( $tax_query as $index => $tax ) {
+            if ( is_array( $tax ) && isset( $tax['taxonomy'] ) && 'product_cat' === $tax['taxonomy'] ) {
+                unset( $tax_query[ $index ] );
             }
         }
-        $tax_query = array_values($tax_query); // Reindex array
+        $tax_query = array_values( $tax_query ); // Reindex array
         
         if ($filter_type === 'advanced') {
             // Advanced logic: Custom logic based on your requirements
