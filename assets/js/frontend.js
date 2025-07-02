@@ -238,6 +238,7 @@ jQuery(document).ready(function($) {
         $widget.find('.gm2-category-name.selected').each(function() {
             selectedIds.push($(this).data('term-id'));
         });
+        const currentCat = parseInt($widget.data('current-cat')) || 0;
         
         const url = gm2CreateURL(window.location.href);
         if (!orderby) {
@@ -315,7 +316,8 @@ jQuery(document).ready(function($) {
             gm2_per_page: perPage,
             gm2_paged: page,
             orderby: orderby,
-            gm2_nonce: gm2CategorySort.nonce || ''
+            gm2_nonce: gm2CategorySort.nonce || '',
+            gm2_current_cat: currentCat
         };
 
         if (typeof gm2CategorySort === 'undefined' || !gm2CategorySort.ajax_url) {
