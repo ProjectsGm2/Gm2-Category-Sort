@@ -57,7 +57,29 @@ jQuery(document).ready(function ($) {
   if (!$('#gm2-loading-overlay').length) {
     $('body').append('<div id="gm2-loading-overlay"><div class="gm2-spinner"></div></div>');
   }
-  var $initialList = $('ul.products').first();
+  function gm2FindProductList() {
+    if (window.jQuery) {
+      var $list = $('.elementor-widget[data-widget_type*="products"] ul.products:visible').first();
+      if ($list.length) return $list;
+      $list = $('ul.products:visible').first();
+      if ($list.length) return $list;
+      return $('ul.products').first();
+    }
+    function isVisible(el) {
+      if (!el) return false;
+      var style = el.style || {};
+      return style.display !== 'none' && style.visibility !== 'hidden';
+    }
+    var widgetLists = Array.from(document.querySelectorAll('.elementor-widget[data-widget_type*="products"] ul.products'));
+    var element = widgetLists.find(isVisible);
+    if (!element) {
+      var lists = Array.from(document.querySelectorAll('ul.products'));
+      element = lists.find(isVisible) || lists[0] || null;
+    }
+    return element;
+  }
+  window.gm2FindProductList = gm2FindProductList;
+  var $initialList = gm2FindProductList();
   if ($initialList.length) {
     $initialList.data('original-classes', $initialList.attr('class'));
   }
@@ -298,7 +320,7 @@ jQuery(document).ready(function ($) {
     } else {
       url.searchParams.delete('orderby');
     }
-    var $oldList = $('.products').first();
+    var $oldList = gm2FindProductList();
     var $elementorWidget = $oldList.closest('.elementor-widget');
     var columns = 0;
     var perPage = 0;

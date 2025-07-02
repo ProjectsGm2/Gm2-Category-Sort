@@ -42,7 +42,31 @@ jQuery(document).ready(function($) {
         $('body').append('<div id="gm2-loading-overlay"><div class="gm2-spinner"></div></div>');
     }
 
-    const $initialList = $('ul.products').first();
+    function gm2FindProductList() {
+        if (window.jQuery) {
+            let $list = $('.elementor-widget[data-widget_type*="products"] ul.products:visible').first();
+            if ($list.length) return $list;
+            $list = $('ul.products:visible').first();
+            if ($list.length) return $list;
+            return $('ul.products').first();
+        }
+        function isVisible(el) {
+            if (!el) return false;
+            const style = el.style || {};
+            return style.display !== 'none' && style.visibility !== 'hidden';
+        }
+        const widgetLists = Array.from(document.querySelectorAll('.elementor-widget[data-widget_type*="products"] ul.products'));
+        let element = widgetLists.find(isVisible);
+        if (!element) {
+            const lists = Array.from(document.querySelectorAll('ul.products'));
+            element = lists.find(isVisible) || lists[0] || null;
+        }
+        return element;
+    }
+
+    window.gm2FindProductList = gm2FindProductList;
+
+    const $initialList = gm2FindProductList();
     if ($initialList.length) {
         $initialList.data('original-classes', $initialList.attr('class'));
     }
@@ -310,7 +334,7 @@ jQuery(document).ready(function($) {
             url.searchParams.delete('orderby');
         }
         
-        const $oldList = $('.products').first();
+        const $oldList = gm2FindProductList();
         const $elementorWidget = $oldList.closest('.elementor-widget');
         let columns = 0;
         let perPage = 0;
