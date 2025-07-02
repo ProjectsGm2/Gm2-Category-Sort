@@ -91,13 +91,24 @@ jQuery(document).ready(function ($) {
   function gm2HideLoading() {
     $('#gm2-loading-overlay').removeClass('gm2-visible');
   }
-  function gm2ScrollToSelectedSection() {
-    var $target = $('.gm2-selected-header:visible').first();
-    if (!$target.length) {
-      $target = $('.gm2-selected-categories:visible').first();
-    }
-    if (!$target.length) {
-      $target = $('.gm2-category-sort').first();
+  function gm2ScrollToSelectedSection($root) {
+    var $target;
+    if ($root && $root.length) {
+      $target = $root.find('.gm2-selected-header:visible').first();
+      if (!$target.length) {
+        $target = $root.find('.gm2-selected-categories:visible').first();
+      }
+      if (!$target.length) {
+        $target = $root.first();
+      }
+    } else {
+      $target = $('.gm2-selected-header:visible').first();
+      if (!$target.length) {
+        $target = $('.gm2-selected-categories:visible').first();
+      }
+      if (!$target.length) {
+        $target = $('.gm2-category-sort').first();
+      }
     }
     if ($target.length) {
       var $widget = $target.closest('.gm2-category-sort');
@@ -204,7 +215,7 @@ jQuery(document).ready(function ($) {
     $('.gm2-category-sort').each(function () {
       gm2RefreshSelectedList($(this));
     });
-    var $widget = $('.gm2-category-sort').first();
+    var $widget = $(this).closest('.gm2-category-sort');
     gm2UpdateProductFiltering($widget, 1);
   }
   function gm2RefreshSelectedList($widget) {
@@ -442,7 +453,7 @@ jQuery(document).ready(function ($) {
       gm2DisplayNoProducts($oldList, url);
     }).always(function () {
       gm2HideLoading();
-      gm2ScrollToSelectedSection();
+      gm2ScrollToSelectedSection($widget);
     });
   }
   function gm2ReinitArchiveWidget($list) {
@@ -485,14 +496,14 @@ jQuery(document).ready(function ($) {
         page = 1;
       }
     }
-    var $widget = $('.gm2-category-sort').first();
+    var $widget = $(this).closest('.gm2-category-sort');
     gm2UpdateProductFiltering($widget, page);
     return false;
   });
   $(document).on('change', '.woocommerce-ordering select.orderby', function (e) {
     e.preventDefault();
     var val = $(this).val();
-    var $widget = $('.gm2-category-sort').first();
+    var $widget = $(this).closest('.gm2-category-sort');
     gm2UpdateProductFiltering($widget, 1, val);
   });
   $(document).on('submit', 'form.woocommerce-ordering', function (e) {
