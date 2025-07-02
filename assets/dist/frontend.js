@@ -95,9 +95,54 @@ jQuery(document).ready(function ($) {
     if (window.jQuery) {
       var $list = jQuery(list);
       rows = parseInt($list.data('rows'), 10);
+      if (!rows) {
+        var $widget = $list.closest('.elementor-widget');
+        var settings = $widget.data('settings') || {};
+        if (settings.rows) {
+          rows = parseInt(settings.rows, 10);
+        }
+        if (!rows) {
+          var columns = gm2GetResponsiveColumns(settings);
+          if (!columns) {
+            columns = parseInt($list.data('columns'), 10) || 0;
+          }
+          var count = $list.children('li').length;
+          if (columns) {
+            rows = Math.ceil(count / columns);
+          }
+        }
+      }
     } else if (list.getAttribute) {
       var attr = list.getAttribute('data-rows');
       rows = attr ? parseInt(attr, 10) : 0;
+      if (!rows) {
+        var widget = list.closest ? list.closest('.elementor-widget') : null;
+        var _settings = {};
+        if (widget) {
+          var sattr = widget.getAttribute('data-settings');
+          if (sattr) {
+            try {
+              _settings = JSON.parse(sattr);
+            } catch (e) {
+              _settings = {};
+            }
+          }
+        }
+        if (_settings.rows) {
+          rows = parseInt(_settings.rows, 10);
+        }
+        if (!rows) {
+          var _columns = gm2GetResponsiveColumns(_settings);
+          if (!_columns) {
+            var cAttr = list.getAttribute('data-columns');
+            if (cAttr) _columns = parseInt(cAttr, 10) || 0;
+          }
+          var _count = list.querySelectorAll('li').length;
+          if (_columns) {
+            rows = Math.ceil(_count / _columns);
+          }
+        }
+      }
     }
     if (isNaN(rows)) rows = 0;
     return rows;
@@ -370,8 +415,9 @@ jQuery(document).ready(function ($) {
         perPage = parseInt(settings.posts_per_page, 10) || 0;
       }
     }
+    var gm2Rows = gm2GetListRows($oldList);
     if (!rows) {
-      rows = gm2GetListRows($oldList);
+      rows = gm2Rows;
     }
     var originalClasses = $oldList.data('original-classes') || $oldList.attr('class');
     var match = originalClasses.match(/columns-(\d+)/);
@@ -400,7 +446,7 @@ jQuery(document).ready(function ($) {
       gm2_simple_operator: simpleOperator,
       gm2_columns: columns,
       gm2_per_page: perPage,
-      gm2_rows: rows,
+      gm2_rows: gm2Rows,
       gm2_paged: page,
       orderby: orderby,
       gm2_nonce: gm2CategorySort.nonce || '',
