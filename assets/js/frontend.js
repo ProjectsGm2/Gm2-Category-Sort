@@ -366,7 +366,7 @@ jQuery(document).ready(function($) {
 
         const originalClasses = $oldList.data('original-classes') || $oldList.attr('class');
         const match = originalClasses.match(/columns-(\d+)/);
-        if (match) {
+        if (match && !columns) {
             columns = parseInt(match[1], 10);
         }
 
