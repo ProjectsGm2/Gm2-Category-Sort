@@ -83,9 +83,50 @@ jQuery(document).ready(function($) {
         if (window.jQuery) {
             const $list = jQuery(list);
             rows = parseInt($list.data('rows'), 10);
+            if (!rows) {
+                const $widget = $list.closest('.elementor-widget');
+                const settings = $widget.data('settings') || {};
+                if (settings.rows) {
+                    rows = parseInt(settings.rows, 10);
+                }
+                if (!rows) {
+                    let columns = gm2GetResponsiveColumns(settings);
+                    if (!columns) {
+                        columns = parseInt($list.data('columns'), 10) || 0;
+                    }
+                    const count = $list.children('li').length;
+                    if (columns) {
+                        rows = Math.ceil(count / columns);
+                    }
+                }
+            }
         } else if (list.getAttribute) {
             const attr = list.getAttribute('data-rows');
             rows = attr ? parseInt(attr, 10) : 0;
+            if (!rows) {
+                const widget = list.closest ? list.closest('.elementor-widget') : null;
+                let settings = {};
+                if (widget) {
+                    const sattr = widget.getAttribute('data-settings');
+                    if (sattr) {
+                        try { settings = JSON.parse(sattr); } catch (e) { settings = {}; }
+                    }
+                }
+                if (settings.rows) {
+                    rows = parseInt(settings.rows, 10);
+                }
+                if (!rows) {
+                    let columns = gm2GetResponsiveColumns(settings);
+                    if (!columns) {
+                        const cAttr = list.getAttribute('data-columns');
+                        if (cAttr) columns = parseInt(cAttr, 10) || 0;
+                    }
+                    const count = list.querySelectorAll('li').length;
+                    if (columns) {
+                        rows = Math.ceil(count / columns);
+                    }
+                }
+            }
         }
         if (isNaN(rows)) rows = 0;
         return rows;
@@ -389,8 +430,9 @@ jQuery(document).ready(function($) {
             }
         }
 
+        const gm2Rows = gm2GetListRows($oldList);
         if (!rows) {
-            rows = gm2GetListRows($oldList);
+            rows = gm2Rows;
         }
 
         const originalClasses = $oldList.data('original-classes') || $oldList.attr('class');
@@ -424,7 +466,7 @@ jQuery(document).ready(function($) {
             gm2_simple_operator: simpleOperator,
             gm2_columns: columns,
             gm2_per_page: perPage,
-            gm2_rows: rows,
+            gm2_rows: gm2Rows,
             gm2_paged: page,
             orderby: orderby,
             gm2_nonce: gm2CategorySort.nonce || '',
