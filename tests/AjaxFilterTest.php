@@ -146,6 +146,7 @@ class AjaxFilterTest extends TestCase {
         Gm2_Category_Sort_Ajax::filter_products();
         $this->assertNotNull($GLOBALS['gm2_json_result']);
         $html = $GLOBALS['gm2_json_result']['data']['html'];
+        $this->assertStringContainsString('data-rows="2"', $html);
         preg_match_all('/<li class="product">item<\/li>/', $html, $matches);
         $this->assertCount(6, $matches[0]);
     }
@@ -168,6 +169,7 @@ class AjaxFilterTest extends TestCase {
         Gm2_Category_Sort_Ajax::filter_products();
         $this->assertNotNull($GLOBALS['gm2_json_result']);
         $html = $GLOBALS['gm2_json_result']['data']['html'];
+        $this->assertStringContainsString('data-rows="2"', $html);
         preg_match_all('/<li class="product">item<\/li>/', $html, $matches);
         $this->assertCount(4, $matches[0]);
     }
@@ -189,6 +191,7 @@ class AjaxFilterTest extends TestCase {
         Gm2_Category_Sort_Ajax::filter_products();
         $this->assertNotNull($GLOBALS['gm2_json_result']);
         $html = $GLOBALS['gm2_json_result']['data']['html'];
+        $this->assertStringContainsString('data-rows="2"', $html);
         preg_match_all('/<li class="product">item<\/li>/', $html, $matches);
         $this->assertCount(3, $matches[0]);
     }

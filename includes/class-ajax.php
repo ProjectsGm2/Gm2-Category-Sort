@@ -62,6 +62,7 @@ class Gm2_Category_Sort_Ajax {
         $paged = isset($_POST['gm2_paged']) ? absint($_POST['gm2_paged']) : 1;
 
         $columns  = isset($_POST['gm2_columns']) ? absint($_POST['gm2_columns']) : 0;
+        $rows     = isset($_POST['gm2_rows']) ? absint($_POST['gm2_rows']) : 0;
         $per_page = isset($_POST['gm2_per_page']) ? absint($_POST['gm2_per_page']) : 0;
         $widget_type = isset($_POST['gm2_widget_type']) ? sanitize_key($_POST['gm2_widget_type']) : '';
         $settings = [];
@@ -73,13 +74,16 @@ class Gm2_Category_Sort_Ajax {
             }
         }
         if (!$per_page) {
-            $rows = isset($_POST['gm2_rows']) ? absint($_POST['gm2_rows']) : 0;
             if ($columns && $rows) {
                 $per_page = $columns * $rows;
             } else {
                 // Fall back to the loop's per_page setting when rows are unknown.
                 $per_page = wc_get_loop_prop('per_page');
             }
+        }
+
+        if (!$rows && $columns && $per_page) {
+            $rows = (int) ceil($per_page / $columns);
         }
 
         // If still zero, use the shop default via the woocommerce_products_per_page filter.
@@ -169,6 +173,10 @@ class Gm2_Category_Sort_Ajax {
         wp_reset_postdata();
 
         $html = ob_get_clean();
+
+        if ($rows) {
+            $html = preg_replace('/<ul class="products([^"]*)">/', '<ul class="products$1" data-rows="' . $rows . '">', $html, 1);
+        }
 
         ob_start();
         woocommerce_result_count();
