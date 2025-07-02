@@ -64,6 +64,14 @@ class Gm2_Category_Sort_Ajax {
         $columns  = isset($_POST['gm2_columns']) ? absint($_POST['gm2_columns']) : 0;
         $per_page = isset($_POST['gm2_per_page']) ? absint($_POST['gm2_per_page']) : 0;
         $widget_type = isset($_POST['gm2_widget_type']) ? sanitize_key($_POST['gm2_widget_type']) : '';
+        $settings = [];
+        if (isset($_POST['gm2_widget_settings'])) {
+            $json = wp_unslash($_POST['gm2_widget_settings']);
+            $decoded = json_decode($json, true);
+            if (is_array($decoded)) {
+                $settings = $decoded;
+            }
+        }
         if (!$per_page) {
             $rows = isset($_POST['gm2_rows']) ? absint($_POST['gm2_rows']) : 0;
             if ($columns && $rows) {
@@ -141,6 +149,9 @@ class Gm2_Category_Sort_Ajax {
 
             if ($widget_class) {
                 $widget = new $widget_class();
+                if (method_exists($widget, 'set_settings')) {
+                    $widget->set_settings( $settings );
+                }
                 if (method_exists($widget, 'render')) {
                     $widget->render();
                 }
