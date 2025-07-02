@@ -18,7 +18,7 @@ Gm2 Category Sort adds a product category sorting widget for WooCommerce shops w
 ## Usage
 1. Edit a WooCommerce shop or archive page with Elementor.
 2. Search for the **GM2 Category Sort** widget and drag it into your layout.
-3. Choose optional parent categories and select the filter logic (Simple or Advanced) in the widget settings.
+3. Enter an optional title, choose parent categories and select the filter logic (Simple or Advanced) in the widget settings.
 4. Save the page. On the frontend, shoppers can expand categories and filter the product list.
    After each filter update, the page automatically scrolls back to the selected
    categories list so it's easy to refine choices.
@@ -28,6 +28,8 @@ Gm2 Category Sort adds a product category sorting widget for WooCommerce shops w
 The **Widget Box** section styles the outer `.gm2-category-sort` container. Set
 a background, border, radius and box shadow here so the widget blends with your
 theme.
+
+The **Title** panel customizes the heading displayed above the category tree. Typography, colour and spacing controls match those of the Selected Categories widget.
 
 The **Layout** panel switches the entire widget between block and inline
 display. Selecting **Inline** adds the `gm2-display-inline` class to
