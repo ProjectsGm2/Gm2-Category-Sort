@@ -303,6 +303,7 @@
 
 .gm2-selected-header {
     margin-top: 20px;
+    margin-bottom: 0;
     font-weight: bold;
     padding-bottom: 10px;
     border-bottom: 1px solid #eee;
@@ -311,6 +312,7 @@
 
 .gm2-selected-categories {
     margin-top: 15px;
+    margin-bottom: 0;
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
