@@ -81,6 +81,21 @@ jQuery(document).ready(function ($) {
     return element;
   }
   window.gm2FindProductList = gm2FindProductList;
+  function gm2GetListRows(root) {
+    var list = gm2FindProductList(root);
+    if (!list) return 0;
+    var rows = 0;
+    if (window.jQuery) {
+      var $list = jQuery(list);
+      rows = parseInt($list.data('rows'), 10);
+    } else if (list.getAttribute) {
+      var attr = list.getAttribute('data-rows');
+      rows = attr ? parseInt(attr, 10) : 0;
+    }
+    if (isNaN(rows)) rows = 0;
+    return rows;
+  }
+  window.gm2GetListRows = gm2GetListRows;
   var $initialList = gm2FindProductList();
   if ($initialList.length) {
     $initialList.data('original-classes', $initialList.attr('class'));
@@ -348,6 +363,9 @@ jQuery(document).ready(function ($) {
         perPage = parseInt(settings.posts_per_page, 10) || 0;
       }
     }
+    if (!rows) {
+      rows = gm2GetListRows($oldList);
+    }
     var originalClasses = $oldList.data('original-classes') || $oldList.attr('class');
     var match = originalClasses.match(/columns-(\d+)/);
     if (match && !columns) {
@@ -359,7 +377,7 @@ jQuery(document).ready(function ($) {
         columns = parseInt(widgetColumns, 10) || 0;
       }
     }
-    if (!perPage && settings && rows) {
+    if (!perPage && rows && columns) {
       perPage = rows * columns;
     }
     if (!perPage) {

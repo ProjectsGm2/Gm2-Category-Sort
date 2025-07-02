@@ -68,6 +68,23 @@ jQuery(document).ready(function($) {
 
     window.gm2FindProductList = gm2FindProductList;
 
+    function gm2GetListRows(root) {
+        const list = gm2FindProductList(root);
+        if (!list) return 0;
+        let rows = 0;
+        if (window.jQuery) {
+            const $list = jQuery(list);
+            rows = parseInt($list.data('rows'), 10);
+        } else if (list.getAttribute) {
+            const attr = list.getAttribute('data-rows');
+            rows = attr ? parseInt(attr, 10) : 0;
+        }
+        if (isNaN(rows)) rows = 0;
+        return rows;
+    }
+
+    window.gm2GetListRows = gm2GetListRows;
+
     const $initialList = gm2FindProductList();
     if ($initialList.length) {
         $initialList.data('original-classes', $initialList.attr('class'));
@@ -364,6 +381,10 @@ jQuery(document).ready(function($) {
             }
         }
 
+        if (!rows) {
+            rows = gm2GetListRows($oldList);
+        }
+
         const originalClasses = $oldList.data('original-classes') || $oldList.attr('class');
         const match = originalClasses.match(/columns-(\d+)/);
         if (match && !columns) {
@@ -377,7 +398,7 @@ jQuery(document).ready(function($) {
             }
         }
 
-        if (!perPage && settings && rows) {
+        if (!perPage && rows && columns) {
             perPage = rows * columns;
         }
 
