@@ -51,3 +51,12 @@ describe('gm2GetResponsiveColumns', () => {
     expect(cols).toBe(3);
   });
 });
+
+describe('gm2UpdateProductFiltering', () => {
+  test('fallback to original classes only when columns is zero', () => {
+    const src = fs.readFileSync(path.resolve(__dirname, '../../assets/js/frontend.js'), 'utf8');
+    const fnCode = src.match(/function gm2UpdateProductFiltering([\s\S]+?)function gm2ReinitArchiveWidget/);
+    expect(fnCode).not.toBeNull();
+    expect(fnCode[0]).toMatch(/match && !columns/);
+  });
+});

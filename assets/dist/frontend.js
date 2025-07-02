@@ -350,7 +350,7 @@ jQuery(document).ready(function ($) {
     }
     var originalClasses = $oldList.data('original-classes') || $oldList.attr('class');
     var match = originalClasses.match(/columns-(\d+)/);
-    if (match) {
+    if (match && !columns) {
       columns = parseInt(match[1], 10);
     }
     if (!columns) {
