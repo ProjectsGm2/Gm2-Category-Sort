@@ -59,4 +59,22 @@ describe('gm2UpdateProductFiltering', () => {
     expect(fnCode).not.toBeNull();
     expect(fnCode[0]).toMatch(/match && !columns/);
   });
+
+  test('uses rows and columns before posts_per_page', () => {
+    const src = fs.readFileSync(path.resolve(__dirname, '../../assets/js/frontend.js'), 'utf8');
+    const fnCode = src.match(/function gm2UpdateProductFiltering([\s\S]+?)\n(?=\s*function gm2ReinitArchiveWidget)/);
+    expect(fnCode).not.toBeNull();
+    const code = fnCode[0];
+    const idxRowsCols = code.indexOf('perPage = rows * columns');
+    const idxPostsPer = code.indexOf('settings.posts_per_page');
+    expect(idxRowsCols).toBeGreaterThan(-1);
+    expect(idxPostsPer).toBeGreaterThan(idxRowsCols);
+  });
+
+  test('widget per-page only used when rows unavailable', () => {
+    const src = fs.readFileSync(path.resolve(__dirname, '../../assets/js/frontend.js'), 'utf8');
+    const fnCode = src.match(/function gm2UpdateProductFiltering([\s\S]+?)\n(?=\s*function gm2ReinitArchiveWidget)/);
+    expect(fnCode).not.toBeNull();
+    expect(fnCode[0]).toMatch(/!perPage && !rows[\s\S]*\.data\('per-page'\)/);
+  });
 });

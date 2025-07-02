@@ -403,22 +403,17 @@ jQuery(document).ready(function ($) {
     var $oldList = gm2FindProductList($widget);
     var $elementorWidget = $oldList.closest('.elementor-widget');
     var columns = 0;
-    var perPage = 0;
     var rows = 0;
     var settings = $elementorWidget.data('settings');
     if (settings) {
       columns = gm2GetResponsiveColumns(settings);
       rows = gm2GetResponsiveRows(settings);
-      if (rows && columns) {
-        perPage = rows * columns;
-      } else if (settings.posts_per_page) {
-        perPage = parseInt(settings.posts_per_page, 10) || 0;
-      }
     }
     var gm2Rows = gm2GetListRows($oldList);
     if (!rows) {
       rows = gm2Rows;
     }
+    var perPage = 0;
     var originalClasses = $oldList.data('original-classes') || $oldList.attr('class');
     var match = originalClasses.match(/columns-(\d+)/);
     if (match && !columns) {
@@ -430,10 +425,13 @@ jQuery(document).ready(function ($) {
         columns = parseInt(widgetColumns, 10) || 0;
       }
     }
-    if (!perPage && rows && columns) {
+    if (rows && columns) {
       perPage = rows * columns;
     }
-    if (!perPage) {
+    if (!perPage && settings && settings.posts_per_page) {
+      perPage = parseInt(settings.posts_per_page, 10) || 0;
+    }
+    if (!perPage && !rows) {
       var widgetPerPage = $widget.data('per-page');
       if (widgetPerPage) {
         perPage = parseInt(widgetPerPage, 10) || 0;

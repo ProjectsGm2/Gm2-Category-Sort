@@ -416,24 +416,20 @@ jQuery(document).ready(function($) {
         const $oldList = gm2FindProductList($widget);
         const $elementorWidget = $oldList.closest('.elementor-widget');
         let columns = 0;
-        let perPage = 0;
         let rows = 0;
 
         const settings = $elementorWidget.data('settings');
         if (settings) {
             columns = gm2GetResponsiveColumns(settings);
             rows = gm2GetResponsiveRows(settings);
-            if (rows && columns) {
-                perPage = rows * columns;
-            } else if (settings.posts_per_page) {
-                perPage = parseInt(settings.posts_per_page, 10) || 0;
-            }
         }
 
         const gm2Rows = gm2GetListRows($oldList);
         if (!rows) {
             rows = gm2Rows;
         }
+
+        let perPage = 0;
 
         const originalClasses = $oldList.data('original-classes') || $oldList.attr('class');
         const match = originalClasses.match(/columns-(\d+)/);
@@ -448,11 +444,15 @@ jQuery(document).ready(function($) {
             }
         }
 
-        if (!perPage && rows && columns) {
+        if (rows && columns) {
             perPage = rows * columns;
         }
 
-        if (!perPage) {
+        if (!perPage && settings && settings.posts_per_page) {
+            perPage = parseInt(settings.posts_per_page, 10) || 0;
+        }
+
+        if (!perPage && !rows) {
             const widgetPerPage = $widget.data('per-page');
             if (widgetPerPage) {
                 perPage = parseInt(widgetPerPage, 10) || 0;
