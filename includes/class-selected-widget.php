@@ -54,6 +54,20 @@ class Gm2_Selected_Category_Widget extends \Elementor\Widget_Base {
             ],
         ] );
 
+        $this->add_responsive_control( 'title_spacing', [
+            'label' => __( 'Bottom Spacing', 'gm2-category-sort' ),
+            'type'  => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => [ 'px' ],
+            'range' => [ 'px' => [ 'min' => 0, 'max' => 100 ] ],
+            'default' => [
+                'size' => 0,
+                'unit' => 'px',
+            ],
+            'selectors' => [
+                '{{WRAPPER}} .gm2-selected-header' => 'margin-bottom: {{SIZE}}{{UNIT}};',
+            ],
+        ] );
+
         $this->end_controls_section();
 
         // Selected Categories styles copied from the main widget.
@@ -139,6 +153,34 @@ class Gm2_Selected_Category_Widget extends \Elementor\Widget_Base {
             'type'  => \Elementor\Controls_Manager::COLOR,
             'selectors' => [
                 '{{WRAPPER}} .gm2-remove-category:hover' => 'color: {{VALUE}};',
+            ],
+        ] );
+
+        $this->add_responsive_control( 'selected_spacing_top', [
+            'label' => __( 'Top Spacing', 'gm2-category-sort' ),
+            'type'  => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => [ 'px' ],
+            'range' => [ 'px' => [ 'min' => 0, 'max' => 100 ] ],
+            'default' => [
+                'size' => 15,
+                'unit' => 'px',
+            ],
+            'selectors' => [
+                '{{WRAPPER}} .gm2-selected-categories' => 'margin-top: {{SIZE}}{{UNIT}};',
+            ],
+        ] );
+
+        $this->add_responsive_control( 'selected_spacing_bottom', [
+            'label' => __( 'Bottom Spacing', 'gm2-category-sort' ),
+            'type'  => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => [ 'px' ],
+            'range' => [ 'px' => [ 'min' => 0, 'max' => 100 ] ],
+            'default' => [
+                'size' => 0,
+                'unit' => 'px',
+            ],
+            'selectors' => [
+                '{{WRAPPER}} .gm2-selected-categories' => 'margin-bottom: {{SIZE}}{{UNIT}};',
             ],
         ] );
 
