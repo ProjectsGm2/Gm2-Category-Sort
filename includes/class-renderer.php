@@ -20,8 +20,8 @@ class Gm2_Category_Sort_Renderer {
              data-per-page="<?= esc_attr(wc_get_loop_prop('per_page')) ?>"
              data-scroll-offset="<?= esc_attr($this->settings['scroll_offset'] ?? 0) ?>"
              data-scroll-offset-tablet="<?= esc_attr($this->settings['scroll_offset_tablet'] ?? '') ?>"
-             data-scroll-offset-mobile="<?= esc_attr($this->settings['scroll_offset_mobile'] ?? '') ?>"
-             data-current-cat="<?php
+            data-scroll-offset-mobile="<?= esc_attr($this->settings['scroll_offset_mobile'] ?? '') ?>"
+            data-current-cat="<?php
                 $current = 0;
                 if ( is_product_category() ) {
                     $obj = get_queried_object();
@@ -31,6 +31,12 @@ class Gm2_Category_Sort_Renderer {
                 }
                 echo esc_attr( $current );
             ?>">
+
+            <?php if ( ! empty( $this->settings['title'] ) ) : ?>
+                <div class="gm2-widget-title">
+                    <?= esc_html( $this->settings['title'] ); ?>
+                </div>
+            <?php endif; ?>
 
             <nav class="gm2-category-tree">
                 <?php $this->render_category_tree(); ?>

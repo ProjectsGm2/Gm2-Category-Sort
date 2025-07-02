@@ -23,6 +23,13 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'label' => __('Settings', 'gm2-category-sort'),
             'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
         ]);
+
+        $this->add_control('title', [
+            'label'       => __('Title', 'gm2-category-sort'),
+            'type'        => \Elementor\Controls_Manager::TEXT,
+            'default'     => __('Filter Categories', 'gm2-category-sort'),
+            'label_block' => true,
+        ]);
         
         $this->add_control('parent_categories', [
             'label' => __('Parent Categories', 'gm2-category-sort'),
@@ -62,6 +69,44 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'type'        => \Elementor\Controls_Manager::NUMBER,
             'default'     => 0,
             'description' => __('Pixels to offset when scrolling to the selected list', 'gm2-category-sort'),
+        ]);
+
+        $this->end_controls_section();
+
+        // Title styles
+        $this->start_controls_section('gm2_title_style_section', [
+            'label' => __('Title', 'gm2-category-sort'),
+            'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+        ]);
+
+        $this->add_group_control(
+            \Elementor\Group_Control_Typography::get_type(),
+            [
+                'name'     => 'title_typography',
+                'selector' => '{{WRAPPER}} .gm2-widget-title',
+            ]
+        );
+
+        $this->add_control('title_color', [
+            'label' => __('Color', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::COLOR,
+            'selectors' => [
+                '{{WRAPPER}} .gm2-widget-title' => 'color: {{VALUE}};',
+            ],
+        ]);
+
+        $this->add_responsive_control('title_spacing', [
+            'label' => __('Bottom Spacing', 'gm2-category-sort'),
+            'type'  => \Elementor\Controls_Manager::SLIDER,
+            'size_units' => [ 'px' ],
+            'range' => [ 'px' => [ 'min' => 0, 'max' => 100 ] ],
+            'default' => [
+                'size' => 0,
+                'unit' => 'px',
+            ],
+            'selectors' => [
+                '{{WRAPPER}} .gm2-widget-title' => 'margin-bottom: {{SIZE}}{{UNIT}};',
+            ],
         ]);
 
         $this->end_controls_section();
@@ -891,6 +936,7 @@ class Gm2_Category_Sort_Widget extends \Elementor\Widget_Base {
             'filter_type'          => $settings['filter_type'],
             'simple_operator'      => $settings['simple_operator'],
             'widget_id'            => $this->get_id(),
+            'title'                => $settings['title'],
             'synonym_icon'         => $settings['synonym_icon'],
             'synonym_icon_position'=> $settings['synonym_icon_position'],
             'expand_icon'          => $settings['expand_icon'],
