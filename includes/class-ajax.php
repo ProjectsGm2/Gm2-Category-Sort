@@ -63,28 +63,13 @@ class Gm2_Category_Sort_Ajax {
 
         $columns  = isset($_POST['gm2_columns']) ? absint($_POST['gm2_columns']) : 0;
         $per_page = isset($_POST['gm2_per_page']) ? absint($_POST['gm2_per_page']) : 0;
-        $widget_type = isset($_POST['gm2_widget_type']) ? sanitize_key($_POST['gm2_widget_type']) : '';
-        $settings = [];
-        if (isset($_POST['gm2_widget_settings'])) {
-            $json = wp_unslash($_POST['gm2_widget_settings']);
-            $decoded = json_decode($json, true);
-            if (is_array($decoded)) {
-                $settings = $decoded;
-            }
-        }
         if (!$per_page) {
             $rows = isset($_POST['gm2_rows']) ? absint($_POST['gm2_rows']) : 0;
             if ($columns && $rows) {
                 $per_page = $columns * $rows;
             } else {
-                // Fall back to the loop's per_page setting when rows are unknown.
                 $per_page = wc_get_loop_prop('per_page');
             }
-        }
-
-        // If still zero, use the shop default via the woocommerce_products_per_page filter.
-        if ( ! $per_page ) {
-            $per_page = apply_filters( 'woocommerce_products_per_page', 12 );
         }
 
         $orderby = isset($_POST['orderby']) ? wc_clean($_POST['orderby']) : '';
@@ -126,43 +111,16 @@ class Gm2_Category_Sort_Ajax {
         $GLOBALS['wp_query'] = $query;
 
         ob_start();
-        // Product markup is generated via WooCommerce template functions by
-        // default. When filtering a list created with Elementor's Products
-        // widget, use the widget renderer so the wrapper classes and data
-        // attributes remain intact.
+        // Product markup is generated solely via WooCommerce template
+        // functions. Altering these calls may change or remove the
+        // structured data that WooCommerce outputs.
         if ($query->have_posts()) {
-            $widget_class = null;
-
-            if (
-                $widget_type &&
-                strpos($widget_type, 'archive-products') === 0 &&
-                class_exists('\\ElementorPro\\Modules\\Woocommerce\\Widgets\\Archive_Products')
-            ) {
-                $widget_class = '\\ElementorPro\\Modules\\Woocommerce\\Widgets\\Archive_Products';
-            } elseif (
-                $widget_type &&
-                strpos($widget_type, 'products') !== false &&
-                class_exists('\\ElementorPro\\Modules\\Woocommerce\\Widgets\\Products')
-            ) {
-                $widget_class = '\\ElementorPro\\Modules\\Woocommerce\\Widgets\\Products';
+            woocommerce_product_loop_start();
+            while ($query->have_posts()) {
+                $query->the_post();
+                wc_get_template_part('content', 'product');
             }
-
-            if ($widget_class) {
-                $widget = new $widget_class();
-                if (method_exists($widget, 'set_settings')) {
-                    $widget->set_settings( $settings );
-                }
-                if (method_exists($widget, 'render')) {
-                    $widget->render();
-                }
-            } else {
-                woocommerce_product_loop_start();
-                while ($query->have_posts()) {
-                    $query->the_post();
-                    wc_get_template_part('content', 'product');
-                }
-                woocommerce_product_loop_end();
-            }
+            woocommerce_product_loop_end();
         } else {
             woocommerce_no_products_found();
         }

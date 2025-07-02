@@ -57,53 +57,7 @@ jQuery(document).ready(function ($) {
   if (!$('#gm2-loading-overlay').length) {
     $('body').append('<div id="gm2-loading-overlay"><div class="gm2-spinner"></div></div>');
   }
-  function gm2FindProductList(root) {
-    function search(scope) {
-      if (window.jQuery) {
-        var $list = jQuery(scope).find('.elementor-widget[data-widget_type*="products"] ul.products:visible').first();
-        if ($list.length) return $list;
-        $list = jQuery(scope).find('ul.products:visible').first();
-        if ($list.length) return $list;
-        return jQuery(scope).find('ul.products').first();
-      }
-      function isVisible(el) {
-        if (!el) return false;
-        var style = el.style || {};
-        return style.display !== 'none' && style.visibility !== 'hidden';
-      }
-      var widgetLists = Array.from(scope.querySelectorAll('.elementor-widget[data-widget_type*="products"] ul.products'));
-      var element = widgetLists.find(isVisible);
-      if (!element) {
-        var lists = Array.from(scope.querySelectorAll('ul.products'));
-        element = lists.find(isVisible) || lists[0] || null;
-      }
-      return element;
-    }
-    if (root) {
-      var found = search(root);
-      if (found && (found.length ? found.length : found)) {
-        return found;
-      }
-    }
-    return search(document);
-  }
-  window.gm2FindProductList = gm2FindProductList;
-  function gm2GetListRows(root) {
-    var list = gm2FindProductList(root);
-    if (!list) return 0;
-    var rows = 0;
-    if (window.jQuery) {
-      var $list = jQuery(list);
-      rows = parseInt($list.data('rows'), 10);
-    } else if (list.getAttribute) {
-      var attr = list.getAttribute('data-rows');
-      rows = attr ? parseInt(attr, 10) : 0;
-    }
-    if (isNaN(rows)) rows = 0;
-    return rows;
-  }
-  window.gm2GetListRows = gm2GetListRows;
-  var $initialList = gm2FindProductList();
+  var $initialList = $('ul.products').first();
   if ($initialList.length) {
     $initialList.data('original-classes', $initialList.attr('class'));
   }
@@ -113,24 +67,13 @@ jQuery(document).ready(function ($) {
   function gm2HideLoading() {
     $('#gm2-loading-overlay').removeClass('gm2-visible');
   }
-  function gm2ScrollToSelectedSection($root) {
-    var $target;
-    if ($root && $root.length) {
-      $target = $root.find('.gm2-selected-header:visible').first();
-      if (!$target.length) {
-        $target = $root.find('.gm2-selected-categories:visible').first();
-      }
-      if (!$target.length) {
-        $target = $root.first();
-      }
-    } else {
-      $target = $('.gm2-selected-header:visible').first();
-      if (!$target.length) {
-        $target = $('.gm2-selected-categories:visible').first();
-      }
-      if (!$target.length) {
-        $target = $('.gm2-category-sort').first();
-      }
+  function gm2ScrollToSelectedSection() {
+    var $target = $('.gm2-selected-header:visible').first();
+    if (!$target.length) {
+      $target = $('.gm2-selected-categories:visible').first();
+    }
+    if (!$target.length) {
+      $target = $('.gm2-category-sort').first();
     }
     if ($target.length) {
       var $widget = $target.closest('.gm2-category-sort');
@@ -237,7 +180,7 @@ jQuery(document).ready(function ($) {
     $('.gm2-category-sort').each(function () {
       gm2RefreshSelectedList($(this));
     });
-    var $widget = $(this).closest('.gm2-category-sort');
+    var $widget = $('.gm2-category-sort').first();
     gm2UpdateProductFiltering($widget, 1);
   }
   function gm2RefreshSelectedList($widget) {
@@ -289,38 +232,6 @@ jQuery(document).ready(function ($) {
       }
     });
   }
-  function gm2GetResponsiveRows(settings) {
-    if (!settings) return 0;
-    var rows = settings.rows ? parseInt(settings.rows, 10) : 0;
-    if (window.elementorFrontend && elementorFrontend.config && elementorFrontend.config.breakpoints) {
-      var bp = elementorFrontend.config.breakpoints;
-      var width = window.innerWidth;
-      if (width <= bp.md && settings.rows_mobile) {
-        rows = parseInt(settings.rows_mobile, 10);
-      } else if (width <= bp.lg && settings.rows_tablet) {
-        rows = parseInt(settings.rows_tablet, 10);
-      }
-    }
-    if (isNaN(rows)) rows = 0;
-    return rows;
-  }
-  window.gm2GetResponsiveRows = gm2GetResponsiveRows;
-  function gm2GetResponsiveColumns(settings) {
-    if (!settings) return 0;
-    var columns = settings.columns ? parseInt(settings.columns, 10) : 0;
-    if (window.elementorFrontend && elementorFrontend.config && elementorFrontend.config.breakpoints) {
-      var bp = elementorFrontend.config.breakpoints;
-      var width = window.innerWidth;
-      if (width <= bp.md && settings.columns_mobile) {
-        columns = parseInt(settings.columns_mobile, 10);
-      } else if (width <= bp.lg && settings.columns_tablet) {
-        columns = parseInt(settings.columns_tablet, 10);
-      }
-    }
-    if (isNaN(columns)) columns = 0;
-    return columns;
-  }
-  window.gm2GetResponsiveColumns = gm2GetResponsiveColumns;
   function gm2UpdateProductFiltering($widget) {
     var page = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
     var orderby = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
@@ -355,27 +266,23 @@ jQuery(document).ready(function ($) {
     } else {
       url.searchParams.delete('orderby');
     }
-    var $oldList = gm2FindProductList($widget);
+    var $oldList = $('.products').first();
     var $elementorWidget = $oldList.closest('.elementor-widget');
     var columns = 0;
     var perPage = 0;
     var rows = 0;
     var settings = $elementorWidget.data('settings');
     if (settings) {
-      columns = gm2GetResponsiveColumns(settings);
-      rows = gm2GetResponsiveRows(settings);
-      if (rows && columns) {
-        perPage = rows * columns;
-      } else if (settings.posts_per_page) {
+      if (settings.columns) {
+        columns = parseInt(settings.columns, 10) || 0;
+      }
+      if (settings.posts_per_page) {
         perPage = parseInt(settings.posts_per_page, 10) || 0;
       }
     }
-    if (!rows) {
-      rows = gm2GetListRows($oldList);
-    }
     var originalClasses = $oldList.data('original-classes') || $oldList.attr('class');
     var match = originalClasses.match(/columns-(\d+)/);
-    if (match && !columns) {
+    if (match) {
       columns = parseInt(match[1], 10);
     }
     if (!columns) {
@@ -384,8 +291,13 @@ jQuery(document).ready(function ($) {
         columns = parseInt(widgetColumns, 10) || 0;
       }
     }
-    if (!perPage && rows && columns) {
-      perPage = rows * columns;
+    if (!perPage && settings && settings.rows) {
+      rows = parseInt(settings.rows, 10);
+      if (!isNaN(rows) && columns) {
+        perPage = rows * columns;
+      } else if (isNaN(rows)) {
+        rows = 0;
+      }
     }
     if (!perPage) {
       var widgetPerPage = $widget.data('per-page');
@@ -403,9 +315,7 @@ jQuery(document).ready(function ($) {
       gm2_rows: rows,
       gm2_paged: page,
       orderby: orderby,
-      gm2_nonce: gm2CategorySort.nonce || '',
-      gm2_widget_type: $elementorWidget.data('widget_type') || '',
-      gm2_widget_settings: JSON.stringify($elementorWidget.data('settings') || {})
+      gm2_nonce: gm2CategorySort.nonce || ''
     };
     if (typeof gm2CategorySort === 'undefined' || !gm2CategorySort.ajax_url) {
       window.location.href = url.toString();
@@ -423,7 +333,10 @@ jQuery(document).ready(function ($) {
       if (response && response.success) {
         var html = response.data && response.data.html ? response.data.html : '';
         var $response = $(html);
-        var $newList = $(gm2FindProductList($response));
+        var $newList = $response.filter('ul.products').first();
+        if (!$newList.length) {
+          $newList = $response.find('ul.products').first();
+        }
         if (!$newList.length) {
           var message = $response.filter('.woocommerce-info').first().text();
           gm2DisplayNoProducts($oldList, url, message);
@@ -478,7 +391,7 @@ jQuery(document).ready(function ($) {
       gm2DisplayNoProducts($oldList, url);
     }).always(function () {
       gm2HideLoading();
-      gm2ScrollToSelectedSection($widget);
+      gm2ScrollToSelectedSection();
     });
   }
   function gm2ReinitArchiveWidget($list) {
@@ -521,14 +434,14 @@ jQuery(document).ready(function ($) {
         page = 1;
       }
     }
-    var $widget = $(this).closest('.gm2-category-sort');
+    var $widget = $('.gm2-category-sort').first();
     gm2UpdateProductFiltering($widget, page);
     return false;
   });
   $(document).on('change', '.woocommerce-ordering select.orderby', function (e) {
     e.preventDefault();
     var val = $(this).val();
-    var $widget = $(this).closest('.gm2-category-sort');
+    var $widget = $('.gm2-category-sort').first();
     gm2UpdateProductFiltering($widget, 1, val);
   });
   $(document).on('submit', 'form.woocommerce-ordering', function (e) {

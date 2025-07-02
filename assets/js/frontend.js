@@ -42,58 +42,7 @@ jQuery(document).ready(function($) {
         $('body').append('<div id="gm2-loading-overlay"><div class="gm2-spinner"></div></div>');
     }
 
-    function gm2FindProductList(root) {
-        function search(scope) {
-            if (window.jQuery) {
-                let $list = jQuery(scope).find('.elementor-widget[data-widget_type*="products"] ul.products:visible').first();
-                if ($list.length) return $list;
-                $list = jQuery(scope).find('ul.products:visible').first();
-                if ($list.length) return $list;
-                return jQuery(scope).find('ul.products').first();
-            }
-            function isVisible(el) {
-                if (!el) return false;
-                const style = el.style || {};
-                return style.display !== 'none' && style.visibility !== 'hidden';
-            }
-            const widgetLists = Array.from(scope.querySelectorAll('.elementor-widget[data-widget_type*="products"] ul.products'));
-            let element = widgetLists.find(isVisible);
-            if (!element) {
-                const lists = Array.from(scope.querySelectorAll('ul.products'));
-                element = lists.find(isVisible) || lists[0] || null;
-            }
-            return element;
-        }
-
-        if (root) {
-            const found = search(root);
-            if (found && (found.length ? found.length : found)) {
-                return found;
-            }
-        }
-        return search(document);
-    }
-
-    window.gm2FindProductList = gm2FindProductList;
-
-    function gm2GetListRows(root) {
-        const list = gm2FindProductList(root);
-        if (!list) return 0;
-        let rows = 0;
-        if (window.jQuery) {
-            const $list = jQuery(list);
-            rows = parseInt($list.data('rows'), 10);
-        } else if (list.getAttribute) {
-            const attr = list.getAttribute('data-rows');
-            rows = attr ? parseInt(attr, 10) : 0;
-        }
-        if (isNaN(rows)) rows = 0;
-        return rows;
-    }
-
-    window.gm2GetListRows = gm2GetListRows;
-
-    const $initialList = gm2FindProductList();
+    const $initialList = $('ul.products').first();
     if ($initialList.length) {
         $initialList.data('original-classes', $initialList.attr('class'));
     }
@@ -106,24 +55,13 @@ jQuery(document).ready(function($) {
         $('#gm2-loading-overlay').removeClass('gm2-visible');
     }
   
-    function gm2ScrollToSelectedSection($root) {
-        let $target;
-        if ($root && $root.length) {
-            $target = $root.find('.gm2-selected-header:visible').first();
-            if (!$target.length) {
-                $target = $root.find('.gm2-selected-categories:visible').first();
-            }
-            if (!$target.length) {
-                $target = $root.first();
-            }
-        } else {
-            $target = $('.gm2-selected-header:visible').first();
-            if (!$target.length) {
-                $target = $('.gm2-selected-categories:visible').first();
-            }
-            if (!$target.length) {
-                $target = $('.gm2-category-sort').first();
-            }
+    function gm2ScrollToSelectedSection() {
+        let $target = $('.gm2-selected-header:visible').first();
+        if (!$target.length) {
+            $target = $('.gm2-selected-categories:visible').first();
+        }
+        if (!$target.length) {
+            $target = $('.gm2-category-sort').first();
         }
         if ($target.length) {
             const $widget = $target.closest('.gm2-category-sort');
@@ -239,7 +177,7 @@ jQuery(document).ready(function($) {
             gm2RefreshSelectedList($(this));
         });
 
-        const $widget = $(this).closest('.gm2-category-sort');
+        const $widget = $('.gm2-category-sort').first();
         gm2UpdateProductFiltering($widget, 1);
     }
 
@@ -297,43 +235,7 @@ jQuery(document).ready(function($) {
             }
         });
     }
-
-    function gm2GetResponsiveRows(settings) {
-        if (!settings) return 0;
-        let rows = settings.rows ? parseInt(settings.rows, 10) : 0;
-        if (window.elementorFrontend && elementorFrontend.config && elementorFrontend.config.breakpoints) {
-            const bp = elementorFrontend.config.breakpoints;
-            const width = window.innerWidth;
-            if (width <= bp.md && settings.rows_mobile) {
-                rows = parseInt(settings.rows_mobile, 10);
-            } else if (width <= bp.lg && settings.rows_tablet) {
-                rows = parseInt(settings.rows_tablet, 10);
-            }
-        }
-        if (isNaN(rows)) rows = 0;
-        return rows;
-    }
-
-    window.gm2GetResponsiveRows = gm2GetResponsiveRows;
-
-    function gm2GetResponsiveColumns(settings) {
-        if (!settings) return 0;
-        let columns = settings.columns ? parseInt(settings.columns, 10) : 0;
-        if (window.elementorFrontend && elementorFrontend.config && elementorFrontend.config.breakpoints) {
-            const bp = elementorFrontend.config.breakpoints;
-            const width = window.innerWidth;
-            if (width <= bp.md && settings.columns_mobile) {
-                columns = parseInt(settings.columns_mobile, 10);
-            } else if (width <= bp.lg && settings.columns_tablet) {
-                columns = parseInt(settings.columns_tablet, 10);
-            }
-        }
-        if (isNaN(columns)) columns = 0;
-        return columns;
-    }
-
-    window.gm2GetResponsiveColumns = gm2GetResponsiveColumns;
-
+      
       function gm2UpdateProductFiltering($widget, page = 1, orderby = null) {
         const selectedIds = [];
         $widget.find('.gm2-category-name.selected').each(function() {
@@ -372,7 +274,7 @@ jQuery(document).ready(function($) {
             url.searchParams.delete('orderby');
         }
         
-        const $oldList = gm2FindProductList($widget);
+        const $oldList = $('.products').first();
         const $elementorWidget = $oldList.closest('.elementor-widget');
         let columns = 0;
         let perPage = 0;
@@ -380,22 +282,17 @@ jQuery(document).ready(function($) {
 
         const settings = $elementorWidget.data('settings');
         if (settings) {
-            columns = gm2GetResponsiveColumns(settings);
-            rows = gm2GetResponsiveRows(settings);
-            if (rows && columns) {
-                perPage = rows * columns;
-            } else if (settings.posts_per_page) {
+            if (settings.columns) {
+                columns = parseInt(settings.columns, 10) || 0;
+            }
+            if (settings.posts_per_page) {
                 perPage = parseInt(settings.posts_per_page, 10) || 0;
             }
         }
 
-        if (!rows) {
-            rows = gm2GetListRows($oldList);
-        }
-
         const originalClasses = $oldList.data('original-classes') || $oldList.attr('class');
         const match = originalClasses.match(/columns-(\d+)/);
-        if (match && !columns) {
+        if (match) {
             columns = parseInt(match[1], 10);
         }
 
@@ -406,8 +303,13 @@ jQuery(document).ready(function($) {
             }
         }
 
-        if (!perPage && rows && columns) {
-            perPage = rows * columns;
+        if (!perPage && settings && settings.rows) {
+            rows = parseInt(settings.rows, 10);
+            if (!isNaN(rows) && columns) {
+                perPage = rows * columns;
+            } else if (isNaN(rows)) {
+                rows = 0;
+            }
         }
 
         if (!perPage) {
@@ -427,9 +329,7 @@ jQuery(document).ready(function($) {
             gm2_rows: rows,
             gm2_paged: page,
             orderby: orderby,
-            gm2_nonce: gm2CategorySort.nonce || '',
-            gm2_widget_type: $elementorWidget.data('widget_type') || '',
-            gm2_widget_settings: JSON.stringify($elementorWidget.data('settings') || {})
+            gm2_nonce: gm2CategorySort.nonce || ''
         };
 
         if (typeof gm2CategorySort === 'undefined' || !gm2CategorySort.ajax_url) {
@@ -449,7 +349,10 @@ jQuery(document).ready(function($) {
             if (response && response.success) {
                 const html = response.data && response.data.html ? response.data.html : '';
                 const $response = $(html);
-                let $newList = $(gm2FindProductList($response));
+                let $newList = $response.filter('ul.products').first();
+                if (!$newList.length) {
+                    $newList = $response.find('ul.products').first();
+                }
                 if (!$newList.length) {
                     let message = $response.filter('.woocommerce-info').first().text();
                     gm2DisplayNoProducts($oldList, url, message);
@@ -512,7 +415,7 @@ jQuery(document).ready(function($) {
             gm2DisplayNoProducts($oldList, url);
         }).always(function() {
             gm2HideLoading();
-            gm2ScrollToSelectedSection($widget);
+            gm2ScrollToSelectedSection();
         });
     }
 
@@ -564,7 +467,7 @@ jQuery(document).ready(function($) {
                 page = 1;
             }
         }
-        const $widget = $(this).closest('.gm2-category-sort');
+        const $widget = $('.gm2-category-sort').first();
         gm2UpdateProductFiltering($widget, page);
         return false;
     });
@@ -572,7 +475,7 @@ jQuery(document).ready(function($) {
     $(document).on('change', '.woocommerce-ordering select.orderby', function(e) {
         e.preventDefault();
         const val = $(this).val();
-        const $widget = $(this).closest('.gm2-category-sort');
+        const $widget = $('.gm2-category-sort').first();
         gm2UpdateProductFiltering($widget, 1, val);
     });
 

@@ -24,18 +24,14 @@ class Gm2_Category_Sort_Query_Handler {
         
         // Get existing tax query
         $tax_query = $query->get('tax_query') ?: [];
-
-        // Preserve the relation while removing existing product_cat queries
-        $relation  = isset($tax_query['relation']) ? $tax_query['relation'] : 'AND';
-        $filtered  = ['relation' => $relation];
-
-        foreach ($tax_query as $tax) {
-            if (is_array($tax) && isset($tax['taxonomy']) && $tax['taxonomy'] !== 'product_cat') {
-                $filtered[] = $tax;
+        
+        // Remove any existing product_cat queries to prevent conflicts
+        foreach ($tax_query as $index => $tax) {
+            if ($tax['taxonomy'] === 'product_cat') {
+                unset($tax_query[$index]);
             }
         }
-
-        $tax_query = $filtered;
+        $tax_query = array_values($tax_query); // Reindex array
         
         if ($filter_type === 'advanced') {
             // Advanced logic: Custom logic based on your requirements
