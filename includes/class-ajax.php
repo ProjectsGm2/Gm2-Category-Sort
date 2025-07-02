@@ -25,18 +25,24 @@ class Gm2_Category_Sort_Ajax {
     public static function filter_products() {
         check_ajax_referer('gm2_filter_products', 'gm2_nonce');
 
-        $term_ids = [];
-        if (!empty($_POST['gm2_cat'])) {
-            $term_ids = array_map('intval', explode(',', $_POST['gm2_cat']));
+        $term_ids   = [];
+        if ( ! empty( $_POST['gm2_cat'] ) ) {
+            $term_ids = array_map( 'intval', explode( ',', $_POST['gm2_cat'] ) );
         }
 
-        // When no categories are selected on a product category page,
-        // default to the current category so the results match the
-        // archive context instead of returning all products.
-        if (empty($term_ids) && function_exists('is_product_category') && is_product_category()) {
-            $current = get_queried_object();
-            if ($current && isset($current->term_id)) {
-                $term_ids = [ (int) $current->term_id ];
+        $current_cat = ! empty( $_POST['gm2_current_cat'] ) ? absint( $_POST['gm2_current_cat'] ) : 0;
+
+        // When no categories are selected and a current category was
+        // provided, use that to limit the results. Fallback to the
+        // queried object for front end requests when possible.
+        if ( empty( $term_ids ) ) {
+            if ( $current_cat ) {
+                $term_ids = [ $current_cat ];
+            } elseif ( function_exists( 'is_product_category' ) && is_product_category() ) {
+                $current = get_queried_object();
+                if ( $current && isset( $current->term_id ) ) {
+                    $term_ids = [ (int) $current->term_id ];
+                }
             }
         }
         $filter_type = sanitize_key($_POST['gm2_filter_type'] ?? 'simple');
