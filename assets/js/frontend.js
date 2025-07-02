@@ -42,23 +42,25 @@ jQuery(document).ready(function($) {
         $('body').append('<div id="gm2-loading-overlay"><div class="gm2-spinner"></div></div>');
     }
 
-    function gm2FindProductList() {
+    function gm2FindProductList(root) {
         if (window.jQuery) {
-            let $list = $('.elementor-widget[data-widget_type*="products"] ul.products:visible').first();
+            const $scope = root ? jQuery(root) : jQuery(document);
+            let $list = $scope.find('.elementor-widget[data-widget_type*="products"] ul.products:visible').first();
             if ($list.length) return $list;
-            $list = $('ul.products:visible').first();
+            $list = $scope.find('ul.products:visible').first();
             if ($list.length) return $list;
-            return $('ul.products').first();
+            return $scope.find('ul.products').first();
         }
         function isVisible(el) {
             if (!el) return false;
             const style = el.style || {};
             return style.display !== 'none' && style.visibility !== 'hidden';
         }
-        const widgetLists = Array.from(document.querySelectorAll('.elementor-widget[data-widget_type*="products"] ul.products'));
+        const scope = root || document;
+        const widgetLists = Array.from(scope.querySelectorAll('.elementor-widget[data-widget_type*="products"] ul.products'));
         let element = widgetLists.find(isVisible);
         if (!element) {
-            const lists = Array.from(document.querySelectorAll('ul.products'));
+            const lists = Array.from(scope.querySelectorAll('ul.products'));
             element = lists.find(isVisible) || lists[0] || null;
         }
         return element;
@@ -406,10 +408,7 @@ jQuery(document).ready(function($) {
             if (response && response.success) {
                 const html = response.data && response.data.html ? response.data.html : '';
                 const $response = $(html);
-                let $newList = $response.filter('ul.products').first();
-                if (!$newList.length) {
-                    $newList = $response.find('ul.products').first();
-                }
+                let $newList = $(gm2FindProductList($response));
                 if (!$newList.length) {
                     let message = $response.filter('.woocommerce-info').first().text();
                     gm2DisplayNoProducts($oldList, url, message);

@@ -57,23 +57,25 @@ jQuery(document).ready(function ($) {
   if (!$('#gm2-loading-overlay').length) {
     $('body').append('<div id="gm2-loading-overlay"><div class="gm2-spinner"></div></div>');
   }
-  function gm2FindProductList() {
+  function gm2FindProductList(root) {
     if (window.jQuery) {
-      var $list = $('.elementor-widget[data-widget_type*="products"] ul.products:visible').first();
+      var $scope = root ? jQuery(root) : jQuery(document);
+      var $list = $scope.find('.elementor-widget[data-widget_type*="products"] ul.products:visible').first();
       if ($list.length) return $list;
-      $list = $('ul.products:visible').first();
+      $list = $scope.find('ul.products:visible').first();
       if ($list.length) return $list;
-      return $('ul.products').first();
+      return $scope.find('ul.products').first();
     }
     function isVisible(el) {
       if (!el) return false;
       var style = el.style || {};
       return style.display !== 'none' && style.visibility !== 'hidden';
     }
-    var widgetLists = Array.from(document.querySelectorAll('.elementor-widget[data-widget_type*="products"] ul.products'));
+    var scope = root || document;
+    var widgetLists = Array.from(scope.querySelectorAll('.elementor-widget[data-widget_type*="products"] ul.products'));
     var element = widgetLists.find(isVisible);
     if (!element) {
-      var lists = Array.from(document.querySelectorAll('ul.products'));
+      var lists = Array.from(scope.querySelectorAll('ul.products'));
       element = lists.find(isVisible) || lists[0] || null;
     }
     return element;
@@ -384,10 +386,7 @@ jQuery(document).ready(function ($) {
       if (response && response.success) {
         var html = response.data && response.data.html ? response.data.html : '';
         var $response = $(html);
-        var $newList = $response.filter('ul.products').first();
-        if (!$newList.length) {
-          $newList = $response.find('ul.products').first();
-        }
+        var $newList = $(gm2FindProductList($response));
         if (!$newList.length) {
           var message = $response.filter('.woocommerce-info').first().text();
           gm2DisplayNoProducts($oldList, url, message);
