@@ -43,27 +43,35 @@ jQuery(document).ready(function($) {
     }
 
     function gm2FindProductList(root) {
-        if (window.jQuery) {
-            const $scope = root ? jQuery(root) : jQuery(document);
-            let $list = $scope.find('.elementor-widget[data-widget_type*="products"] ul.products:visible').first();
-            if ($list.length) return $list;
-            $list = $scope.find('ul.products:visible').first();
-            if ($list.length) return $list;
-            return $scope.find('ul.products').first();
+        function search(scope) {
+            if (window.jQuery) {
+                let $list = jQuery(scope).find('.elementor-widget[data-widget_type*="products"] ul.products:visible').first();
+                if ($list.length) return $list;
+                $list = jQuery(scope).find('ul.products:visible').first();
+                if ($list.length) return $list;
+                return jQuery(scope).find('ul.products').first();
+            }
+            function isVisible(el) {
+                if (!el) return false;
+                const style = el.style || {};
+                return style.display !== 'none' && style.visibility !== 'hidden';
+            }
+            const widgetLists = Array.from(scope.querySelectorAll('.elementor-widget[data-widget_type*="products"] ul.products'));
+            let element = widgetLists.find(isVisible);
+            if (!element) {
+                const lists = Array.from(scope.querySelectorAll('ul.products'));
+                element = lists.find(isVisible) || lists[0] || null;
+            }
+            return element;
         }
-        function isVisible(el) {
-            if (!el) return false;
-            const style = el.style || {};
-            return style.display !== 'none' && style.visibility !== 'hidden';
+
+        if (root) {
+            const found = search(root);
+            if (found && (found.length ? found.length : found)) {
+                return found;
+            }
         }
-        const scope = root || document;
-        const widgetLists = Array.from(scope.querySelectorAll('.elementor-widget[data-widget_type*="products"] ul.products'));
-        let element = widgetLists.find(isVisible);
-        if (!element) {
-            const lists = Array.from(scope.querySelectorAll('ul.products'));
-            element = lists.find(isVisible) || lists[0] || null;
-        }
-        return element;
+        return search(document);
     }
 
     window.gm2FindProductList = gm2FindProductList;
