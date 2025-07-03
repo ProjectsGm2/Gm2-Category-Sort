@@ -805,6 +805,10 @@ class Gm2_Category_Sort_Product_Category_Generator {
 
             $terms = array_merge( [ $name ], array_filter( array_map( 'trim', explode( ',', $synonyms[ $id ] ?? '' ) ) ) );
             foreach ( $terms as $term ) {
+                $norm = self::normalize_text( $term );
+                if ( preg_match( '/^\d$/', $norm ) ) {
+                    continue;
+                }
                 $variants = [ $term ];
                 if ( substr( $term, -1 ) !== 's' ) {
                     $variants[] = $term . 's';

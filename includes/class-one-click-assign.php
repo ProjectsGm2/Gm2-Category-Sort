@@ -378,6 +378,10 @@ class Gm2_Category_Sort_One_Click_Assign {
             }
             $terms_list = array_merge( [ $name ], array_filter( array_map( 'trim', explode( ',', $synonyms[ $id ] ?? '' ) ) ) );
             foreach ( $terms_list as $term ) {
+                $norm = Gm2_Category_Sort_Product_Category_Generator::normalize_text( $term );
+                if ( preg_match( '/^\d$/', $norm ) ) {
+                    continue;
+                }
                 $variants = [ $term ];
                 if ( substr( $term, -1 ) !== 's' ) {
                     $variants[] = $term . 's';
