@@ -121,6 +121,12 @@ class Gm2_Category_Sort_Rewrite_Rules {
             ? trim( $permalinks['category_base'], '/' )
             : '';
         self::handle_base_change( $current );
+
+        if ( is_array( $permalinks ) && ! empty( $permalinks['product_base'] ) && strpos( $permalinks['product_base'], '%product_cat%' ) !== false ) {
+            $parts   = explode( '/', trim( $permalinks['product_base'], '/' ) );
+            $segment = $parts[0] ?? '';
+            self::handle_product_base_change( $segment );
+        }
     }
 
     /**
@@ -134,6 +140,12 @@ class Gm2_Category_Sort_Rewrite_Rules {
             ? trim( $value['category_base'], '/' )
             : '';
         self::handle_base_change( $current );
+
+        if ( is_array( $value ) && ! empty( $value['product_base'] ) && strpos( $value['product_base'], '%product_cat%' ) !== false ) {
+            $parts   = explode( '/', trim( $value['product_base'], '/' ) );
+            $segment = $parts[0] ?? '';
+            self::handle_product_base_change( $segment );
+        }
     }
 
     /**
@@ -163,6 +175,38 @@ class Gm2_Category_Sort_Rewrite_Rules {
             $updated = true;
         }
         update_option( 'gm2_rewrite_prev_base', $current );
+        if ( $updated ) {
+            flush_rewrite_rules();
+        }
+    }
+
+    /**
+     * Track product permalink base segments when %product_cat% is used.
+     *
+     * @param string $segment Leading segment before %product_cat%.
+     */
+    protected static function handle_product_base_change( $segment ) {
+        $previous = get_option( 'gm2_rewrite_prev_product_segment', '' );
+        if ( $previous === '' ) {
+            update_option( 'gm2_rewrite_prev_product_segment', $segment );
+            return;
+        }
+
+        if ( $segment === '' || $segment === $previous ) {
+            return;
+        }
+
+        $bases = get_option( 'gm2_rewrite_bases', [] );
+        if ( ! is_array( $bases ) ) {
+            $bases = [];
+        }
+        $updated = false;
+        if ( ! in_array( $previous, $bases, true ) ) {
+            $bases[] = $previous;
+            update_option( 'gm2_rewrite_bases', $bases );
+            $updated = true;
+        }
+        update_option( 'gm2_rewrite_prev_product_segment', $segment );
         if ( $updated ) {
             flush_rewrite_rules();
         }
