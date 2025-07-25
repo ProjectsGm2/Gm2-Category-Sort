@@ -192,5 +192,19 @@ class RewriteRulesRedirectTest extends TestCase {
         $this->assertSame( 301, $GLOBALS['gm2_wp_redirect']['status'] );
         $this->assertSame( $child2['term_id'], $GLOBALS['gm2_last_term_id'] );
     }
+
+    public function test_canonical_product_base_handled_by_woocommerce() {
+        wp_insert_term( 'Cat', 'product_cat' );
+        $GLOBALS['gm2_products']['sample-product'] = (object) [ 'post_name' => 'sample-product' ];
+
+        // Simulate WooCommerce handling the canonical product base. gm2_alt_base
+        // is not set because our plugin should not register a matching rule.
+        $GLOBALS['gm2_query_vars']['product_cat'] = 'cat';
+        $GLOBALS['gm2_query_vars']['product']     = 'sample-product';
+
+        Gm2_Category_Sort_Rewrite_Rules::maybe_redirect();
+
+        $this->assertNull( $GLOBALS['gm2_wp_redirect'] );
+    }
 }
 }
