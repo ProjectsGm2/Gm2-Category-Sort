@@ -166,10 +166,7 @@ class Gm2_Category_Sort_Rewrite_Rules {
                 }
                 $found = null;
                 foreach ( $children as $child ) {
-                    $child_slug = isset( $child->slug ) ? $child->slug : sanitize_title( $child->name );
-                    if ( ! isset( $child->slug ) ) {
-                        $child->slug = $child_slug;
-                    }
+                    $child_slug = ( isset( $child->slug ) && $child->slug !== '' ) ? $child->slug : sanitize_title( $child->name );
                     if ( $child_slug === $part ) {
                         $found  = $child;
                         $parent = $child->term_id;

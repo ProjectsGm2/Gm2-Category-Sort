@@ -212,7 +212,13 @@ if ( ! function_exists( 'get_terms' ) ) {
         if ( $taxonomy !== 'product_cat' ) {
             foreach ( $GLOBALS['gm2_attr_terms'][ $taxonomy ] ?? [] as $name => $id ) {
                 $slug = $GLOBALS['gm2_term_slugs'][ $id ] ?? sanitize_title( $name );
-                $terms[] = (object) [ 'term_id' => $id, 'parent' => 0, 'name' => $name, 'slug' => $slug ];
+                $term       = (object) [
+                    'term_id' => $id,
+                    'parent'  => 0,
+                    'name'    => $name,
+                ];
+                $term->slug = $slug;
+                $terms[]    = $term;
             }
             return $terms;
         }
@@ -224,12 +230,14 @@ if ( ! function_exists( 'get_terms' ) ) {
                 if ( $include && ! in_array( $id, $include, true ) ) {
                     continue;
                 }
-                $terms[] = (object) [
+                $slug      = $GLOBALS['gm2_term_slugs'][ $id ] ?? sanitize_title( $name );
+                $term      = (object) [
                     'term_id' => $id,
                     'parent'  => $p,
                     'name'    => $name,
-                    'slug'    => $GLOBALS['gm2_term_slugs'][ $id ] ?? sanitize_title( $name ),
                 ];
+                $term->slug = $slug;
+                $terms[]    = $term;
             }
         }
         return $terms;
