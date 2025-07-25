@@ -72,5 +72,30 @@ class RewriteRulesSaveTest extends TestCase {
         $this->assertSame( 'index.php?product_cat=$matches[1]&gm2_alt_base=alt', $rule['query'] );
         $this->assertSame( 'top', $rule['position'] );
     }
+
+    public function test_multiple_windows_line_breaks_create_rules() {
+        $_POST['gm2_rewrites_nonce'] = 't';
+        $_POST['gm2_rewrite_bases'] = "alt\r\nshop\r\n";
+
+        try {
+            Gm2_Category_Sort_Rewrite_Rules::save_rules();
+            $this->fail('SaveRedirectException not thrown');
+        } catch ( SaveRedirectException $e ) {
+            // Expected.
+        }
+
+        $this->assertSame( [ 'alt', 'shop' ], $GLOBALS['gm2_options']['gm2_rewrite_bases'] );
+
+        Gm2_Category_Sort_Rewrite_Rules::add_rules();
+        $this->assertCount( 2, $GLOBALS['gm2_added_rules'] );
+
+        $rule1 = $GLOBALS['gm2_added_rules'][0];
+        $this->assertSame( '^alt/(.+?)/?$', $rule1['regex'] );
+        $this->assertSame( 'index.php?product_cat=$matches[1]&gm2_alt_base=alt', $rule1['query'] );
+
+        $rule2 = $GLOBALS['gm2_added_rules'][1];
+        $this->assertSame( '^shop/(.+?)/?$', $rule2['regex'] );
+        $this->assertSame( 'index.php?product_cat=$matches[1]&gm2_alt_base=shop', $rule2['query'] );
+    }
 }
 }
