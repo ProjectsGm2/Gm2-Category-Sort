@@ -49,5 +49,23 @@ class RewriteRulesRedirectTest extends TestCase {
         $this->assertSame( 'http://example.com/valid-cat', $GLOBALS['gm2_wp_redirect']['location'] );
         $this->assertSame( 301, $GLOBALS['gm2_wp_redirect']['status'] );
     }
+
+    public function test_redirects_with_nested_path() {
+        $parent = wp_insert_term( 'Parent', 'product_cat' );
+        wp_insert_term( 'Child', 'product_cat', [ 'parent' => $parent['term_id'] ] );
+
+        $GLOBALS['gm2_query_vars']['gm2_alt_base'] = 'shop';
+        $GLOBALS['gm2_query_vars']['product_cat'] = 'parent/child';
+
+        try {
+            Gm2_Category_Sort_Rewrite_Rules::maybe_redirect();
+            $this->fail( 'RedirectException not thrown' );
+        } catch ( RedirectException $e ) {
+            // Expected.
+        }
+
+        $this->assertSame( 'http://example.com/child', $GLOBALS['gm2_wp_redirect']['location'] );
+        $this->assertSame( 301, $GLOBALS['gm2_wp_redirect']['status'] );
+    }
 }
 }

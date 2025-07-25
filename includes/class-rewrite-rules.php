@@ -21,7 +21,7 @@ class Gm2_Category_Sort_Rewrite_Rules {
                 continue;
             }
             add_rewrite_rule(
-                '^' . preg_quote( $base, '#' ) . '/([^/]+)/?$',
+                '^' . preg_quote( $base, '#' ) . '/(.+?)/?$',
                 'index.php?product_cat=$matches[1]&gm2_alt_base=' . $base,
                 'top'
             );
@@ -87,6 +87,10 @@ class Gm2_Category_Sort_Rewrite_Rules {
             return;
         }
         $slug = get_query_var( 'product_cat' );
+        if ( strpos( $slug, '/' ) !== false ) {
+            $parts = explode( '/', trim( $slug, '/' ) );
+            $slug  = end( $parts );
+        }
         $term = get_term_by( 'slug', $slug, 'product_cat' );
         if ( ! $term || is_wp_error( $term ) ) {
             return;
