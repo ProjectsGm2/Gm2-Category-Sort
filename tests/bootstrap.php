@@ -247,8 +247,22 @@ if ( ! function_exists( 'esc_html' ) ) {
 }
 
 if ( ! function_exists( 'add_query_arg' ) ) {
-    function add_query_arg( $params ) {
-        return '?' . http_build_query( $params );
+    function add_query_arg( $param1, $param2 = null, $param3 = null ) {
+        if ( is_array( $param1 ) ) {
+            $params = $param1;
+            $url    = (string) $param2;
+        } else {
+            $params = [ $param1 => $param2 ];
+            $url    = (string) $param3;
+        }
+
+        $query = http_build_query( $params );
+        if ( $url === '' ) {
+            return '?' . $query;
+        }
+
+        $sep = strpos( $url, '?' ) === false ? '?' : '&';
+        return $url . $sep . $query;
     }
 }
 
