@@ -69,7 +69,7 @@ class RewriteRulesSaveTest extends TestCase {
         $rule = $GLOBALS['gm2_added_rules'][0];
         $this->assertSame( '^alt/(.+?)/?$', $rule['regex'] );
         $this->assertSame( 'index.php?product_cat=$matches[1]&gm2_alt_base=alt', $rule['query'] );
-        $this->assertSame( 'top', $rule['position'] );
+        $this->assertSame( 'bottom', $rule['position'] );
     }
 
     public function test_multiple_windows_line_breaks_create_rules() {
