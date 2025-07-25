@@ -8,6 +8,14 @@ class ProductCategoryImporterTest extends TestCase {
         // Setup some terms for lookup
         $GLOBALS['gm2_test_terms'][0] = [ 'Cat1' => 1, 'Cat2' => 2 ];
         $GLOBALS['gm2_products'] = [ 'SKU1' => 10, 'SKU2' => 20 ];
+
+        $upload = wp_upload_dir();
+        $dir = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure';
+        if ( ! is_dir( $dir ) ) {
+            mkdir( $dir, 0777, true );
+        }
+        file_put_contents( $dir . '/cat1.csv', "Cat1\n" );
+        file_put_contents( $dir . '/cat2.csv', "Cat2\n" );
     }
 
     private function createCsv(string $contents): string {
