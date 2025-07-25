@@ -65,7 +65,6 @@ class RewriteRulesSaveTest extends TestCase {
 
         $this->assertSame( [ 'alt' ], $GLOBALS['gm2_options']['gm2_rewrite_bases'] );
 
-        Gm2_Category_Sort_Rewrite_Rules::add_rules();
         $this->assertCount( 1, $GLOBALS['gm2_added_rules'] );
         $rule = $GLOBALS['gm2_added_rules'][0];
         $this->assertSame( '^alt/(.+?)/?$', $rule['regex'] );
@@ -86,7 +85,6 @@ class RewriteRulesSaveTest extends TestCase {
 
         $this->assertSame( [ 'alt', 'shop' ], $GLOBALS['gm2_options']['gm2_rewrite_bases'] );
 
-        Gm2_Category_Sort_Rewrite_Rules::add_rules();
         $this->assertCount( 2, $GLOBALS['gm2_added_rules'] );
 
         $rule1 = $GLOBALS['gm2_added_rules'][0];
