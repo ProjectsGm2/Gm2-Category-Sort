@@ -19,6 +19,7 @@ Gm2 Category Sort adds a product category sorting widget for WooCommerce shops w
    routes work immediately. Deactivating the plugin flushes the rules again.
 5. If you change the WooCommerce category base later, the previous value is stored and the rules are flushed automatically.
 6. Changes to the product permalink structure are detected as well when it contains `%product_cat%`; the previous shop segment is added to the alternate bases and rules are flushed.
+7. Use the **Rewrite Rules** submenu under **Gm2 Sort & Filter** to manage alternate bases. If redirects fail after adding or changing a base, visit **Settings → Permalinks** or deactivate and reactivate the plugin to flush the rules.
 
 ## Usage
 1. Edit a WooCommerce shop or archive page with Elementor.
