@@ -22,7 +22,7 @@ class Gm2_Category_Sort_Rewrite_Rules {
             add_rewrite_rule(
                 '^' . preg_quote( $base, '#' ) . '/(.+?)/?$',
                 'index.php?product_cat=$matches[1]&gm2_alt_base=' . $base,
-                'top'
+                'bottom'
             );
         }
     }
