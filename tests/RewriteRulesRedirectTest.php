@@ -155,5 +155,27 @@ class RewriteRulesRedirectTest extends TestCase {
         $this->assertSame( 301, $GLOBALS['gm2_wp_redirect']['status'] );
         $this->assertSame( $child2['term_id'], $GLOBALS['gm2_last_term_id'] );
     }
+
+    public function test_redirects_with_custom_parent_slug() {
+        $p1 = wp_insert_term( 'Parent1', 'product_cat' );
+        wp_insert_term( 'Shared', 'product_cat', [ 'parent' => $p1['term_id'] ] );
+
+        $p2     = wp_insert_term( 'Parent2', 'product_cat', [ 'slug' => 'alt-parent' ] );
+        $child2 = wp_insert_term( 'Shared', 'product_cat', [ 'parent' => $p2['term_id'] ] );
+
+        $GLOBALS['gm2_query_vars']['gm2_alt_base'] = 'alt';
+        $GLOBALS['gm2_query_vars']['product_cat']  = 'alt-parent/shared';
+
+        try {
+            Gm2_Category_Sort_Rewrite_Rules::maybe_redirect();
+            $this->fail( 'RedirectException not thrown' );
+        } catch ( RedirectException $e ) {
+            // Expected.
+        }
+
+        $this->assertSame( 'http://example.com/shared', $GLOBALS['gm2_wp_redirect']['location'] );
+        $this->assertSame( 301, $GLOBALS['gm2_wp_redirect']['status'] );
+        $this->assertSame( $child2['term_id'], $GLOBALS['gm2_last_term_id'] );
+    }
 }
 }

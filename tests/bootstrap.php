@@ -38,6 +38,7 @@ $GLOBALS['gm2_products'] = [];
 $GLOBALS['gm2_set_terms_calls'] = [];
 $GLOBALS['gm2_attributes'] = [];
 $GLOBALS['gm2_attr_terms'] = [];
+$GLOBALS['gm2_term_slugs'] = [];
 
 function gm2_test_reset_terms() {
     $GLOBALS['gm2_test_terms'] = [];
@@ -48,9 +49,18 @@ function gm2_test_reset_terms() {
     $GLOBALS['gm2_products'] = [];
     $GLOBALS['gm2_set_terms_calls'] = [];
     $GLOBALS['gm2_attributes'] = [];
+    $GLOBALS['gm2_term_slugs'] = [];
 }
 
 gm2_test_reset_terms();
+
+if ( ! function_exists( 'sanitize_title' ) ) {
+    function sanitize_title( $str ) {
+        $s = strtolower( $str );
+        $s = preg_replace( '/[^a-z0-9]+/', '-', $s );
+        return trim( $s, '-' );
+    }
+}
 
 function term_exists( $name, $taxonomy = null, $parent = 0 ) {
     if ( $taxonomy && $taxonomy !== 'product_cat' ) {
@@ -75,6 +85,8 @@ function wp_insert_term( $name, $taxonomy, $args = [] ) {
             $GLOBALS['gm2_test_terms'][ $parent ] = [];
         }
         $GLOBALS['gm2_test_terms'][ $parent ][ $name ] = $id;
+        $slug = $args['slug'] ?? sanitize_title( $name );
+        $GLOBALS['gm2_term_slugs'][ $id ] = $slug;
     } else {
         if ( ! isset( $GLOBALS['gm2_attr_terms'][ $taxonomy ] ) ) {
             $GLOBALS['gm2_attr_terms'][ $taxonomy ] = [];
@@ -97,8 +109,7 @@ function get_term_by( $field, $value, $taxonomy ) {
     if ( $taxonomy === 'product_cat' ) {
         foreach ( $GLOBALS['gm2_test_terms'] as $parent => $terms ) {
             foreach ( $terms as $name => $id ) {
-                $slug = strtolower( preg_replace( '/[^a-z0-9]+/i', '-', $name ) );
-                $slug = trim( $slug, '-' );
+                $slug = $GLOBALS['gm2_term_slugs'][ $id ] ?? sanitize_title( $name );
                 if ( ( $field === 'name' && $name === $value ) || ( $field === 'slug' && $slug === $value ) ) {
                     return (object) [ 'term_id' => $id, 'slug' => $slug ];
                 }
@@ -200,7 +211,8 @@ if ( ! function_exists( 'get_terms' ) ) {
         $terms    = [];
         if ( $taxonomy !== 'product_cat' ) {
             foreach ( $GLOBALS['gm2_attr_terms'][ $taxonomy ] ?? [] as $name => $id ) {
-                $terms[] = (object) [ 'term_id' => $id, 'parent' => 0, 'name' => $name ];
+                $slug = $GLOBALS['gm2_term_slugs'][ $id ] ?? sanitize_title( $name );
+                $terms[] = (object) [ 'term_id' => $id, 'parent' => 0, 'name' => $name, 'slug' => $slug ];
             }
             return $terms;
         }
@@ -216,6 +228,7 @@ if ( ! function_exists( 'get_terms' ) ) {
                     'term_id' => $id,
                     'parent'  => $p,
                     'name'    => $name,
+                    'slug'    => $GLOBALS['gm2_term_slugs'][ $id ] ?? sanitize_title( $name ),
                 ];
             }
         }
