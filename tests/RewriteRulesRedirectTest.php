@@ -1,0 +1,53 @@
+<?php
+namespace {
+require_once __DIR__ . '/../includes/class-rewrite-rules.php';
+
+if ( ! function_exists( 'get_query_var' ) ) {
+    function get_query_var( $key ) {
+        return $GLOBALS['gm2_query_vars'][ $key ] ?? '';
+    }
+}
+
+class RedirectException extends \Exception {}
+
+if ( ! function_exists( 'get_term_link' ) ) {
+    function get_term_link( $term ) {
+        return 'http://example.com/' . $term->slug;
+    }
+}
+
+if ( ! function_exists( 'wp_redirect' ) ) {
+    function wp_redirect( $location, $status = 302 ) {
+        $GLOBALS['gm2_wp_redirect'] = [ 'location' => $location, 'status' => $status ];
+        throw new RedirectException();
+    }
+}
+}
+
+namespace {
+use PHPUnit\Framework\TestCase;
+
+class RewriteRulesRedirectTest extends TestCase {
+    protected function setUp(): void {
+        gm2_test_reset_terms();
+        $GLOBALS['gm2_query_vars'] = [];
+        $GLOBALS['gm2_wp_redirect'] = null;
+    }
+
+    public function test_redirects_when_alt_base_present() {
+        wp_insert_term( 'Valid Cat', 'product_cat' );
+        $GLOBALS['gm2_query_vars']['gm2_alt_base'] = 'alt';
+        $GLOBALS['gm2_query_vars']['product_cat'] = 'valid-cat';
+
+        try {
+            Gm2_Category_Sort_Rewrite_Rules::maybe_redirect();
+            $this->fail( 'RedirectException not thrown' );
+        } catch ( RedirectException $e ) {
+            // Expected.
+        }
+
+        $this->assertSame( 'http://example.com/valid-cat', $GLOBALS['gm2_wp_redirect']['location'] );
+        $this->assertSame( 301, $GLOBALS['gm2_wp_redirect']['status'] );
+    }
+}
+}

@@ -94,11 +94,13 @@ function update_term_meta( $term_id, $key, $value ) {
 }
 
 function get_term_by( $field, $value, $taxonomy ) {
-    if ( $field === 'name' && $taxonomy === 'product_cat' ) {
+    if ( $taxonomy === 'product_cat' ) {
         foreach ( $GLOBALS['gm2_test_terms'] as $parent => $terms ) {
             foreach ( $terms as $name => $id ) {
-                if ( $name === $value ) {
-                    return (object) [ 'term_id' => $id ];
+                $slug = strtolower( preg_replace( '/[^a-z0-9]+/i', '-', $name ) );
+                $slug = trim( $slug, '-' );
+                if ( ( $field === 'name' && $name === $value ) || ( $field === 'slug' && $slug === $value ) ) {
+                    return (object) [ 'term_id' => $id, 'slug' => $slug ];
                 }
             }
         }
