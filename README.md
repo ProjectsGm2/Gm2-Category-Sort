@@ -14,6 +14,8 @@ Gm2 Category Sort adds a product category sorting widget for WooCommerce shops w
 1. Download or clone this repository into the `wp-content/plugins` directory of your WordPress installation.
 2. Make sure WooCommerce and Elementor are installed and activated.
 3. Activate **Gm2 Category Sort** from the **Plugins** screen in WordPress.
+4. The plugin flushes WordPress rewrite rules on activation and deactivation so custom routes work immediately.
+5. If you change the WooCommerce category base later, the previous value is stored and the rules are flushed automatically.
 
 ## Usage
 1. Edit a WooCommerce shop or archive page with Elementor.

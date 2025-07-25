@@ -26,6 +26,7 @@ function gm2_category_sort_activate() {
     if ( ! wp_next_scheduled( GM2_CAT_SORT_CRON_HOOK ) ) {
         wp_schedule_event( time(), 'daily', GM2_CAT_SORT_CRON_HOOK );
     }
+    // Ensure any rewrite rules from previous activations are registered.
     flush_rewrite_rules();
 }
 
@@ -34,6 +35,7 @@ function gm2_category_sort_deactivate() {
     if ( $timestamp ) {
         wp_unschedule_event( $timestamp, GM2_CAT_SORT_CRON_HOOK );
     }
+    // Clean up custom routes when the plugin is disabled.
     flush_rewrite_rules();
 }
 

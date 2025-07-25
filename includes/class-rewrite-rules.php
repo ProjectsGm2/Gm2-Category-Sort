@@ -142,11 +142,15 @@ class Gm2_Category_Sort_Rewrite_Rules {
         if ( ! is_array( $bases ) ) {
             $bases = [];
         }
+        $updated = false;
         if ( ! in_array( $previous, $bases, true ) ) {
             $bases[] = $previous;
             update_option( 'gm2_rewrite_bases', $bases );
+            $updated = true;
         }
         update_option( 'gm2_rewrite_prev_base', $current );
-        flush_rewrite_rules();
+        if ( $updated ) {
+            flush_rewrite_rules();
+        }
     }
 }
