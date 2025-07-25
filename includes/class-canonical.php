@@ -5,6 +5,19 @@ class Gm2_Category_Sort_Canonical {
     }
 
     public static function maybe_output_canonical() {
+        $alt = get_query_var( 'gm2_alt_base' );
+        if ( $alt ) {
+            $slug = get_query_var( 'product_cat' );
+            $term = $slug ? get_term_by( 'slug', $slug, 'product_cat' ) : false;
+            if ( $term && ! is_wp_error( $term ) ) {
+                $link = get_term_link( $term );
+                if ( ! is_wp_error( $link ) ) {
+                    echo '<link rel="canonical" href="' . esc_url( $link ) . '" />\n';
+                }
+            }
+            return;
+        }
+
         if (!self::has_filter_params()) {
             return;
         }
