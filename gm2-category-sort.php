@@ -121,6 +121,7 @@ function gm2_category_sort_init() {
     Gm2_Category_Sort_One_Click_Assign::init();
     Gm2_Category_Sort_Branch_Rules::init();
     Gm2_Category_Sort_Rewrite_Rules::init();
+    add_action( 'admin_post_gm2_save_rewrites', [ 'Gm2_Category_Sort_Rewrite_Rules', 'save_rules' ] );
     Gm2_Category_Sort_Product_CSV::init();
     
     add_filter('pre_get_document_title', 'gm2_category_sort_modify_title');

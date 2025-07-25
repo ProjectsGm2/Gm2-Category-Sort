@@ -5,7 +5,6 @@ class Gm2_Category_Sort_Rewrite_Rules {
         add_action( 'init', [ __CLASS__, 'maybe_track_base_change' ] );
         add_filter( 'query_vars', [ __CLASS__, 'add_query_var' ] );
         add_action( 'admin_menu', [ __CLASS__, 'register_page' ] );
-        add_action( 'admin_post_gm2_save_rewrites', [ __CLASS__, 'save_rules' ] );
         add_action( 'template_redirect', [ __CLASS__, 'maybe_redirect' ] );
         add_action( 'update_option_woocommerce_permalinks', [ __CLASS__, 'permalinks_updated' ], 10, 2 );
     }
@@ -66,6 +65,11 @@ class Gm2_Category_Sort_Rewrite_Rules {
     }
 
     public static function save_rules() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_safe_redirect( add_query_arg( 'gm2_error', 1, menu_page_url( 'gm2-rewrite-rules', false ) ) );
+            exit;
+        }
+
         check_admin_referer( 'gm2_save_rewrites', 'gm2_rewrites_nonce' );
         if ( isset( $_POST['gm2_rewrite_bases'] ) ) {
             $text  = wp_unslash( $_POST['gm2_rewrite_bases'] );
