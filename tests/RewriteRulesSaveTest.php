@@ -65,11 +65,17 @@ class RewriteRulesSaveTest extends TestCase {
 
         $this->assertSame( [ 'alt' ], $GLOBALS['gm2_options']['gm2_rewrite_bases'] );
 
-        $this->assertCount( 1, $GLOBALS['gm2_added_rules'] );
-        $rule = $GLOBALS['gm2_added_rules'][0];
-        $this->assertSame( '^alt/(.+?)/?$', $rule['regex'] );
-        $this->assertSame( 'index.php?product_cat=$matches[1]&gm2_alt_base=alt', $rule['query'] );
-        $this->assertSame( 'top', $rule['position'] );
+        $this->assertCount( 2, $GLOBALS['gm2_added_rules'] );
+        $cat_rule   = $GLOBALS['gm2_added_rules'][0];
+        $product_rule = $GLOBALS['gm2_added_rules'][1];
+
+        $this->assertSame( '^alt/(.+?)/?$', $cat_rule['regex'] );
+        $this->assertSame( 'index.php?product_cat=$matches[1]&gm2_alt_base=alt', $cat_rule['query'] );
+        $this->assertSame( 'top', $cat_rule['position'] );
+
+        $this->assertSame( '^alt/(.+?)/([^/]+)/?$', $product_rule['regex'] );
+        $this->assertSame( 'index.php?product_cat=$matches[1]&product=$matches[2]&gm2_alt_base=alt', $product_rule['query'] );
+        $this->assertSame( 'top', $product_rule['position'] );
     }
 
     public function test_multiple_windows_line_breaks_create_rules() {
@@ -85,15 +91,25 @@ class RewriteRulesSaveTest extends TestCase {
 
         $this->assertSame( [ 'alt', 'shop' ], $GLOBALS['gm2_options']['gm2_rewrite_bases'] );
 
-        $this->assertCount( 2, $GLOBALS['gm2_added_rules'] );
+        $this->assertCount( 4, $GLOBALS['gm2_added_rules'] );
 
         $rule1 = $GLOBALS['gm2_added_rules'][0];
         $this->assertSame( '^alt/(.+?)/?$', $rule1['regex'] );
         $this->assertSame( 'index.php?product_cat=$matches[1]&gm2_alt_base=alt', $rule1['query'] );
 
         $rule2 = $GLOBALS['gm2_added_rules'][1];
-        $this->assertSame( '^shop/(.+?)/?$', $rule2['regex'] );
-        $this->assertSame( 'index.php?product_cat=$matches[1]&gm2_alt_base=shop', $rule2['query'] );
+        $this->assertSame( '^alt/(.+?)/([^/]+)/?$', $rule2['regex'] );
+        $this->assertSame( 'index.php?product_cat=$matches[1]&product=$matches[2]&gm2_alt_base=alt', $rule2['query'] );
+
+        $rule3 = $GLOBALS['gm2_added_rules'][2];
+        $this->assertSame( '^shop/(.+?)/?$', $rule3['regex'] );
+        $this->assertSame( 'index.php?product_cat=$matches[1]&gm2_alt_base=shop', $rule3['query'] );
+        $this->assertSame( 'top', $rule3['position'] );
+
+        $rule4 = $GLOBALS['gm2_added_rules'][3];
+        $this->assertSame( '^shop/(.+?)/([^/]+)/?$', $rule4['regex'] );
+        $this->assertSame( 'index.php?product_cat=$matches[1]&product=$matches[2]&gm2_alt_base=shop', $rule4['query'] );
+        $this->assertSame( 'top', $rule4['position'] );
     }
 }
 }
