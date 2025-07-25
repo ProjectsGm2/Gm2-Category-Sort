@@ -182,7 +182,12 @@ class Gm2_Category_Sort_One_Click_Assign {
      * @return array<string,array>
      */
     public static function build_branch_map( $file ) {
-        $rows     = array_map( 'str_getcsv', file( $file ) );
+        $rows     = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( $file )
+        );
         $branches = [];
         foreach ( $rows as $row ) {
             $prev       = null;
@@ -443,7 +448,12 @@ class Gm2_Category_Sort_One_Click_Assign {
             unlink( $csv );
         }
 
-        $rows    = array_map( 'str_getcsv', file( $tree_file ) );
+        $rows    = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( $tree_file )
+        );
 
 
         $handles = [];
@@ -478,7 +488,7 @@ class Gm2_Category_Sort_One_Click_Assign {
                     }
                 }
 
-                fputcsv( $handles[ $slug ], $row );
+                fputcsv( $handles[ $slug ], $row, ',', '"', '\\' );
             }
         }
 

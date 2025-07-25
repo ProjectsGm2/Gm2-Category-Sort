@@ -91,7 +91,12 @@ class Gm2_Category_Sort_Branch_Rules {
      * @return array Mapping of slug => "Root > Child > ..." path.
      */
     public static function build_slug_path_map( $file ) {
-        $rows = array_map( 'str_getcsv', file( $file ) );
+        $rows = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( $file )
+        );
         $map  = [];
 
         foreach ( $rows as $row ) {
@@ -323,7 +328,7 @@ class Gm2_Category_Sort_Branch_Rules {
         $tree   = trailingslashit( $upload['basedir'] ) . 'gm2-category-sort/categories-structure/category-tree.csv';
         $map    = file_exists( $tree ) ? self::build_slug_path_map( $tree ) : [];
 
-        fputcsv( $fh, [ 'slug', 'path', 'include', 'exclude', 'include_attrs', 'exclude_attrs', 'allow_multi' ] );
+        fputcsv( $fh, [ 'slug', 'path', 'include', 'exclude', 'include_attrs', 'exclude_attrs', 'allow_multi' ], ',', '"', '\\' );
 
         $rules = get_option( 'gm2_branch_rules', [] );
         if ( is_array( $rules ) ) {
@@ -337,7 +342,7 @@ class Gm2_Category_Sort_Branch_Rules {
                     self::attrs_to_string( $rule['exclude_attrs'] ?? [] ),
                     empty( $rule['allow_multi'] ) ? '0' : '1',
                 ];
-                fputcsv( $fh, $row );
+                fputcsv( $fh, $row, ',', '"', '\\' );
             }
         }
 
@@ -361,7 +366,7 @@ class Gm2_Category_Sort_Branch_Rules {
             return new WP_Error( 'gm2_unreadable', __( 'Unable to read file.', 'gm2-category-sort' ) );
         }
 
-        $header = fgetcsv( $fh );
+        $header = fgetcsv( $fh, 0, ',', '"', '\\' );
         if ( ! $header ) {
             fclose( $fh );
             return [];
@@ -369,7 +374,7 @@ class Gm2_Category_Sort_Branch_Rules {
         $header[0] = preg_replace( "/^\xEF\xBB\xBF/", '', $header[0] );
         $cols      = array_flip( $header );
         $rules     = [];
-        while ( ( $row = fgetcsv( $fh ) ) !== false ) {
+        while ( ( $row = fgetcsv( $fh, 0, ',', '"', '\\' ) ) !== false ) {
             if ( empty( $row ) ) {
                 continue;
             }

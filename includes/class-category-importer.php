@@ -112,7 +112,7 @@ class Gm2_Category_Sort_Category_Importer {
         }
 
         $first_row = true;
-        while ( ( $row = fgetcsv( $handle ) ) !== false ) {
+        while ( ( $row = fgetcsv( $handle, 0, ',', '"', '\\' ) ) !== false ) {
             if ( empty( $row ) ) {
                 continue;
             }
@@ -124,7 +124,7 @@ class Gm2_Category_Sort_Category_Importer {
 
             $parent = 0;
             foreach ( $row as $name ) {
-                $name = trim( $name );
+                $name = trim( (string) $name );
                 if ( $name === '' ) {
                     continue;
                 }

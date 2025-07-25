@@ -29,9 +29,24 @@ class BranchCsvExportTest extends TestCase {
         $this->assertFileExists( "$dir/root-branch-leaf.csv" );
         $this->assertFileExists( "$dir/solo.csv" );
 
-        $branch_rows = array_map( 'str_getcsv', file( "$dir/root-branch.csv" ) );
-        $leaf_rows   = array_map( 'str_getcsv', file( "$dir/root-branch-leaf.csv" ) );
-        $solo_rows   = array_map( 'str_getcsv', file( "$dir/solo.csv" ) );
+        $branch_rows = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( "$dir/root-branch.csv" )
+        );
+        $leaf_rows   = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( "$dir/root-branch-leaf.csv" )
+        );
+        $solo_rows   = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( "$dir/solo.csv" )
+        );
 
         $this->assertContains( [ 'Root', 'Branch', 'Leaf' ], $branch_rows );
         $this->assertSame( [ [ 'Root', 'Branch', 'Leaf' ] ], $leaf_rows );

@@ -166,7 +166,7 @@ class Gm2_Category_Sort_Product_Category_Importer {
         }
 
         for ( $i = 0; $i < $offset; $i++ ) {
-            if ( false === fgetcsv( $handle ) ) {
+            if ( false === fgetcsv( $handle, 0, ',', '"', '\\' ) ) {
                 fclose( $handle );
                 return [
                     'offset' => $offset,
@@ -177,7 +177,7 @@ class Gm2_Category_Sort_Product_Category_Importer {
 
         $count      = 0;
         $first_row  = ( 0 === $offset );
-        while ( ( $row = fgetcsv( $handle ) ) !== false ) {
+        while ( ( $row = fgetcsv( $handle, 0, ',', '"', '\\' ) ) !== false ) {
             if ( $limit && $count >= $limit ) {
                 break;
             }
@@ -250,7 +250,7 @@ class Gm2_Category_Sort_Product_Category_Importer {
             return 0;
         }
         $count = 0;
-        while ( false !== fgetcsv( $handle ) ) {
+        while ( false !== fgetcsv( $handle, 0, ',', '"', '\\' ) ) {
             $count++;
         }
         fclose( $handle );

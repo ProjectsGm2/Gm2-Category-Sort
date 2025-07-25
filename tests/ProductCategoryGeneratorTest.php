@@ -463,7 +463,12 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertFileExists( $dir . '/models.csv' );
         $this->assertFileExists( $dir . '/wheel-sizes.csv' );
 
-        $brands = array_map( 'str_getcsv', file( $dir . '/brands.csv' ) );
+        $brands = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( $dir . '/brands.csv' )
+        );
         $header = array_shift( $brands );
         $this->assertSame( [ 'Brand', 'Terms' ], $header );
         $found = false;
@@ -475,11 +480,21 @@ class ProductCategoryGeneratorTest extends TestCase {
         }
         $this->assertTrue( $found );
 
-        $sizes = array_map( 'str_getcsv', file( $dir . '/wheel-sizes.csv' ) );
+        $sizes = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( $dir . '/wheel-sizes.csv' )
+        );
         $header = array_shift( $sizes );
         $this->assertSame( [ 'Size', 'Terms' ], $header );
 
-        $models = array_map( 'str_getcsv', file( $dir . '/models.csv' ) );
+        $models = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( $dir . '/models.csv' )
+        );
         $header = array_shift( $models );
         $this->assertSame( [ 'Brand', 'Model', 'Terms' ], $header );
         $found = false;
@@ -507,7 +522,12 @@ class ProductCategoryGeneratorTest extends TestCase {
 
         Gm2_Category_Sort_Product_Category_Generator::export_brand_model_csv( $mapping, $dir );
 
-        $brands = array_map( 'str_getcsv', file( $dir . '/brands.csv' ) );
+        $brands = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( $dir . '/brands.csv' )
+        );
         $header = array_shift( $brands );
         $this->assertSame( [ 'Brand', 'Terms' ], $header );
         $found = false;
@@ -518,7 +538,12 @@ class ProductCategoryGeneratorTest extends TestCase {
         }
         $this->assertTrue( $found );
 
-        $models = array_map( 'str_getcsv', file( $dir . '/models.csv' ) );
+        $models = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( $dir . '/models.csv' )
+        );
         $header = array_shift( $models );
         $this->assertSame( [ 'Brand', 'Model', 'Terms' ], $header );
         $found = false;
@@ -530,7 +555,12 @@ class ProductCategoryGeneratorTest extends TestCase {
         $this->assertTrue( $found );
 
         $this->assertFileExists( $dir . '/wheel-sizes.csv' );
-        $sizes = array_map( 'str_getcsv', file( $dir . '/wheel-sizes.csv' ) );
+        $sizes = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( $dir . '/wheel-sizes.csv' )
+        );
         $header = array_shift( $sizes );
         $this->assertSame( [ 'Size', 'Terms' ], $header );
     }
@@ -847,7 +877,12 @@ class ProductCategoryGeneratorTest extends TestCase {
         Gm2_Category_Sort_Product_Category_Generator::export_category_tree_csv( $dir );
 
         $this->assertFileExists( $dir . '/category-tree.csv' );
-        $rows = array_map( 'str_getcsv', file( $dir . '/category-tree.csv' ) );
+        $rows = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( $dir . '/category-tree.csv' )
+        );
         $this->assertContains( [ 'Top (T)', 'Sub (S1,S2)' ], $rows );
     }
 
