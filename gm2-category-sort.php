@@ -26,6 +26,10 @@ function gm2_category_sort_activate() {
     if ( ! wp_next_scheduled( GM2_CAT_SORT_CRON_HOOK ) ) {
         wp_schedule_event( time(), 'daily', GM2_CAT_SORT_CRON_HOOK );
     }
+    // Track the current product permalink segment before rules are flushed.
+    require_once GM2_CAT_SORT_PATH . 'includes/class-rewrite-rules.php';
+    Gm2_Category_Sort_Rewrite_Rules::maybe_track_base_change();
+
     // Ensure any rewrite rules from previous activations are registered.
     flush_rewrite_rules();
 }

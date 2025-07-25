@@ -187,8 +187,22 @@ class Gm2_Category_Sort_Rewrite_Rules {
      */
     protected static function handle_product_base_change( $segment ) {
         $previous = get_option( 'gm2_rewrite_prev_product_segment', '' );
+        $bases    = get_option( 'gm2_rewrite_bases', [] );
+        if ( ! is_array( $bases ) ) {
+            $bases = [];
+        }
+        $updated = false;
+
         if ( $previous === '' ) {
             update_option( 'gm2_rewrite_prev_product_segment', $segment );
+            if ( $segment !== '' && ! in_array( $segment, $bases, true ) ) {
+                $bases[] = $segment;
+                update_option( 'gm2_rewrite_bases', $bases );
+                $updated = true;
+            }
+            if ( $updated ) {
+                flush_rewrite_rules();
+            }
             return;
         }
 
@@ -196,10 +210,6 @@ class Gm2_Category_Sort_Rewrite_Rules {
             return;
         }
 
-        $bases = get_option( 'gm2_rewrite_bases', [] );
-        if ( ! is_array( $bases ) ) {
-            $bases = [];
-        }
         $updated = false;
         if ( ! in_array( $previous, $bases, true ) ) {
             $bases[] = $previous;
