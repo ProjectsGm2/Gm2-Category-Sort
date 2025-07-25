@@ -74,7 +74,7 @@ class RewriteRulesSaveTest extends TestCase {
         $this->assertSame( 'top', $cat_rule['position'] );
 
         $this->assertSame( '^alt/(.+?)/([^/]+)/?$', $product_rule['regex'] );
-        $this->assertSame( 'index.php?product_cat=$matches[1]&product=$matches[2]&gm2_alt_base=alt', $product_rule['query'] );
+        $this->assertSame( 'index.php?product=$matches[2]&gm2_alt_base=alt', $product_rule['query'] );
         $this->assertSame( 'top', $product_rule['position'] );
     }
 
@@ -99,7 +99,7 @@ class RewriteRulesSaveTest extends TestCase {
 
         $rule2 = $GLOBALS['gm2_added_rules'][1];
         $this->assertSame( '^alt/(.+?)/([^/]+)/?$', $rule2['regex'] );
-        $this->assertSame( 'index.php?product_cat=$matches[1]&product=$matches[2]&gm2_alt_base=alt', $rule2['query'] );
+        $this->assertSame( 'index.php?product=$matches[2]&gm2_alt_base=alt', $rule2['query'] );
 
         $rule3 = $GLOBALS['gm2_added_rules'][2];
         $this->assertSame( '^shop/(.+?)/?$', $rule3['regex'] );
@@ -108,7 +108,7 @@ class RewriteRulesSaveTest extends TestCase {
 
         $rule4 = $GLOBALS['gm2_added_rules'][3];
         $this->assertSame( '^shop/(.+?)/([^/]+)/?$', $rule4['regex'] );
-        $this->assertSame( 'index.php?product_cat=$matches[1]&product=$matches[2]&gm2_alt_base=shop', $rule4['query'] );
+        $this->assertSame( 'index.php?product=$matches[2]&gm2_alt_base=shop', $rule4['query'] );
         $this->assertSame( 'top', $rule4['position'] );
     }
 }

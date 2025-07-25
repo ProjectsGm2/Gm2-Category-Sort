@@ -100,7 +100,6 @@ class RewriteRulesRedirectTest extends TestCase {
         $GLOBALS['gm2_products']['sample-product'] = (object) [ 'post_name' => 'sample-product' ];
 
         $GLOBALS['gm2_query_vars']['gm2_alt_base'] = 'alt';
-        $GLOBALS['gm2_query_vars']['product_cat']  = 'cat';
         $GLOBALS['gm2_query_vars']['product']      = 'sample-product';
 
         try {
@@ -119,7 +118,6 @@ class RewriteRulesRedirectTest extends TestCase {
         $GLOBALS['gm2_products']['sample-product'] = (object) [ 'post_name' => 'sample-product' ];
 
         $GLOBALS['gm2_query_vars']['gm2_alt_base'] = 'product';
-        $GLOBALS['gm2_query_vars']['product_cat']  = 'cat';
         $GLOBALS['gm2_query_vars']['product']      = 'sample-product';
         $_SERVER['REQUEST_URI'] = '/product/sample-product';
 
@@ -135,7 +133,25 @@ class RewriteRulesRedirectTest extends TestCase {
         $GLOBALS['gm2_products']['sample-product'] = (object) [ 'post_name' => 'sample-product' ];
 
         $GLOBALS['gm2_query_vars']['gm2_alt_base'] = 'shop';
-        $GLOBALS['gm2_query_vars']['product_cat']  = 'parent/child';
+        $GLOBALS['gm2_query_vars']['product']      = 'sample-product';
+
+        try {
+            Gm2_Category_Sort_Rewrite_Rules::maybe_redirect();
+            $this->fail( 'RedirectException not thrown' );
+        } catch ( RedirectException $e ) {
+            // Expected.
+        }
+
+        $this->assertSame( 'http://example.com/product/sample-product', $GLOBALS['gm2_wp_redirect']['location'] );
+        $this->assertSame( 301, $GLOBALS['gm2_wp_redirect']['status'] );
+    }
+
+    public function test_product_not_in_category_still_redirects() {
+        wp_insert_term( 'CatA', 'product_cat' );
+        wp_insert_term( 'CatB', 'product_cat' );
+        $GLOBALS['gm2_products']['sample-product'] = (object) [ 'post_name' => 'sample-product' ];
+
+        $GLOBALS['gm2_query_vars']['gm2_alt_base'] = 'alt';
         $GLOBALS['gm2_query_vars']['product']      = 'sample-product';
 
         try {
