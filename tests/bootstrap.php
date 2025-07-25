@@ -285,6 +285,12 @@ if ( ! function_exists( 'trailingslashit' ) ) {
     }
 }
 
+if ( ! function_exists( 'home_url' ) ) {
+    function home_url( $path = '', $scheme = null ) {
+        return 'http://example.com' . $path;
+    }
+}
+
 if ( ! function_exists( 'wp_upload_dir' ) ) {
     function wp_upload_dir() {
         $base = sys_get_temp_dir() . '/uploads';
