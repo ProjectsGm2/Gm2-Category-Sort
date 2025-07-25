@@ -19,6 +19,10 @@ define('GM2_CAT_SORT_CRON_HOOK', 'gm2_category_sort_generate_sitemap');
 // Slug for the top-level admin menu
 define('GM2_CAT_SORT_MENU_SLUG', 'gm2-sort-filter');
 
+// Ensure rewrite rules are always available.
+require_once GM2_CAT_SORT_PATH . 'includes/class-rewrite-rules.php';
+add_action( 'admin_post_gm2_save_rewrites', [ 'Gm2_Category_Sort_Rewrite_Rules', 'save_rules' ] );
+
 register_activation_hook( __FILE__, 'gm2_category_sort_activate' );
 register_deactivation_hook( __FILE__, 'gm2_category_sort_deactivate' );
 
@@ -128,7 +132,6 @@ function gm2_category_sort_init() {
     Gm2_Category_Sort_One_Click_Assign::init();
     Gm2_Category_Sort_Branch_Rules::init();
     Gm2_Category_Sort_Rewrite_Rules::init();
-    add_action( 'admin_post_gm2_save_rewrites', [ 'Gm2_Category_Sort_Rewrite_Rules', 'save_rules' ] );
     Gm2_Category_Sort_Product_CSV::init();
     
     add_filter('pre_get_document_title', 'gm2_category_sort_modify_title');
