@@ -2,10 +2,12 @@
 class Gm2_Category_Sort_Rewrite_Rules {
     public static function init() {
         add_action( 'init', [ __CLASS__, 'add_rules' ] );
+        add_action( 'init', [ __CLASS__, 'maybe_track_base_change' ] );
         add_filter( 'query_vars', [ __CLASS__, 'add_query_var' ] );
         add_action( 'admin_menu', [ __CLASS__, 'register_page' ] );
         add_action( 'admin_post_gm2_save_rewrites', [ __CLASS__, 'save_rules' ] );
         add_action( 'template_redirect', [ __CLASS__, 'maybe_redirect' ] );
+        add_action( 'update_option_woocommerce_permalinks', [ __CLASS__, 'permalinks_updated' ], 10, 2 );
     }
 
     public static function add_rules() {
@@ -94,5 +96,57 @@ class Gm2_Category_Sort_Rewrite_Rules {
             wp_redirect( $link, 301 );
             exit;
         }
+    }
+
+    /**
+     * Detect changes to the WooCommerce category base and store previous values.
+     */
+    public static function maybe_track_base_change() {
+        $permalinks = get_option( 'woocommerce_permalinks' );
+        $current    = is_array( $permalinks ) && isset( $permalinks['category_base'] )
+            ? trim( $permalinks['category_base'], '/' )
+            : '';
+        self::handle_base_change( $current );
+    }
+
+    /**
+     * Handle update_option_woocommerce_permalinks action.
+     *
+     * @param mixed $old_value Previous value.
+     * @param mixed $value     New value.
+     */
+    public static function permalinks_updated( $old_value, $value ) {
+        $current = is_array( $value ) && isset( $value['category_base'] )
+            ? trim( $value['category_base'], '/' )
+            : '';
+        self::handle_base_change( $current );
+    }
+
+    /**
+     * Compare the current base with the stored one and update options.
+     *
+     * @param string $current Current category base.
+     */
+    protected static function handle_base_change( $current ) {
+        $previous = get_option( 'gm2_rewrite_prev_base', '' );
+        if ( $previous === '' ) {
+            update_option( 'gm2_rewrite_prev_base', $current );
+            return;
+        }
+
+        if ( $current === '' || $current === $previous ) {
+            return;
+        }
+
+        $bases = get_option( 'gm2_rewrite_bases', [] );
+        if ( ! is_array( $bases ) ) {
+            $bases = [];
+        }
+        if ( ! in_array( $previous, $bases, true ) ) {
+            $bases[] = $previous;
+            update_option( 'gm2_rewrite_bases', $bases );
+        }
+        update_option( 'gm2_rewrite_prev_base', $current );
+        flush_rewrite_rules();
     }
 }
