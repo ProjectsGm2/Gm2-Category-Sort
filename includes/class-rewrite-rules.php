@@ -15,6 +15,18 @@ class Gm2_Category_Sort_Rewrite_Rules {
         if ( ! is_array( $bases ) ) {
             $bases = [];
         }
+
+        $permalinks      = get_option( 'woocommerce_permalinks' );
+        $product_segment = '';
+        if (
+            is_array( $permalinks ) &&
+            ! empty( $permalinks['product_base'] ) &&
+            strpos( $permalinks['product_base'], '%product_cat%' ) !== false
+        ) {
+            $parts          = explode( '/', trim( $permalinks['product_base'], '/' ) );
+            $product_segment = $parts[0] ?? '';
+        }
+
         foreach ( $bases as $base ) {
             $base = trim( $base, '/' );
             if ( $base === '' ) {
@@ -25,6 +37,14 @@ class Gm2_Category_Sort_Rewrite_Rules {
                 'index.php?product_cat=$matches[1]&gm2_alt_base=' . $base,
                 'top'
             );
+
+            // When the base matches the canonical product segment, WooCommerce's
+            // own rules handle product permalinks. Skip registering a product
+            // rule to avoid conflicts.
+            if ( $base === $product_segment ) {
+                continue;
+            }
+
             // Match products when using an alternate base before the category rule.
             add_rewrite_rule(
                 '^' . preg_quote( $base, '#' ) . '/(.+?)/([^/]+)/?$',
