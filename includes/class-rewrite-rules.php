@@ -140,7 +140,7 @@ class Gm2_Category_Sort_Rewrite_Rules {
                 }
                 $found = null;
                 foreach ( $children as $child ) {
-                    $child_slug = sanitize_title( $child->name );
+                    $child_slug = isset( $child->slug ) ? $child->slug : sanitize_title( $child->name );
                     if ( ! isset( $child->slug ) ) {
                         $child->slug = $child_slug;
                     }
