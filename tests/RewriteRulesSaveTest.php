@@ -35,6 +35,9 @@ if ( ! function_exists( 'add_rewrite_rule' ) ) {
         $GLOBALS['gm2_added_rules'][] = [ 'regex' => $regex, 'query' => $query, 'position' => $position ];
     }
 }
+if ( ! function_exists( 'current_user_can' ) ) {
+    function current_user_can( $cap ) { return true; }
+}
 }
 
 namespace {
