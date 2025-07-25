@@ -48,7 +48,7 @@ class Gm2_Category_Sort_Rewrite_Rules {
             // Match products when using an alternate base before the category rule.
             add_rewrite_rule(
                 '^' . preg_quote( $base, '#' ) . '/(.+?)/([^/]+)/?$',
-                'index.php?product_cat=$matches[1]&product=$matches[2]&gm2_alt_base=' . $base,
+                'index.php?product=$matches[2]&gm2_alt_base=' . $base,
                 'top'
             );
         }
@@ -150,6 +150,9 @@ class Gm2_Category_Sort_Rewrite_Rules {
             }
         }
         $slug = get_query_var( 'product_cat' );
+        if ( $slug === '' ) {
+            return;
+        }
         $term = null;
         if ( strpos( $slug, '/' ) !== false ) {
             $parts  = array_filter( explode( '/', trim( $slug, '/' ) ) );
