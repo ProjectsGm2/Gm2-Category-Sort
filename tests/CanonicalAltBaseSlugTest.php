@@ -10,6 +10,7 @@ if ( ! function_exists( 'get_query_var' ) ) {
 
 if ( ! function_exists( 'get_term_link' ) ) {
     function get_term_link( $term ) {
+        $GLOBALS['gm2_last_term_id'] = $term->term_id;
         return 'http://example.com/' . $term->slug;
     }
 }

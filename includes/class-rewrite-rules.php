@@ -124,11 +124,46 @@ class Gm2_Category_Sort_Rewrite_Rules {
             }
         }
         $slug = get_query_var( 'product_cat' );
+        $term = null;
         if ( strpos( $slug, '/' ) !== false ) {
-            $parts = explode( '/', trim( $slug, '/' ) );
-            $slug  = end( $parts );
+            $parts  = array_filter( explode( '/', trim( $slug, '/' ) ) );
+            $parent = 0;
+            foreach ( $parts as $part ) {
+                $children = get_terms( [
+                    'taxonomy'   => 'product_cat',
+                    'parent'     => $parent,
+                    'hide_empty' => false,
+                ] );
+                if ( is_wp_error( $children ) ) {
+                    $term = null;
+                    break;
+                }
+                $found = null;
+                foreach ( $children as $child ) {
+                    $child_slug = sanitize_title( $child->name );
+                    if ( ! isset( $child->slug ) ) {
+                        $child->slug = $child_slug;
+                    }
+                    if ( $child_slug === $part ) {
+                        $found  = $child;
+                        $parent = $child->term_id;
+                        break;
+                    }
+                }
+                if ( ! $found ) {
+                    $term = null;
+                    break;
+                }
+                $term = $found;
+            }
         }
-        $term = get_term_by( 'slug', $slug, 'product_cat' );
+        if ( ! $term ) {
+            if ( strpos( $slug, '/' ) !== false ) {
+                $parts = explode( '/', trim( $slug, '/' ) );
+                $slug  = end( $parts );
+            }
+            $term = get_term_by( 'slug', $slug, 'product_cat' );
+        }
         if ( ! $term || is_wp_error( $term ) ) {
             return;
         }
