@@ -67,10 +67,16 @@ class Gm2_Category_Sort_Rewrite_Rules {
 
     public static function save_rules() {
         check_admin_referer( 'gm2_save_rewrites', 'gm2_rewrites_nonce' );
-        $bases = isset( $_POST['gm2_rewrite_bases'] ) ? explode( "\n", wp_unslash( $_POST['gm2_rewrite_bases'] ) ) : [];
+        if ( isset( $_POST['gm2_rewrite_bases'] ) ) {
+            $text  = wp_unslash( $_POST['gm2_rewrite_bases'] );
+            $bases = preg_split( '/\r?\n/', $text );
+        } else {
+            $bases = [];
+        }
         $clean = [];
         foreach ( $bases as $base ) {
-            $base = trim( sanitize_text_field( $base ), '/' );
+            $base = trim( sanitize_text_field( $base ) );
+            $base = trim( $base, '/' );
             if ( $base !== '' ) {
                 $clean[] = $base;
             }
