@@ -86,6 +86,7 @@ class Gm2_Category_Sort_Rewrite_Rules {
             }
         }
         update_option( 'gm2_rewrite_bases', $clean );
+        self::add_rules();
         flush_rewrite_rules();
         wp_safe_redirect( add_query_arg( 'gm2_saved', 1, menu_page_url( 'gm2-rewrite-rules', false ) ) );
         exit;
@@ -176,6 +177,7 @@ class Gm2_Category_Sort_Rewrite_Rules {
         }
         update_option( 'gm2_rewrite_prev_base', $current );
         if ( $updated ) {
+            self::add_rules();
             flush_rewrite_rules();
         }
     }
@@ -201,6 +203,7 @@ class Gm2_Category_Sort_Rewrite_Rules {
                 $updated = true;
             }
             if ( $updated ) {
+                self::add_rules();
                 flush_rewrite_rules();
             }
             return;
@@ -218,6 +221,7 @@ class Gm2_Category_Sort_Rewrite_Rules {
         }
         update_option( 'gm2_rewrite_prev_product_segment', $segment );
         if ( $updated ) {
+            self::add_rules();
             flush_rewrite_rules();
         }
     }
