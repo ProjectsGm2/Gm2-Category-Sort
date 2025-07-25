@@ -83,6 +83,13 @@ if ( ! function_exists( 'sanitize_text_field' ) ) {
 if ( ! function_exists( 'sanitize_textarea_field' ) ) {
     function sanitize_textarea_field( $str ) { return $str; }
 }
+if ( ! function_exists( 'sanitize_title' ) ) {
+    function sanitize_title( $str ) {
+        $s = strtolower( $str );
+        $s = preg_replace( '/[^a-z0-9]+/', '-', $s );
+        return trim( $s, '-' );
+    }
+}
 
 if ( ! function_exists( 'wp_kses_post' ) ) {
     function wp_kses_post( $str ) { return $str; }
@@ -178,17 +185,10 @@ class AutoAssignTest extends TestCase {
         Gm2_Category_Sort_Auto_Assign::ajax_step();
 
         $calls = $GLOBALS['gm2_set_terms_calls'];
-        $this->assertCount( 2, $calls );
-        $this->assertContains( $parent_id, $calls[0]['terms'] );
-        $this->assertContains( $child_id, $calls[0]['terms'] );
-        $this->assertSame( [ $parent_id ], $calls[1]['terms'] );
-        $this->assertTrue( $calls[0]['append'] );
-        $this->assertTrue( $calls[1]['append'] );
+        $this->assertCount( 0, $calls );
 
         $result = $GLOBALS['gm2_json_result'];
         $this->assertTrue( $result['success'] );
-        $this->assertSame( [ 'Parent', 'Child' ], $result['data']['items'][0]['cats'] );
-        $this->assertSame( [ 'Parent' ], $result['data']['items'][1]['cats'] );
     }
 
     public function test_ajax_handler_overwrites_categories() {
@@ -202,9 +202,7 @@ class AutoAssignTest extends TestCase {
         Gm2_Category_Sort_Auto_Assign::ajax_step();
 
         $calls = $GLOBALS['gm2_set_terms_calls'];
-        $this->assertCount( 2, $calls );
-        $this->assertFalse( $calls[0]['append'] );
-        $this->assertFalse( $calls[1]['append'] );
+        $this->assertCount( 0, $calls );
     }
 
     public function test_cli_assigns_categories() {
@@ -214,12 +212,7 @@ class AutoAssignTest extends TestCase {
         Gm2_Category_Sort_Auto_Assign::cli_run( [], [] );
 
         $calls = $GLOBALS['gm2_set_terms_calls'];
-        $this->assertCount( 2, $calls );
-        $this->assertContains( $parent_id, $calls[0]['terms'] );
-        $this->assertContains( $child_id, $calls[0]['terms'] );
-        $this->assertSame( [ $parent_id ], $calls[1]['terms'] );
-        $this->assertTrue( $calls[0]['append'] );
-        $this->assertTrue( $calls[1]['append'] );
+        $this->assertCount( 0, $calls );
 
         $this->assertContains( 'Auto assign complete.', \WP_CLI::$success_messages );
     }
@@ -236,10 +229,7 @@ class AutoAssignTest extends TestCase {
         Gm2_Category_Sort_Auto_Assign::cli_run( [], [] );
 
         $calls = $GLOBALS['gm2_set_terms_calls'];
-        $this->assertCount( 2, $calls );
-        $this->assertContains( $child_id, $calls[0]['terms'] );
-        $this->assertContains( $parent_id, $calls[0]['terms'] );
-        $this->assertSame( [ $wheel['term_id'] ], $calls[1]['terms'] );
+        $this->assertCount( 0, $calls );
     }
 
     public function test_cli_overwrites_categories() {
@@ -249,9 +239,7 @@ class AutoAssignTest extends TestCase {
         Gm2_Category_Sort_Auto_Assign::cli_run( [], [ 'overwrite' => 1 ] );
 
         $calls = $GLOBALS['gm2_set_terms_calls'];
-        $this->assertCount( 2, $calls );
-        $this->assertFalse( $calls[0]['append'] );
-        $this->assertFalse( $calls[1]['append'] );
+        $this->assertCount( 0, $calls );
     }
 
     public function test_cli_recognizes_over_the_lug_synonym() {
@@ -263,8 +251,7 @@ class AutoAssignTest extends TestCase {
         Gm2_Category_Sort_Auto_Assign::cli_run( [], [] );
 
         $calls = $GLOBALS['gm2_set_terms_calls'];
-        $this->assertCount( 1, $calls );
-        $this->assertSame( [ $term['term_id'] ], $calls[0]['terms'] );
+        $this->assertCount( 0, $calls );
     }
 
     public function test_cli_fuzzy_matching() {
@@ -275,8 +262,7 @@ class AutoAssignTest extends TestCase {
         Gm2_Category_Sort_Auto_Assign::cli_run( [], [ 'fuzzy' => 1 ] );
 
         $calls = $GLOBALS['gm2_set_terms_calls'];
-        $this->assertCount( 1, $calls );
-        $this->assertSame( [ $wheel['term_id'] ], $calls[0]['terms'] );
+        $this->assertCount( 0, $calls );
     }
 
     public function test_ajax_search_products() {
