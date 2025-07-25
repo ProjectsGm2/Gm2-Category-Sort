@@ -66,7 +66,11 @@ class Gm2_Category_Sort_Rewrite_Rules {
 
     public static function save_rules() {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_safe_redirect( add_query_arg( 'gm2_error', 1, menu_page_url( 'gm2-rewrite-rules', false ) ) );
+            $url = menu_page_url( 'gm2-rewrite-rules', false );
+            if ( ! $url ) {
+                $url = admin_url( 'admin.php?page=gm2-rewrite-rules' );
+            }
+            wp_safe_redirect( add_query_arg( 'gm2_error', 1, $url ) );
             exit;
         }
 
@@ -88,7 +92,11 @@ class Gm2_Category_Sort_Rewrite_Rules {
         update_option( 'gm2_rewrite_bases', $clean );
         self::add_rules();
         flush_rewrite_rules();
-        wp_safe_redirect( add_query_arg( 'gm2_saved', 1, menu_page_url( 'gm2-rewrite-rules', false ) ) );
+        $url = menu_page_url( 'gm2-rewrite-rules', false );
+        if ( ! $url ) {
+            $url = admin_url( 'admin.php?page=gm2-rewrite-rules' );
+        }
+        wp_safe_redirect( add_query_arg( 'gm2_saved', 1, $url ) );
         exit;
     }
 
