@@ -1,7 +1,8 @@
 <?php
 class Gm2_Category_Sort_Rewrite_Rules {
     public static function init() {
-        add_action( 'init', [ __CLASS__, 'add_rules' ] );
+        // Run early so WooCommerce product rules added later take precedence.
+        add_action( 'init', [ __CLASS__, 'add_rules' ], 5 );
         add_action( 'init', [ __CLASS__, 'maybe_track_base_change' ] );
         add_filter( 'query_vars', [ __CLASS__, 'add_query_var' ] );
         add_action( 'admin_menu', [ __CLASS__, 'register_page' ] );
@@ -22,7 +23,7 @@ class Gm2_Category_Sort_Rewrite_Rules {
             add_rewrite_rule(
                 '^' . preg_quote( $base, '#' ) . '/(.+?)/?$',
                 'index.php?product_cat=$matches[1]&gm2_alt_base=' . $base,
-                'bottom'
+                'top'
             );
         }
     }
