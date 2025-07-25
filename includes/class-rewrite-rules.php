@@ -118,6 +118,12 @@ class Gm2_Category_Sort_Rewrite_Rules {
             if ( $product ) {
                 $link = get_permalink( $product );
                 if ( $link ) {
+                    $current = home_url( $_SERVER['REQUEST_URI'] ?? '' );
+                    $link_path    = trim( (string) parse_url( $link, PHP_URL_PATH ), '/' );
+                    $current_path = trim( (string) parse_url( $current, PHP_URL_PATH ), '/' );
+                    if ( $link_path === $current_path ) {
+                        return;
+                    }
                     wp_redirect( $link, 301 );
                     exit;
                 }
