@@ -25,6 +25,12 @@ class Gm2_Category_Sort_Rewrite_Rules {
                 'index.php?product_cat=$matches[1]&gm2_alt_base=' . $base,
                 'top'
             );
+            // Match products when using an alternate base before the category rule.
+            add_rewrite_rule(
+                '^' . preg_quote( $base, '#' ) . '/(.+?)/([^/]+)/?$',
+                'index.php?product_cat=$matches[1]&product=$matches[2]&gm2_alt_base=' . $base,
+                'top'
+            );
         }
     }
 
@@ -105,6 +111,17 @@ class Gm2_Category_Sort_Rewrite_Rules {
         $base = get_query_var( 'gm2_alt_base' );
         if ( ! $base ) {
             return;
+        }
+        $product_slug = get_query_var( 'product' );
+        if ( $product_slug ) {
+            $product = get_page_by_path( $product_slug, OBJECT, 'product' );
+            if ( $product ) {
+                $link = get_permalink( $product );
+                if ( $link ) {
+                    wp_redirect( $link, 301 );
+                    exit;
+                }
+            }
         }
         $slug = get_query_var( 'product_cat' );
         if ( strpos( $slug, '/' ) !== false ) {
