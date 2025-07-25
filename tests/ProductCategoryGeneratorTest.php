@@ -59,6 +59,9 @@ class ProductCategoryGeneratorTest extends TestCase {
     private function flattenCats( array $map ): array {
         $result = [];
         foreach ( $map as $path ) {
+            if ( ! is_array( $path ) ) {
+                continue;
+            }
             foreach ( $path as $n ) {
                 if ( ! in_array( $n, $result, true ) ) {
                     $result[] = $n;

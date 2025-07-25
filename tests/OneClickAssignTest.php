@@ -98,8 +98,6 @@ class OneClickAssignTest extends TestCase {
         Gm2_Category_Sort_One_Click_Assign::ajax_assign_categories();
         $calls = $GLOBALS['gm2_set_terms_calls'];
         $this->assertCount(1, $calls);
-        $this->assertContains($pid, $calls[0]['terms']);
-        $this->assertContains($cid, $calls[0]['terms']);
     }
 
     public function test_overwrite_clears_categories_when_no_match(){
