@@ -1,8 +1,8 @@
 <?php
 class Gm2_Category_Sort_Rewrite_Rules {
     public static function init() {
-        // Run early so WooCommerce product rules added later take precedence.
-        add_action( 'init', [ __CLASS__, 'add_rules' ], 5 );
+        // Register rules after WooCommerce so its product rules match first.
+        add_action( 'init', [ __CLASS__, 'add_rules' ], 20 );
         add_action( 'init', [ __CLASS__, 'maybe_track_base_change' ] );
         add_filter( 'query_vars', [ __CLASS__, 'add_query_var' ] );
         add_action( 'admin_menu', [ __CLASS__, 'register_page' ] );
