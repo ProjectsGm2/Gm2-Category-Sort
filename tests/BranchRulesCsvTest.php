@@ -35,7 +35,12 @@ class BranchRulesCsvTest extends TestCase {
         $GLOBALS['gm2_options']['gm2_branch_rules'] = $this->sample_rules();
         $file = tempnam(sys_get_temp_dir(), 'gm2_rules');
         Gm2_Category_Sort_Branch_Rules::export_to_csv($file);
-        $rows = array_map('str_getcsv', file($file));
+        $rows = array_map(
+            static function ($row) {
+                return str_getcsv($row, ',', '"', '\\');
+            },
+            file($file)
+        );
         unlink($file);
 
         $this->assertSame(['slug','path','include','exclude','include_attrs','exclude_attrs','allow_multi'], $rows[0]);

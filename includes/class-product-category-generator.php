@@ -158,7 +158,12 @@ class Gm2_Category_Sort_Product_Category_Generator {
         if ( ! file_exists( $file ) ) {
             return [ $brands, $models ];
         }
-        $rows = array_map( 'str_getcsv', file( $file ) );
+        $rows = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( $file )
+        );
         foreach ( $rows as $row ) {
             $brand_idx = false;
             foreach ( $row as $i => $seg ) {
@@ -214,7 +219,12 @@ class Gm2_Category_Sort_Product_Category_Generator {
         if ( ! file_exists( $file ) ) {
             return $sizes;
         }
-        $rows = array_map( 'str_getcsv', file( $file ) );
+        $rows = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( $file )
+        );
         foreach ( $rows as $row ) {
             $idx = array_search( 'By Wheel Size', $row, true );
             if ( $idx === false ) {
@@ -248,7 +258,12 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $bfile  = rtrim( $dir, '/' ) . '/brands.csv';
         $mfile  = rtrim( $dir, '/' ) . '/models.csv';
         if ( file_exists( $bfile ) ) {
-            $rows = array_map( 'str_getcsv', file( $bfile ) );
+            $rows = array_map(
+                static function ( $row ) {
+                    return str_getcsv( $row, ',', '"', '\\' );
+                },
+                file( $bfile )
+            );
             array_shift( $rows );
             foreach ( $rows as $row ) {
                 $brand = trim( $row[0] ?? '' );
@@ -257,7 +272,12 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
         }
         if ( file_exists( $mfile ) ) {
-            $rows = array_map( 'str_getcsv', file( $mfile ) );
+            $rows = array_map(
+                static function ( $row ) {
+                    return str_getcsv( $row, ',', '"', '\\' );
+                },
+                file( $mfile )
+            );
             array_shift( $rows );
             foreach ( $rows as $row ) {
                 $brand = trim( $row[0] ?? '' );
@@ -321,7 +341,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @param int         $threshold  Fuzzy matching threshold.
      * @return array      When $assigned is provided, returns mapping of branch slug => path. Otherwise list of category names.
      */
-    protected static function match_terms( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
+    protected static function match_terms( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], ?array &$assigned = null, array $branch_rules = [] ) {
         $cats       = [];
         $word_count = count( $words );
         foreach ( $mapping as $term => $paths ) {
@@ -409,7 +429,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /** Brand and model branch logic. */
-    protected static function check_brand_model( $lower, array $words, array $mapping, $fuzzy, $threshold, $csv_dir, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
+    protected static function check_brand_model( $lower, array $words, array $mapping, $fuzzy, $threshold, $csv_dir, array $attributes = [], ?array &$assigned = null, array $branch_rules = [] ) {
         $brands       = [];
         $brand_models = [];
 
@@ -588,7 +608,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /** Wheel size branch logic. */
-    protected static function check_wheel_size( $lower, array $mapping, $wheel_size_num, $wheel_size, $brand_found, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
+    protected static function check_wheel_size( $lower, array $mapping, $wheel_size_num, $wheel_size, $brand_found, array $attributes = [], ?array &$assigned = null, array $branch_rules = [] ) {
         if ( ! $wheel_size_num ) {
             return [];
         }
@@ -721,47 +741,47 @@ class Gm2_Category_Sort_Product_Category_Generator {
     }
 
     /** Generic helpers for additional branches. */
-    protected static function check_wheel_type( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
+    protected static function check_wheel_type( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], ?array &$assigned = null, array $branch_rules = [] ) {
         return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Wheel Type' ), $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
     }
 
-    protected static function check_set_sizes( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
+    protected static function check_set_sizes( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], ?array &$assigned = null, array $branch_rules = [] ) {
         return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Wheel Set Sizes' ), $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
     }
 
-    protected static function check_fit_type( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
+    protected static function check_fit_type( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], ?array &$assigned = null, array $branch_rules = [] ) {
         return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Fit Type' ), $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
     }
 
-    protected static function check_vehicle_type( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
+    protected static function check_vehicle_type( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], ?array &$assigned = null, array $branch_rules = [] ) {
         return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'By Vehicle Type' ), $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
     }
 
-    protected static function check_ring_mount( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
+    protected static function check_ring_mount( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], ?array &$assigned = null, array $branch_rules = [] ) {
         return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Ring Mount' ), $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
     }
 
-    protected static function check_dayton_spoke( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
+    protected static function check_dayton_spoke( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], ?array &$assigned = null, array $branch_rules = [] ) {
         return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Dayton Spoke' ), $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
     }
 
-    protected static function check_wheel_center_caps( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
+    protected static function check_wheel_center_caps( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], ?array &$assigned = null, array $branch_rules = [] ) {
         return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Wheel Center Caps' ), $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
     }
 
-    protected static function check_wheel_cover_parts( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
+    protected static function check_wheel_cover_parts( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], ?array &$assigned = null, array $branch_rules = [] ) {
         return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Wheel Cover Parts' ), $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
     }
 
-    protected static function check_seat_covers( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
+    protected static function check_seat_covers( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], ?array &$assigned = null, array $branch_rules = [] ) {
         return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Seat Covers' ), $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
     }
 
-    protected static function check_coverking_accessories( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
+    protected static function check_coverking_accessories( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], ?array &$assigned = null, array $branch_rules = [] ) {
         return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Coverking Accessories' ), $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
     }
 
-    protected static function check_accessories_hardware( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], array &$assigned = null, array $branch_rules = [] ) {
+    protected static function check_accessories_hardware( $lower, array $words, array $mapping, $fuzzy, $threshold, array $attributes = [], ?array &$assigned = null, array $branch_rules = [] ) {
         return self::match_terms( $lower, $words, self::filter_by_segment( $mapping, 'Accessories & Hardware' ), $fuzzy, $threshold, $attributes, $assigned, $branch_rules );
     }
 
@@ -1139,7 +1159,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
      * @param array $attributes Mapping of attribute slugs to selected term slugs.
      * @return array Mapping of branch slug => path that match the attribute rules.
      */
-    public static function assign_categories_from_attributes( array $attributes, array &$assigned = null, array $branch_rules_override = [] ) {
+    public static function assign_categories_from_attributes( array $attributes, ?array &$assigned = null, array $branch_rules_override = [] ) {
         $rules = $branch_rules_override ? $branch_rules_override : get_option( 'gm2_branch_rules', [] );
         if ( ! is_array( $rules ) || ! $rules ) {
             return [];
@@ -1214,7 +1234,12 @@ class Gm2_Category_Sort_Product_Category_Generator {
                 return [];
             }
         }
-        $rows = array_map( 'str_getcsv', file( $file ) );
+        $rows = array_map(
+            static function ( $row ) {
+                return str_getcsv( $row, ',', '"', '\\' );
+            },
+            file( $file )
+        );
         if ( empty( $rows ) ) {
             return [];
         }
@@ -1360,19 +1385,19 @@ class Gm2_Category_Sort_Product_Category_Generator {
 
         $brand_file = rtrim( $dir, '/' ) . '/brands.csv';
         if ( $fh = fopen( $brand_file, 'w' ) ) {
-            fputcsv( $fh, [ 'Brand', 'Terms' ] );
+            fputcsv( $fh, [ 'Brand', 'Terms' ], ',', '"', '\\' );
             foreach ( $brands as $brand => $terms ) {
-                fputcsv( $fh, [ $brand, implode( ' | ', array_unique( $terms ) ) ] );
+                fputcsv( $fh, [ $brand, implode( ' | ', array_unique( $terms ) ) ], ',', '"', '\\' );
             }
             fclose( $fh );
         }
 
         $model_file = rtrim( $dir, '/' ) . '/models.csv';
         if ( $fh = fopen( $model_file, 'w' ) ) {
-            fputcsv( $fh, [ 'Brand', 'Model', 'Terms' ] );
+            fputcsv( $fh, [ 'Brand', 'Model', 'Terms' ], ',', '"', '\\' );
             foreach ( $models as $brand => $mset ) {
                 foreach ( $mset as $model => $terms ) {
-                    fputcsv( $fh, [ $brand, $model, implode( ' | ', array_unique( $terms ) ) ] );
+                    fputcsv( $fh, [ $brand, $model, implode( ' | ', array_unique( $terms ) ) ], ',', '"', '\\' );
                 }
             }
             fclose( $fh );
@@ -1381,9 +1406,9 @@ class Gm2_Category_Sort_Product_Category_Generator {
         $sizes = self::build_wheel_sizes_from_tree( $tree_file );
         $size_file = rtrim( $dir, '/' ) . '/wheel-sizes.csv';
         if ( $fh = fopen( $size_file, 'w' ) ) {
-            fputcsv( $fh, [ 'Size', 'Terms' ] );
+            fputcsv( $fh, [ 'Size', 'Terms' ], ',', '"', '\\' );
             foreach ( $sizes as $size => $terms ) {
-                fputcsv( $fh, [ $size, implode( ' | ', array_unique( $terms ) ) ] );
+                fputcsv( $fh, [ $size, implode( ' | ', array_unique( $terms ) ) ], ',', '"', '\\' );
             }
             fclose( $fh );
         }
@@ -1446,7 +1471,7 @@ class Gm2_Category_Sort_Product_Category_Generator {
             }
             $path[] = $name;
             if ( empty( $children[ $id ] ) ) {
-                fputcsv( $fh, $path );
+                fputcsv( $fh, $path, ',', '"', '\\' );
             } else {
                 foreach ( $children[ $id ] as $child ) {
                     $write( $child, $path );
