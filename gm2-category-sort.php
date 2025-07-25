@@ -26,6 +26,7 @@ function gm2_category_sort_activate() {
     if ( ! wp_next_scheduled( GM2_CAT_SORT_CRON_HOOK ) ) {
         wp_schedule_event( time(), 'daily', GM2_CAT_SORT_CRON_HOOK );
     }
+    flush_rewrite_rules();
 }
 
 function gm2_category_sort_deactivate() {
@@ -33,6 +34,7 @@ function gm2_category_sort_deactivate() {
     if ( $timestamp ) {
         wp_unschedule_event( $timestamp, GM2_CAT_SORT_CRON_HOOK );
     }
+    flush_rewrite_rules();
 }
 
 // Register top-level admin menu
@@ -101,6 +103,7 @@ function gm2_category_sort_init() {
     require_once GM2_CAT_SORT_PATH . 'includes/class-auto-assign.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-one-click-assign.php';
     require_once GM2_CAT_SORT_PATH . 'includes/class-branch-rules.php';
+    require_once GM2_CAT_SORT_PATH . 'includes/class-rewrite-rules.php';
     
     // Initialize components
     Gm2_Category_Sort_Enqueuer::init();
@@ -115,6 +118,7 @@ function gm2_category_sort_init() {
     Gm2_Category_Sort_Auto_Assign::init();
     Gm2_Category_Sort_One_Click_Assign::init();
     Gm2_Category_Sort_Branch_Rules::init();
+    Gm2_Category_Sort_Rewrite_Rules::init();
     Gm2_Category_Sort_Product_CSV::init();
     
     add_filter('pre_get_document_title', 'gm2_category_sort_modify_title');
