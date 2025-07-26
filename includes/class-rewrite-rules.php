@@ -32,10 +32,12 @@ class Gm2_Category_Sort_Rewrite_Rules {
             if ( $base === '' ) {
                 continue;
             }
+
+            $priority = ( $base === $product_segment ) ? 'bottom' : 'top';
             add_rewrite_rule(
                 '^' . preg_quote( $base, '#' ) . '/(.+?)/?$',
                 'index.php?product_cat=$matches[1]&gm2_alt_base=' . $base,
-                'top'
+                $priority
             );
 
             // When the base matches the canonical product segment, WooCommerce's
