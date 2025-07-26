@@ -111,5 +111,27 @@ class RewriteRulesSaveTest extends TestCase {
         $this->assertSame( 'index.php?product=$matches[2]&gm2_alt_base=shop', $rule4['query'] );
         $this->assertSame( 'top', $rule4['position'] );
     }
+
+    public function test_canonical_product_base_rule_is_low_priority() {
+        $_POST['gm2_rewrites_nonce'] = 't';
+        $_POST['gm2_rewrite_bases'] = "shop\n";
+        $GLOBALS['gm2_options']['woocommerce_permalinks'] = [
+            'product_base' => 'shop/%product_cat%'
+        ];
+
+        try {
+            Gm2_Category_Sort_Rewrite_Rules::save_rules();
+            $this->fail( 'SaveRedirectException not thrown' );
+        } catch ( SaveRedirectException $e ) {
+            // Expected.
+        }
+
+        $this->assertCount( 1, $GLOBALS['gm2_added_rules'] );
+        $rule = $GLOBALS['gm2_added_rules'][0];
+
+        $this->assertSame( '^shop/(.+?)/?$', $rule['regex'] );
+        $this->assertSame( 'index.php?product_cat=$matches[1]&gm2_alt_base=shop', $rule['query'] );
+        $this->assertSame( 'bottom', $rule['position'] );
+    }
 }
 }
