@@ -239,5 +239,15 @@ class RewriteRulesRedirectTest extends TestCase {
 
         $this->assertNull( $GLOBALS['gm2_wp_redirect'] );
     }
+
+    public function test_no_redirect_on_empty_path() {
+        $GLOBALS['gm2_query_vars']['gm2_alt_base'] = 'shop';
+        $GLOBALS['gm2_query_vars']['product_cat']  = '';
+        $GLOBALS['gm2_query_vars']['product']      = '';
+
+        Gm2_Category_Sort_Rewrite_Rules::maybe_redirect();
+
+        $this->assertNull( $GLOBALS['gm2_wp_redirect'] );
+    }
 }
 }
