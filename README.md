@@ -23,7 +23,7 @@ Gm2 Category Sort adds a product category sorting widget for WooCommerce shops w
 
 ## Rewrite Rules
 
-Alternate bases let you map additional URL segments to your main product category structure. These should **not** repeat the leading segment from **WooCommerce → Settings → Permalinks → Product permalinks**. Using the same segment causes the plugin’s product rule to overlap WooCommerce’s own product links which can break individual product pages. Choose a different segment or disable the product rule if you must reuse that slug.
+Alternate bases let you map additional URL segments to your main product category structure. These should **not** repeat the leading segment from **WooCommerce → Settings → Permalinks → Product permalinks** because the plugin’s product rule would overlap WooCommerce’s own product links and could break individual product pages. If an alternate base does match that segment, the plugin automatically skips its product rule and registers only a low‑priority category rule so WooCommerce continues handling product URLs for that base. After saving changes, visit **Settings → Permalinks** to flush your rules and apply the updates.
 
 ## Usage
 1. Edit a WooCommerce shop or archive page with Elementor.
